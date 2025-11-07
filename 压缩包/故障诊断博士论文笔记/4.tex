@@ -1,0 +1,128 @@
+\chapter{标注小技巧}\label{ch:crossref}
+\section{文档中的交叉引用}\label{sec:intro}
+\LaTeX 中有许多{``}东西{''}是可以被标记和引用的，一般来说包括公式，图，表，章节。他们标记之后的引用是会自动编排的。而其他环境的引用取决于不同\LaTeX 的模板有没有给出定义。我们主要探究Elegantbook 这个模板里面一些可标记事物的交叉引用方法。
+\begin{center}
+\captionof{table}{可交叉引用的事物}
+\label{tab:crossref}
+    \begin{tabular}{|c|c|c|}
+    \hline
+    可以引用吗？  & 通常情况下 & Elegantbook 中 \\ \hline
+    章\Verb"\chapter{}" & \checkmark& \checkmark \\ \hline
+    节\Verb"\section{}" & \checkmark& \checkmark \\ \hline
+    公式 & \checkmark& \checkmark \\ \hline
+    图 & \checkmark& \checkmark \\ \hline
+    表 & \checkmark& \checkmark \\ \hline
+    定理\Verb"theorem" & -& \checkmark \\ \hline
+    例题\Verb"example" & -& \checkmark \\ \hline
+    证明\Verb"proof" & -& \ding{55} \\ \hline
+    \end{tabular}
+\end{center}
+\subsection{一些实例}
+我们在第\ref{ch:environment}章中主要讲了环境的使用，这一章讲如何进行交叉引用以及标注。本章的第\ref{sec:intro}节是一个简单的引入。其中图标可以通过\Verb"\ref{tab:crossref}"表\ref{tab:crossref}来引用，也可以通过\Verb"\tabref{tab:crossref}"\tabref{tab:crossref}来引用。
+
+同理\Verb"\ref{fig:Ragdoll}"\ref{fig:Ragdoll}可以引用图片，也可以用\Verb"\figref{fig:Ragdoll}"\figref{fig:Ragdoll}来引用。
+\begin{equation}\label{eq:TDSE}
+    \hat{H} \Psi = \mathrm{i} \hbar \frac{\partial}{\partial t} \Psi.
+\end{equation}
+式\ref{eq:TDSE}被称为含时薛定谔方程。
+\begin{equation}\label{eq:TISE}
+    \hat{H} \Psi = E \Psi.
+\end{equation}
+式\eqref{eq:TISE}被称为不含时薛定谔方程。
+\subsection{解题过程中添加交叉引用}
+主要是使用符号注解，能够简易追溯公式中等号或者不等号的来源根据。下面来看一些例子
+\begin{itemize}[wide, labelwidth=!,labelindent=0pt,leftmargin=*]
+    \item 下括号或上括号
+    \begin{equation*}
+        \bm{0} = (\alpha_1 + \beta_1) \bm{x}_1 + \underbrace{\alpha_2 \bm{x}_2 + \cdots + \alpha_n \bm{x}_n}_{\text{互不相同}} \overbrace{- \beta_2 \bm{y}_2 - \cdots - \beta_m \bm{y}_m}^{\text{互不相同}}
+    \end{equation*}
+    \item 上下注解
+    \begin{theorem}\label{theo:universal_compact}
+    $(X,\mathcal{T})$是一个紧空间，当且仅当在$(X,\mathcal{T})$中所有的万有网都收敛。
+    \end{theorem}
+    \begin{equation*}
+        (K,\mathcal{T}_K)\text{ 是紧空间}~~ \overset{\ref{theo:universal_compact}}{\Longleftrightarrow} ~~\forall K \text{中万有网} \{ x_\alpha \}_{\alpha \in I} \text{ 都满足 } x_\alpha \stackrel{\mathcal{T}_K}{\to} x \in K
+    \end{equation*}
+    \begin{equation*}
+        (K,\mathcal{T}_K)\text{ 是紧空间}~~ \underset{\ref{theo:universal_compact}}{\Longleftrightarrow} ~~\forall K \text{中万有网} \{ x_\alpha \}_{\alpha \in I} \text{ 都满足 } x_\alpha \stackrel{\mathcal{T}_K}{\to} x \in K
+    \end{equation*}
+    \item \Verb"\usepackage{extarrows}"\newline
+    由于$f$是在$(M, \mathbb{C})$上的线性映射，能够推出
+    \begin{align}
+        \Re f(\mathrm{i} x) & = - \Im f(x) \label{eq:RetoIm} \\
+        \Im f(\mathrm{i} x) & = \Re f(x)
+    \end{align}
+    $\forall x \in M$,
+    \begin{align*}
+        \Lambda(x) = & g(x) - \mathrm{i} g(\mathrm{i} x) \\
+        = & \Re f(x) - \mathrm{i} \Re f(\mathrm{i} x) \\
+        \overset{\text{等式}\ref{eq:RetoIm}}{ = } &  \Re f(x) + \mathrm{i} \Im f(x) = f(x) \\
+        \xlongequal{\text{等式}\ref{eq:RetoIm}} &  \Re f(x) + \mathrm{i} \Im f(x)
+    \end{align*}
+    \item \Verb"\usepackage{chemformula}"\newline
+    用专门的化学包来写化学方程式会更加方便！
+    \begin{center}
+        \ch{2 H_2 O_2 ->[$\triangle$] 2 H_2 O + O_2 $\uparrow$}
+    \end{center}
+\end{itemize}
+\begin{remark}
+详情参照extarrows 的\href{https://ftp.fau.de/ctan/macros/latex/contrib/extarrows/extarrows-test.pdf}{ example of use}
+\end{remark}
+\begin{remark}
+详情参照chemformular 的\href{https://ftp.mpi-inf.mpg.de/pub/tex/mirror/ftp.dante.de/pub/tex/macros/latex/contrib/chemformula/chemformula-manual.pdf}{ Documentation}
+\end{remark}
+\begin{remark}
+更多符号的写法参照\href{https://oeis.org/wiki/List_of_LaTeX_mathematical_symbols}{ OEIS页面}
+\end{remark}
+\section{超链接}
+用法：
+\begin{verbatim}
+    \href{链接}{文本}
+\end{verbatim}
+    
+Ayumu 的\href{https://www.bilibili.com/video/BV1ve4y1m7hP/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=4530026c0834d011205a1c8aae339ab9}{第二积分中值定理}是我最喜欢的一集！
+
+\begin{remark}
+每集都是最喜欢的一集是吧？！
+\end{remark}
+\section{引用}
+\subsection{编译详情}
+在Overleaf中，为了方便各位用户的使用，编译过程中的一些细节全部被整合到了\Verb"Compile"这个按钮里面。实际上，一个完整的\LaTeX 中文文档需要经过下面四部编译步骤：
+\begin{verbatim}
+    XeLaTeX -> bibTeX -> XeLaTeX -> XeLaTeX
+\end{verbatim}    
+或者
+\begin{verbatim}
+    XeLaTeX -> biber -> XeLaTeX -> XeLaTeX
+\end{verbatim}    
+\subsubsection{具体用法}
+根据Elegantbook模板的版本不同，需要检查是否存在下列词条
+\begin{itemize}
+    \item 
+    \begin{verbatim}
+        \addbibresource[location=local]{reference.bib}
+    \end{verbatim}
+    \item 
+    \begin{verbatim}
+        \RequirePackage[
+        backend=biber,
+        citestyle=\ELEGANT@citestyle,
+        bibstyle=\ELEGANT@bibstyle
+        ]{biblatex}
+    \end{verbatim}
+\end{itemize}
+若上述词条或命令都能找到的话，则在main.tex 同一个目录下创建reference.bib，然后将论文的引用复制进reference.bib 中。最后使用\Verb"\cite{}"命令进行引用。
+
+\begin{verbatim}
+     inkscape.com -D --export-filename=FILENAME.pdf --export-latex FILENAME.svg
+\end{verbatim}
+
+
+\begin{center}
+    \def\svgwidth{0.7\columnwidth}
+    \input{figure/pointwise.pdf_tex}
+    \captionof{figure}{单调有上界函数必有极限。}
+    \label{fig:pointwise}
+\end{center}
+
+

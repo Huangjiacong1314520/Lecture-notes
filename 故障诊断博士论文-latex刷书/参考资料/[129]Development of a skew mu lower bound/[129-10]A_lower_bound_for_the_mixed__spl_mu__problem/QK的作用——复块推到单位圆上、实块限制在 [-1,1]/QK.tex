@@ -1,0 +1,276 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{ctex}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{mathrsfs}
+\usepackage{bbold}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{shapes,arrows,positioning}
+
+\title{稳定性的逻辑}
+
+\author{黄嘉聪}
+\date{}
+
+
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+
+
+\begin{abstract}
+主要介绍了QK的作用和怎么想到构造这玩意的
+\end{abstract}
+
+KEY WORDS: robust control; $\mu$; skew $\mu$; lower bound
+
+\section{\textbf{$(Q_K)$} 的作用和"为什么会想到构造它"}
+
+很好，这里把 \textbf{$(Q_K)$} 的作用和"为什么会想到构造它"讲成一条完整链路：从 $\mu$ 的定义 $\rightarrow$ 同质性与单位化 $\rightarrow$ "极点/边界原则" $\rightarrow$ 分块极点的具体形态 $\rightarrow$ 计算与算法的好处。你读完就能明白：$(Q_K)$ 不是拍脑袋的集合，它是从问题结构里"被逼出来"的。
+
+\subsection*{1) 从 $\mu$ 定义到"只需关注方向"的单位化}
+
+混合-$\mu$ 的"奇异化"定义是
+\[
+\mu_K(M)=\Big(\min_{\Delta\in X_K}\{\|\Delta\| : \det(I-\Delta M)=0\}\Big)^{-1}.
+\]
+
+\begin{itemize}
+    \item 这个优化是\textbf{同质}的：如果 $\Delta$ 使 $I-\Delta M$ 奇异，那么对任何 $t>0$，"放缩" $t\Delta$ 也只是在尺度上改变。
+    \item 因此可把 $\Delta$ 写成"半径×方向"的极坐标：$\Delta=t\widehat{\Delta}$，其中 $\|\widehat{\Delta}\|=1$。
+    \item 把"最小半径"问题改写为"在单位壳上挑方向"的问题，得到
+    \[
+    \mu_K(M)=\max_{\widehat{\Delta}\in X_K,\ \|\widehat{\Delta}\|\le 1}\ \rho_R(\widehat{\Delta}M).
+    \]
+    也就是说，\textbf{只需要在单位球（单位壳）上挑"方向"}，把 $\widehat{\Delta}M$ 的实特征值推到最大即可。
+\end{itemize}
+
+\subsection*{2) 极点/边界原则：最优方向在"单位球的极点/边界"}
+
+在线性-分式的目标（或由特征值/瑞利商诱导的目标）下，带范数约束的最优化常常在\textbf{单位球的极点（extreme points）或边界}达到最优：
+
+\begin{itemize}
+    \item 对标量块：$\max\{|q|:\ |q|\le 1\}$ 的最优必在 $|q|=1$ 或端点；
+    \item 对矩阵块：$\max\{\operatorname{Re}\langle \Delta,X\rangle:\ \|\Delta\|_\sigma\le 1\}$ 的最优由\textbf{极点}取得，等价于"把 $\Delta$ 与 $X$ 的奇异向量对齐"，并把奇异值推到边界（见冯-诺依曼迹不等式、极点表征）。
+\end{itemize}
+
+于是我们自然会把"单位球"进一步缩到它的\textbf{边界极点集合}上搜索。这就是 $(Q_K)$ 的雏形。
+
+\subsection*{3) 分块到极点：$(Q_K)$ 的具体构造}
+
+$X_K$ 是块对角不确定性集合（实重复标量、复重复标量、全复块等的直和）。把"极点/边界原则"逐块应用：
+
+\begin{itemize}
+    \item \textbf{复重复标量块} $\delta I_r$：单位球 $|\delta|\le 1$ 的极点在\textbf{单位圆}上，故取 $|\delta|=1\Rightarrow \delta=e^{\mathrm j\phi}$。
+    $\checkmark$ 这给出 $(Q_K)$ 中"复标量块相位在单位圆上"。
+    
+    \item \textbf{实重复标量块} $\delta I_r$：单位球 $|\delta|\le 1$ 的边界是区间端点和内点；在极值问题里通常"卡在端点" $\delta=\pm 1$（若一阶最优性迫使留在内点，$\delta\in[-1,1]$ 也被 $(Q_K)$ 覆盖）。
+    $\checkmark$ 这给出 $(Q_K)$ 中"实标量块在 $[-1,1]$"。
+    
+    \item \textbf{全复块} $\Delta_F$（方阵，$\|\Delta_F\|_\sigma\le 1$）：把 $\Delta_F=U\Sigma V^*$（SVD），当与目标矩阵对齐时，最优会把可用的奇异值推到边界 $\Sigma=I$（或一个部分等距算子）。当块是方阵时，可取\textbf{酉矩阵}作为极点代表（$\Delta_F\in\mathbb C^{p\times p}\Rightarrow \Delta_F$ 选酉 $U V^*$）。
+    $\checkmark$ 这给出 $(Q_K)$ 中"全复块取酉矩阵"。
+\end{itemize}
+
+把三类块的"边界代表"做块对角直和，就得到
+\[
+Q_K=\operatorname{diag}\big(q_1 I,\dots,\ e^{\mathrm j\phi_\ell}I,\ \ U_1,\dots\big),
+\]
+这正是你看到的那组"相位/符号/酉"的集合。\textbf{它只保留'方向/相位'，不含'半径'}；半径由最终的特征值 $\lambda$（或放缩 $t$）承担。
+
+\subsection*{4) $(Q_K)$ 的三个关键作用}
+
+\subsubsection*{作用 A：把 $\mu$ 的定义变成"边界上的实特征值最大化"}
+
+有了单位化与极点化，得到
+\[
+\mu_K(M)=\max_{\Delta\in B_{X_K}}\rho_R(\Delta M)
+\quad\Longrightarrow\quad
+\mu_K(M)=\max_{Q\in Q_K}\rho_R(QM).
+\]
+这一步是论文里的核心结论：\textbf{只在 $(Q_K)$ 上搜索就能达到 $\mu$}。直观上：把"允许的半径"统一提到边界而不丧失可达性，剩下只调"方向"。
+
+\subsubsection*{作用 B：把"块范数约束"变成"相位/符号/酉"的\textbf{离散（或低维）参数化}}
+
+\begin{itemize}
+    \item 复标量只剩一个相位 $\phi$；
+    \item 实标量只剩一个符号（或内点标量 $q\in[-1,1]$）；
+    \item 全复块只剩一个酉矩阵（方向）。
+\end{itemize}
+这极大简化了搜索与迭代（不再在半径上纠结）。
+
+\subsubsection*{作用 C：给"幂迭代"提供\textbf{可投影的闭式更新}}
+
+Young–Doyle 下界的幂迭代之所以能落地，就是因为对每个块都有\textbf{显式的"投影/对齐"规则}：
+
+\begin{itemize}
+    \item 复标量块：取 $q=\dfrac{w^*a}{|w^*a|}$ 的相位；
+    \item 实标量块：按 $\operatorname{sign}(\Re(a^*w))$ 卡到 $\pm 1$，或保持内点；
+    \item 全复块：把 $a,w$ 的能量配平，等价于选取一个等距算子/酉使两端"对齐"。
+\end{itemize}
+这些正是 $(Q_K)$ 结构带来的\textbf{块级闭式解}，使得每一步投影都简单、稳定。
+
+\subsection*{5) 为什么会"想到"构造 $(Q_K)$？}
+
+\textbf{这是从三个一线索自然推演出来的：}
+
+\begin{enumerate}
+    \item \textbf{同质性与单位化}：
+    $\mu$ 的定义本身是"放缩不变"的 $\Rightarrow$ 把半径抽掉，只看方向 $\Rightarrow$ 搜索单位壳。
+    
+    \item \textbf{极点原则}（凸分析/算子理论的常识）：
+    在"范数$\le 1$"的约束下，线性或谱型目标的最优往往在\textbf{极点/边界} $\Rightarrow$ 只看单位壳的"最外层"。
+    
+    \item \textbf{结构可分性}（块对角）：
+    结构化集合是直和 $\Rightarrow$ "极点"也可逐块表征；
+    对标量块，"极点"就是"相位或符号"；对全复块，"极点"是"等距/酉"。
+    于是诞生了 $(Q_K)$：\textbf{"单位边界上的复块 + 实块在 $[-1,1]$ 的相位/符号刻度 + 全复块的酉"}。
+\end{enumerate}
+
+这三点合在一起，$(Q_K)$ 并不是人为设定的"奇技淫巧"，而是从 $\mu$ 的数学结构\textbf{推演得到的"边界方向集"}；它既有\textbf{理论最优性}（最大化到 $\mu$），又有\textbf{数值可实现性}（幂迭代时易投影）。
+
+\subsection*{6) 小结（一句话版）}
+
+\textbf{$(Q_K)$} 是把"结构化单位球"收缩到"各块的边界极点"的集合；
+它保留了让 $\mu$ 取到最大值所需的\textbf{方向信息}，同时把"幅度/半径"交给特征值本身；
+因此既保证\textbf{理论上不损失最优}，又让\textbf{算法上每步更新有闭式投影}，是混合-$\mu$ 下界计算的关键角色。
+
+
+
+
+
+
+\section{为什么只在$Q_K$​（复块取单位圆相位、实块在[−1,1][−1,1]，全复块取酉）的“边界集”上搜索，就能达到真正的$\mu$}
+
+
+好的，我把"III. 下界即最大化"这一段里的核心论证完整拆开讲：为什么
+\[
+\boxed{\mu_K(M)=\max_{Q\in Q_K}\rho_R(QM)}
+\]
+也就是——只在 $Q_K$（复块取单位圆相位、实块在 $[-1,1]$，全复块取酉）的"边界集"上搜索，就能达到真正的 $\mu$。
+
+\subsection{起点：把"奇异化的最小范数"化成"单位球上的最大实谱半径"}
+
+混合 $\mu$ 的定义是
+\[
+\mu_K(M)=\big(\min_{\Delta\in X_K}\{\|\Delta\|:\det(I-\Delta M)=0\}\big)^{-1}.
+\]
+把 $\Delta=t\widehat{\Delta}$（$\|\widehat{\Delta}\|=1$）代入，并用
+\[
+\det(I-\Delta M)=0
+\iff \exists v\neq 0:\ \Delta M v=v
+\iff 1\in\sigma(\Delta M),
+\]
+就得到
+\[
+\mu_K(M)=\max_{\Delta\in B_{X_K}}\rho_R(\Delta M),
+\qquad
+B_{X_K}:=\{\Delta\in X_K:\|\Delta\|\le 1\}.
+\]
+含义：只需要在"结构化单位球"的\textbf{壳}上挑方向，把 $\Delta M$ 的\textbf{实}特征值推到最大即可。
+
+\subsection{关键问题：能否把搜索域从 $B_{X_K}$ 缩到"边界极点" $Q_K$ 而不损失最优？}
+
+我们要证明
+\[
+\max_{\Delta\in B_{X_K}}\rho_R(\Delta M)=\max_{Q\in Q_K}\rho_R(QM).
+\]
+难点在于：$B_{X_K}$ 里允许"复标量块的模 $<1$"、"全复块的奇异值 $\Sigma\prec I$"等\textbf{内点}；而 $Q_K$ 强制"复标量块在单位圆上、全复块取酉"。为什么把这些块\textbf{顶到边界}不会让最优值变差，反而能达到等号？
+
+\subsection{块极点原则：把"可缩放的块"顶到边界不会变差}
+
+把 $\Delta$ 分块写成
+\[
+\Delta=\operatorname{diag}(\underbrace{q_1 I,\dots,q_{n_R}I}_{\text{实重复标量}},
+\underbrace{\alpha_1e^{j\phi_1}I,\dots,\alpha_{n_C}e^{j\phi_{n_C}}I}_{\text{复重复标量}},
+\underbrace{U_1\Sigma_1V_1^*,\dots,U_{n_F}\Sigma_{n_F}V_{n_F}^*}_{\text{全复块}}),
+\]
+其中 $|q_i|\le 1$、$0\le \alpha_\ell\le 1$、$\Sigma_j=\operatorname{diag}(\sigma_{j,k})\in[0,1]$。
+
+\textbf{要点}：在保持"$(I-\Delta M)$ 可奇异"的同时，顺着每个"可缩放"的复方向把模（或奇异值）\textbf{推到 1}，最坏情形不会变差：
+
+\begin{itemize}
+    \item 复重复标量块：把 $\alpha_\ell\uparrow 1$，并适配相位 $\phi_\ell$；
+    \item 全复块：把 $\Sigma_j\uparrow I$，并把 $U_j,V_j$ 调成"对齐"的等距算子（酉）。
+\end{itemize}
+
+这背后是两个标准事实：
+
+\begin{enumerate}
+    \item \textbf{线性-谱型最优化在范数球的极点/边界达到极值}（冯–诺依曼迹不等式、KKT 条件、SVD 对齐）。
+    \item \textbf{多块同时"上边界"是可行的}：可以沿着"径向放大 + 相位/单位向量对齐"的路径保持（或恢复）$\det(I-\Delta M)=0$。直观地：一旦某个 $\Delta$ 使 $\Delta M$ 有实特征值 $\lambda\in(0,1]$，就能把该块的幅度推到 1，同时按左右特征向量的相位/奇异向量方向做\textbf{配平}，把"可达的 $\lambda$"不减反增。极限状态正好就是 $Q\in Q_K$。
+\end{enumerate}
+
+于是，对任何 $\Delta\in B_{X_K}$ 都可构造一个 $Q(\Delta)\in Q_K$ 使
+\[
+\rho_R(Q(\Delta) M)\ \ge\ \rho_R(\Delta M).
+\]
+对左边再取最大，就得到
+\[
+\max_{Q\in Q_K}\rho_R(QM)\ \ge\ \max_{\Delta\in B_{X_K}}\rho_R(\Delta M).
+\]
+而因为 $Q_K\subset B_{X_K}$，反向不等式也成立，故两者相等。
+
+\begin{quote}
+直观版：$\mu$ 关心的是"把实特征值推到 1 的\textbf{最小尺度}"，而复/全复块自带"幅度自由度"。\textbf{把这些自由度全用满（冲到边界）}，再靠相位/酉来\textbf{调整方向}，一定不比"留在内部"更差。极限形态就是 $Q\in Q_K$。
+\end{quote}
+
+\subsection{为什么实块允许留在 $[-1,1]$ 而不强制到 $\pm 1$？}
+
+对实重复标量块 $q\in[-1,1]$，KKT 条件会出现两类情况：
+
+\begin{itemize}
+    \item \textbf{端点}：若方向导数指向外，则最优落在 $q=\pm 1$；
+    \item \textbf{内点}：若一阶必要条件 $\Re(a^*w)=0$（由左右特征向量的"对齐条件"导出）成立，则可以停在内点 $q\in(-1,1)$。
+\end{itemize}
+
+因此 $Q_K$ 对实块写成 $[-1,1]$（而不是只取 $\pm 1$）正是为了\textbf{覆盖内点极值}的情形。
+
+\subsection{结论与意义}
+
+\begin{itemize}
+    \item \textbf{理论结论}：$\displaystyle \mu_K(M)=\max_{Q\in Q_K}\rho_R(QM)$。
+    $\mu$ 真正的值等于在"边界集 $Q_K$"上把实特征值推到最大的结果。
+    \item \textbf{算法意义}：把"范数球上的非凸最大化"化成"\textbf{块极点集}上的非凸最大化"。这一步让 Young–Doyle 的\textbf{幂迭代}可落地：每一步都只需按块做\textbf{闭式投影}（复块取相位、全复块做等距配平、实块卡端点或内点），于是能快速给出\textbf{紧的下界}。
+    \item \textbf{工程用法}：频率逐点算 $\underline{\mu}(\omega)=\max_{Q\in Q_K}\rho_R(QM(j\omega))$，再配合 D-scaling 上界形成夹逼；在 FDI/$\mu$-综合里定位最坏频段并做设计。
+\end{itemize}
+
+\subsection{小提示：如何把这段思想"看见"}
+
+\begin{itemize}
+    \item 把一个任意 $\Delta$ 的复块奇异值从 $<1$ 连续推到 $=1$，同时把相位/酉对齐到当前的左右特征向量方向；
+    \item 观察 $\rho_R(\Delta M)$ 不减（通常变大）；
+    \item 极限点就是某个 $Q\in Q_K$。
+\end{itemize}
+
+这就是"把单位球的内点推到边界极点"背后的几何图像，也是为什么"只搜 $Q_K$"足以达到真正 $\mu$ 的根本原因。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

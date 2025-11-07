@@ -1,0 +1,824 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{ctex}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{mathrsfs}
+\usepackage{bbold}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{booktabs}
+\usetikzlibrary{shapes,arrows,positioning}
+
+\title{稳定性的逻辑}
+
+\author{黄嘉聪}
+\date{}
+
+
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+
+
+\begin{abstract}
+主要介绍了稳定性的相关知识，重点在于理解：稳定性条件（传统SISO和传统MIMO和鲁棒稳定背后有什么共性？有界输入有界输出稳定和内稳定）为什么鲁棒稳定的条件是det(I-M\delta)
+\end{abstract}
+
+KEY WORDS: robust control; $\mu$; skew $\mu$; lower bound
+
+\section{复单位圆指的是特征值的取值范围？单位球是$\Delta$的取值范围？}
+
+非常好，你的问题切到了 \textbf{$\mu$-分析几何图景的核心}：
+"复单位圆"和"单位球"这两个'单位'确实是两个不同层面的概念——一个在\textbf{特征值空间（$\lambda$-平面）}里，一个在\textbf{矩阵空间（$\Delta$-空间）}里。下面我们分层详细解释：
+
+\subsection{两个"空间"要分清}
+
+\begin{center}
+\begin{tabular}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|p{0.25\textwidth}|}
+\hline
+\textbf{概念} & \textbf{所属空间} & \textbf{几何意义} & \textbf{出现位置} \\
+\hline
+\textbf{复单位圆} $\{\lambda\in\mathbb{C}:|\lambda|=1\}$ & 特征值平面（$\lambda$-plane） & 描述矩阵 $\Delta M$ 的\textbf{特征值位置} & 用来判断系统"临界稳定"或"奇异" \\
+\hline
+\textbf{结构化单位球} $B_{X_K}=\{\Delta\in X_K:\bar\sigma(\Delta)\le1\}$ & 不确定性矩阵空间（$\Delta$-space） & 描述\textbf{允许的不确定性方向/幅度范围} & $\mu$ 的定义域，搜索"最坏方向" \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{复单位圆：特征值层面的边界}
+
+在 $\mu$ 定义或稳定性分析里，矩阵 $\Delta M$ 的特征值 $\lambda$ 决定系统是否"碰到边界"：
+
+\begin{itemize}
+    \item \textbf{离散时间系统}：若所有特征值都在复单位圆 \textbf{内}（$|\lambda|<1$），系统稳定；
+    \item \textbf{达到奇异或失稳}：有特征值恰好在单位圆 \textbf{上}（$|\lambda|=1$）；
+    \item \textbf{$\mu$ 定义中的关键点}：
+    当我们找到一个 $\Delta$ 使得
+    \[
+    \det(I-\Delta M)=0,
+    \]
+    这就意味着 $1$ 是 $\Delta M$ 的\textbf{特征值}，而 1 就在复单位圆上（$|1|=1$）。
+    所以我们也可以说：当某个特征值"撞到复单位圆"时，系统到达鲁棒稳定的边界。
+\end{itemize}
+
+因此：
+
+\begin{quote}
+\textbf{复单位圆}是特征值的"允许范围"的边界。
+在 $\mu$-分析里，$\mu$ 反映要让特征值从原本的稳定区域（单位圆内）推到单位圆上的最小缩放倍数。
+\end{quote}
+
+\subsection{结构化单位球：$\Delta$ 的可选范围}
+
+另一方面，$\mu$ 是在 \textbf{$\Delta$-空间} 里搜索"哪一个方向最容易让系统变坏"。
+定义：
+\[
+B_{X_K}=\{\Delta\in X_K:\bar\sigma(\Delta)\le1\}.
+\]
+
+\begin{itemize}
+    \item 这是所有允许结构（块对角）的 $\Delta$ 的\textbf{单位球（或单位壳）}；
+    \item 它规定了每个不确定性块的\textbf{范数约束}（复块 $|\Delta|\le1$、实块 $|\Delta|\le1$、全复块 $|\Delta|\le1$）；
+    \item $\mu$ 的定义相当于问：
+\end{itemize}
+
+\begin{quote}
+需要把 $\Delta$ 的整体"半径"放大多少倍，才能让特征值撞到复单位圆？
+\end{quote}
+
+即：
+\[
+\text{最小 }t>0\ \text{使存在 } \Delta\in B_{X_K},\ \det(I-t\Delta M)=0.
+\]
+由此得到
+\[
+\mu_K(M)=\frac{1}{t_{\min}}=\max_{\Delta\in B_{X_K}}\rho_R(\Delta M).
+\]
+这就是为什么"单位球"出现——它是 $\Delta$ 的取值范围，而"单位圆"是 $\lambda$ 的取值范围。二者通过方程
+\[
+(I-\Delta M)v=0 \Leftrightarrow \lambda=1
+\]
+彼此关联。
+
+\subsection{\hl{联系起来的几何直觉}}
+
+把两层放在一起想：
+
+\begin{enumerate}
+    \item \textbf{$\Delta$ 空间（不确定性方向）}：
+    在单位球 $B_{X_K}$ 中找一个方向 $\Delta$，使得 $\Delta M$ 的特征值 $\lambda$ 尽量大。
+    \item \textbf{$\lambda$ 空间（特征值位置）}：
+    对应的 $\lambda$ 从原来单位圆内（安全区）向外移动；
+    当 $\lambda=1$（或 $|\lambda|=1$）时，系统刚好变得奇异/临界稳定。
+\end{enumerate}
+
+因此：
+
+\begin{itemize}
+    \item \textbf{单位球}：$\Delta$ 的"可用能量范围"；
+    \item \textbf{复单位圆}：系统特征值的"稳定边界"；
+    \item \textbf{$\mu$}：这两个空间的"桥梁"，描述要把 $\Delta$ 的半径放大到多少，使 $\lambda$ 到达单位圆。
+\end{itemize}
+
+\subsection{图形比喻}
+
+可以想成两个同心圆：
+
+\begin{itemize}
+    \item \textbf{内圈（单位圆）}：$\lambda$ 平面上特征值的允许区域；
+    \item \textbf{外圈（$\Delta$ 单位球）}：$\Delta$ 空间里不确定性的允许大小。
+\end{itemize}
+
+$\mu$ 问的是：
+
+\begin{quote}
+需要把 $\Delta$-球放大多少倍，才能在 $\lambda$-平面上让某个特征值刚好碰到单位圆？
+\end{quote}
+
+\subsection{总结一句话}
+
+\begin{itemize}
+    \item \textbf{复单位圆} $\rightarrow$ 是特征值 $\lambda$ 的几何边界（判别系统或 $(I-\Delta M)$ 是否奇异）；
+    \item \textbf{结构化单位球} $\rightarrow$ 是不确定性矩阵 $\Delta$ 的范数约束集合；
+    \item $\mu$ 连接两者：它告诉我们在结构化单位球上放大多少倍，才能让 $\Delta M$ 的特征值撞到复单位圆。
+\end{itemize}
+
+
+
+
+
+
+\section{不确定性都结构化了为什么还能是个球形？}
+
+这个问题问得非常深刻——你已经抓到了 \textbf{$\mu$-分析几何直觉的精髓}。
+看似"结构化"的不确定性，为什么我们还称它的取值集合为"球形单位球"？
+下面我从三个层次（\textbf{数学层面、几何层面、结构层面}）来完整解释，让你真正理解：
+
+\subsection{数学层面："球形"来自范数约束，不是形状几何意义的球体}
+
+当我们写
+\[
+B_{X_K} = \{\Delta \in X_K : \|\Delta\| \le 1\},
+\]
+这里的"球"其实是指在一个向量空间上以某个\textbf{矩阵范数}定义的"单位球体"集合。
+它并不是在三维欧式空间里的圆球那种形状，而是范数意义上的"等半径集合"。
+
+例如，在 $\mathbb{R}^2$ 上，用不同的范数定义"单位球"：
+
+\begin{itemize}
+    \item 2-范数（欧几里得）$\rightarrow$ 圆形；
+    \item 1-范数 $\rightarrow$ 菱形；
+    \item $\infty$-范数 $\rightarrow$ 正方形。
+\end{itemize}
+
+它们都叫"unit ball"，只是形状不同。
+
+矩阵空间的"球"同理。
+我们说"单位球"，是因为它满足
+\[
+\|\Delta\| \le 1,
+\]
+而不是说它真的几何上是"球体"。
+
+\subsection{几何层面：结构化 $\neq$ 非球，而是球的笛卡尔积}
+
+当我们引入\textbf{结构化不确定性}，即
+\[
+\Delta = \mathrm{diag}(\Delta_1,\Delta_2,\ldots,\Delta_k),
+\]
+每个子块 $\Delta_i$ 自己也有一个局部"单位球"定义：
+
+\begin{center}
+\begin{tabular}{|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+\textbf{不确定性类型} & \textbf{局部集合} & \textbf{几何直觉} \\
+\hline
+实标量 $\delta_i\in\mathbb{R}$ & $|\delta_i| \le 1$ & 实轴上的区间 $[-1,1]$ \\
+\hline
+复标量 $\delta_i\in\mathbb{C}$ & $|\delta_i| \le 1$ & 复平面上的圆盘 \\
+\hline
+全复块 $\Delta_i\in\mathbb{C}^{r_i\times r_i}$ & $\bar\sigma(\Delta_i)\le1$ & 高维空间中的"矩阵单位球" \\
+\hline
+\end{tabular}
+\end{center}
+
+把这些\textbf{局部单位球}按块拼成对角块对角结构：
+\[
+B_{X_K} = \left\{\mathrm{diag}(\Delta_1,\dots,\Delta_k):\ \bar\sigma(\Delta_i)\le1\right\}.
+\]
+
+几何上，这个集合不是一个"单个球"，而是各个子球的\textbf{笛卡尔积 (direct product)}。
+我们叫它"结构化单位球（structured unit ball）"。
+
+$\Rightarrow$ 所以严格说，这个集合是一个\textbf{块乘积形球体}，
+每个块的"球形半径"为1，但块与块之间没有耦合。
+
+\subsection{结构层面："结构化"体现的是方向约束，不是形状约束}
+
+当你在 $\mu$-分析中结构化不确定性时，你其实是说：
+
+\begin{quote}
+"$\Delta$ 的非零元素只能出现在这些块中（方向约束），
+但在每个块内部，大小依然按范数约束 $\le 1$。"
+\end{quote}
+
+也就是说：
+
+\begin{itemize}
+    \item \textbf{结构化} 限制了 $\Delta$ 的"方向"；
+    \item \textbf{球形} 限制了 $\Delta$ 的"长度"。
+\end{itemize}
+
+举个直观比喻：
+
+\begin{quote}
+你规定：一个人只能在若干固定的街区（块结构）里走路，
+但每个街区内他能走的距离（长度）不超过 1。
+那么所有可能的行走位置集合仍然是"每个街区的球形区域"的笛卡尔积——也可以叫"结构化单位球"。
+\end{quote}
+
+\subsection{形式上为什么还是"球"的表达式}
+
+因为 $\mu$ 的定义是：
+\[
+\mu_K(M)^{-1} = \min_{\Delta\in X_K} \{ \|\Delta\|:\ \det(I-\Delta M)=0\}.
+\]
+
+这在形式上与\textbf{非结构化不确定性}完全一致，只是约束 $\Delta \in X_K$。
+因此自然定义
+\[
+B_{X_K} := \{ \Delta\in X_K : \|\Delta\| \le 1\},
+\]
+沿用了"unit ball"的名字。
+只不过这个"球"在数学上是"限制在结构化子空间上的球体切片 (section of the full unit ball)"。
+
+\subsection{一个直观例子：二维图像}
+
+假设
+\[
+\Delta = \begin{bmatrix}
+\delta_1 & 0 \\
+0 & \delta_2
+\end{bmatrix}, \qquad
+\delta_1,\delta_2\in\mathbb{R},\ |\delta_i|\le 1.
+\]
+
+那么：
+
+\begin{itemize}
+    \item 完全非结构化的单位球是 $\{\Delta:\|\Delta\|_2\le1\}$，是一个真正的四维"球"。
+    \item 而这个结构化集合等价于 $\{(\delta_1,\delta_2):|\delta_1|\le1,|\delta_2|\le1\}$，
+    几何上是一个\textbf{二维正方形}。
+\end{itemize}
+
+虽然它的形状不是"圆的"，我们仍然称它为"结构化单位球"——
+因为它是"以 $\|\Delta\|\le1$" 为半径约束的子集。
+
+\subsection{小结一句话}
+
+\begin{quote}
+"结构化"决定了 \textbf{哪些方向（子空间）} 可以取值；
+"单位球"决定了 \textbf{这些方向上长度（范数）$\le1$}。
+\end{quote}
+
+所以：
+
+\begin{itemize}
+    \item \textbf{单位球} $\neq$ "$\Delta$ 完全自由的球形区域"，
+    \item \textbf{而是} "在特定结构方向上截取的、范数半径为1的球体切片"。
+\end{itemize}
+
+数学上：
+\[
+B_{X_K} = X_K \cap \{\Delta:\|\Delta\|\le1\}
+\]
+这就是 \textbf{结构化单位球} 的精确定义与"球形"意义。
+
+\subsection{总结}
+
+\begin{center}
+\begin{tabular}{|p{0.3\textwidth}|p{0.6\textwidth}|}
+\hline
+\textbf{概念} & \textbf{实际含义} \\
+\hline
+"单位球" & 指所有范数 $\le 1$ 的矩阵集合（形状可不是几何球） \\
+\hline
+"结构化" & 限制 $\Delta$ 的非零分块位置和重复模式 \\
+\hline
+"结构化单位球" & 是在结构化子空间中截取出的范数$\le1$的集合 \\
+\hline
+"为什么还能是球" & 因为范数约束仍然是"半径型"的，只是局限在结构化方向上 \\
+\hline
+\end{tabular}
+\end{center}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{谱半径：最大特征值模}
+
+
+下面把"谱半径（spectral radius）"讲清楚：它的精确定义、与特征值/范数的关系、常用性质和在系统/鲁棒分析里的用法，并给几个小例子帮你快速判断。
+
+\subsection{定义（核心一句话）}
+
+对任意方阵 $A\in\mathbb{C}^{n\times n}$，\textbf{谱半径}定义为
+\[
+\rho(A) = \max\{|\lambda|:\ \lambda\in\sigma(A)\},
+\]
+也就是 \textbf{A 的全部特征值模长（绝对值）里最大的那个}。
+
+\begin{quote}
+补：有时会区分"实谱半径" $\rho_R(A)$（仅在实特征值里取最大值；若无实特征值则记为 0）。你在混合-$\mu$推导里遇到的 $\rho_R$ 就是这个量，它与标准谱半径 $\rho(A)$ 不同。
+\end{quote}
+
+\subsection{与特征值/范数的基本关系}
+
+\subsubsection{相似不变性}
+\[
+\rho(SAS^{-1})=\rho(A)\quad(\forall\ S\ \text{可逆})
+\]
+换一组基（相似变换）不改变谱半径。这也说明谱半径只取决于特征值本身。
+
+\subsubsection{标量缩放}
+\[
+\rho(\alpha A)=|\alpha|\rho(A)\quad(\alpha\in\mathbb{C})
+\]
+
+\subsubsection{与任何次乘性矩阵范数的关系}
+对任一矩阵范数 $\|\cdot\|$（满足 $\|AB\|\le\|A\|\|B\|$），都有
+\[
+\rho(A) \le \|A\|.
+\]
+并且著名的 \textbf{Gelfand 公式}（非常重要）：
+\[
+\boxed{\rho(A) = \lim_{k\to\infty} \|A^k\|^{1/k} = \inf_{k\ge 1} \|A^k\|^{1/k}}
+\]
+这告诉你：无论选什么范数，取高次幂的"k 次方根极限"，都会收敛到谱半径。
+
+\subsubsection{与奇异值（2-范数）的关系}
+
+\begin{itemize}
+    \item 一般情形：$\rho(A) \le \|A\|_2 = \bar\sigma(A)$（最大奇异值）。
+    \item \textbf{若 $A$ 正规（normal）}（与其共轭转置可交换，如厄米/酉/对称矩阵），则
+    \[
+    \|A\|_2 = \max_i |\lambda_i(A)| = \rho(A).
+    \]
+    即正规矩阵时，谱半径就等于 2-范数。
+\end{itemize}
+
+\subsubsection{与特征多项式/根的关系}
+若 $p_A(\lambda)=\det(\lambda I-A)=\prod_{i=1}^n(\lambda-\lambda_i)$，则
+\[
+\rho(A)=\max_i |\lambda_i|.
+\]
+因此它是"特征多项式所有根的最大模"。
+
+\subsubsection{Gershgorin 圆盘给界}
+若 $A=[a_{ij}]$，以第 $i$ 行为中心 $a_{ii}$、半径 $R_i=\sum_{j\ne i}|a_{ij}|$ 的 Gershgorin 圆盘覆盖所有特征值，于是
+\[
+\rho(A) \le \max_i \big(|a_{ii}|+R_i\big).
+\]
+这是估计谱半径的一个简单上界。
+
+\subsection{与稳定性/动力学的关系}
+
+\begin{itemize}
+    \item \textbf{离散时间系统} $x_{k+1}=Ax_k$：
+    若 $A$ 可对角化且 $\rho(A)<1$，则 $A^k\to 0$，即\textbf{渐近稳定}。更广泛地，谱半径控制了 $A^k$ 的增长/衰减速率（见 Gelfand 公式）。
+    
+    \item \textbf{连续时间系统} $\dot x=Ax$：
+    稳定性由 \textbf{谱幅}（spectral abscissa，最大实部）而不是谱半径决定：$\alpha(A):=\max_i \Re\lambda_i(A)<0$ 则稳定。这里容易和谱半径混淆：连续时间看"实部"，离散时间看"模长"。
+    
+    \item \textbf{非负矩阵（Perron–Frobenius）}
+    若 $A\ge 0$（元素非负）且不可约，则 $\rho(A)$ 是 A 的最大实特征值，对应\textbf{正}的左右特征向量。这在网络/马尔可夫链/图论中很常见。
+\end{itemize}
+
+\subsection{在鲁棒控制与 $\mu$-分析中的角色}
+
+在你之前的问题中，我们用到了
+\[
+\mu_K(M) = \max_{\Delta\in B_{X_K}}\rho_R(\Delta M),
+\]
+这里的 $\rho_R$ 是"实谱半径"。原因是奇异条件 $\det(I-\Delta M)=0$ 等价于"$\Delta M$ 存在实特征值 1"，于是把"找最小范数使奇异"等价成"在单位球上把 $\Delta M$ 的实特征值推到最大"。这就是谱半径（或实谱半径）在 $\mu$ 下界公式中的关键位置。
+
+\subsection{快速例子}
+
+\begin{enumerate}
+    \item \textbf{对角矩阵} $A=\mathrm{diag}(2,-3,1+i)$
+    特征值模 $\{2,3,\sqrt{2}\}$，$\rho(A)=3$。
+    
+    \item \textbf{幂零矩阵} $N=\begin{bmatrix}0&1\\0&0\end{bmatrix}$
+    特征值全是 0，$\rho(N)=0$；但 $\|N\|_2>0$。说明谱半径与范数不同。
+    
+    \item \textbf{正规矩阵} $U$ 酉阵
+    $|\lambda_i(U)|=1$，$\rho(U)=1=\|U\|_2$。
+    
+    \item \textbf{离散稳定}
+    若 $\rho(A)=0.8$，通常 $A^k$ 以 $0.8^k$ 量级衰减（精确速率受是否正规及条件数影响，但 Gelfand 公式保证极限根在 0.8）。
+\end{enumerate}
+
+\subsection{小结}
+
+\begin{itemize}
+    \item 谱半径 $\rho(A)$ 是"最大的特征值模"。
+    \item 它与任何矩阵范数满足 $\rho(A)\le\|A\|$，并由 Gelfand 公式与幂次极限紧密相连。
+    \item 正规矩阵时 $\rho(A)=\|A\|_2$。
+    \item 离散系统稳定看 $\rho(A)<1$；连续系统稳定看谱幅 $\alpha(A)<0$。
+    \item 在 $\mu$-分析里，谱半径（尤其"实谱半径"）把"奇异化问题"转成"特征值最大化问题"，是下界算法的核心桥梁。
+\end{itemize}
+
+
+
+\begin{questionnote}[author=JC, date=2025-10-23]
+    $\Delta M$如果不是一个方阵，那应该没有特征值才对啊？你说的这个是不是有问题？
+    \begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=\textwidth]{实谱半径和μ下界的关系}
+        \captionsetup{labelformat=empty}
+        % \caption{}
+    \end{center}
+    \end{figure}
+\end{questionnote}
+
+
+\section{LFT保证了$\Delta M$是方阵}
+
+
+非常好，这个问题非常关键 —— 你已经注意到了很多初学 $\mu$-分析时容易忽略的一个"隐藏假设"：
+\textbf{$\Delta M$ 必须是方阵}，否则谈特征值确实是没有意义的。
+让我们仔细澄清这一点。
+
+\subsection{你的直觉完全正确}
+
+在一般矩阵理论中：
+
+\begin{itemize}
+    \item 如果 $A\in\mathbb{C}^{m\times n}$，且 $m\neq n$，那么 $A$ 不是方阵；
+    \item 此时 $\det(I-A)$ 没有定义（因为 $I$ 只能定义在方阵空间）；
+    \item 所以自然也就\textbf{没有特征值的概念}（特征值只对方阵定义）。
+\end{itemize}
+
+因此，如果 $\mu$ 定义中出现了
+\[
+\det(I-\Delta M)=0,
+\]
+就必须隐含一个前提：\textbf{$\Delta M$ 是方阵。}
+
+\subsection{在 $\mu$-分析框架中，这个前提是成立的}
+
+在 $\mu$ 理论里，矩阵 $M$ 与不确定性 $\Delta$ 的维度并不是随便的，而是通过 \textbf{线性分式变换 (LFT)} 精确匹配好的。
+通常我们写：
+\[
+M = \begin{bmatrix}
+M_{11} & M_{12} \\
+M_{21} & M_{22}
+\end{bmatrix},
+\qquad
+\text{并定义闭环： } F_u(M,\Delta)=M_{22}+M_{21}\Delta(I-M_{11}\Delta)^{-1}M_{12}.
+\]
+
+而 $\mu$ 分析是在"不确定性反馈环节"内部进行的，定义的是：
+\[
+\mu_K(M) = \frac{1}{\min\{\|\Delta\|:\ \det(I-\Delta M)=0,\ \Delta\in X_K\}}.
+\]
+
+此处的 $M$ 并不是任意矩阵，而是经过系统分块后处于 LFT 反馈通道里的那一块。
+维度选择保证了乘积 $\Delta M$ \textbf{总是方阵}，因为它代表的是反馈通道从"$\Delta$输出$\rightarrow$$\Delta$输入"的映射。
+
+具体来说：
+
+\begin{itemize}
+    \item 若 $\Delta$ 映射的是"$\Delta$输入 $\rightarrow$ $\Delta$输出"，那么 $M$ 的相应块 $M_{22}$ 映射的是"$\Delta$输出 $\rightarrow$ $\Delta$输入"；
+    \item 于是 $\Delta M_{22}$ 的维度自然是 $n_\Delta\times n_\Delta$。
+\end{itemize}
+
+$\checkmark$ \textbf{因此在 $\mu$ 定义中，乘积 $\Delta M$ 一定是方阵。}
+
+\subsection{为什么理论必须要求"方阵反馈通道"}
+
+这是鲁棒控制的核心逻辑之一：
+
+\begin{itemize}
+    \item 反馈闭环 $I-\Delta M$ 代表系统整体的内部映射；
+    \item 稳定性要求这个反馈环节可逆；
+    \item "奇异"意味着闭环不再可逆（等价于有特征值 1）；
+    \item 这必须建立在反馈通道\textbf{输入输出维度相等}的前提下。
+\end{itemize}
+
+否则根本无法定义"$I-\Delta M$"或"$\det(\cdots)$"。
+
+\subsection{如果 $\Delta M$ 不是方阵怎么办？}
+
+如果真的有某个分析环节出现 $M\in\mathbb{C}^{p\times q}$，$\Delta\in\mathbb{C}^{q\times p}$，使 $p\neq q$，那就要重新构造分析矩阵使其方阵化。
+
+常见做法有两种：
+
+\subsubsection{扩维（augmentation）}
+
+构造一个等价的方阵系统块，例如
+\[
+\begin{bmatrix}
+0 & M \\
+I & 0
+\end{bmatrix}
+\begin{bmatrix}
+\Delta & 0 \\
+0 & I
+\end{bmatrix},
+\]
+这样整体就变成方阵，再分析其谱性质。
+
+\subsubsection{通过LFT重构}
+
+在标准 LFT 框架中，系统的上/下互联已经自然保证
+$\Delta M$ 方阵 —— 如果没方阵，那说明你取错了分析块。
+
+\subsection{小结（重点）}
+
+\begin{center}
+\begin{tabular}{|p{0.2\textwidth}|p{0.7\textwidth}|}
+\hline
+\textbf{项目} & \textbf{正确理解} \\
+\hline
+\textbf{$\mu$ 定义} & $\displaystyle \mu_K(M)=\frac{1}{\min_{\Delta\in X_K}\{\|\Delta\|:\det(I-\Delta M)=0\}}$ \\
+\hline
+\textbf{要求} & $\Delta M$ 必须是方阵；否则 det 和特征值都没定义 \\
+\hline
+\textbf{解释} & 在 $\mu$-分析里 $M$ 取的是闭环不确定性反馈通道，维度天然匹配 \\
+\hline
+\textbf{因此} & 讨论"$\Delta M$ 的实特征值 1"是完全合法的前提下说的 \\
+\hline
+\textbf{若不方阵} & 需要通过扩维或重新定义反馈路径使其方阵化 \\
+\hline
+\end{tabular}
+\end{center}
+
+$\checkmark$ \textbf{一句话总结：}
+
+\begin{quote}
+在 $\mu$-分析中，$\Delta M$ 代表的是"不确定性反馈通道"的闭环传递矩阵。
+由于反馈系统输入输出必须匹配，所以它总是方阵。
+因此我们才能合法地谈"特征值""谱半径""奇异条件 $\det(I-\Delta M)=0$"这些概念。
+\end{quote}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{researchnote}[author=JC, date=2025-10-23]
+    \subsection*{\hl{为什么最小的扰动对应最大的特征值——以标量不确定性举例}}
+    \subsubsection*{情况一：$\Delta = \{\delta I : \delta \in \mathbb{C}\}$}
+
+        这时不确定性是标量乘单位矩阵。
+
+        \textbf{为什么 $\mu_{\Delta}(M) = \rho(M)$？}
+
+        \begin{itemize}
+            \item 特征方程：$\det(I - M(\delta I)) = \det(I - \delta M) = 0$
+            \item 这等价于 $\det(\frac{1}{\delta}I - M) = 0$，即 $1/\delta$ 是 $M$ 的特征值
+            \item 最小的 $|\delta|$ 对应最大的 $|1/\delta|$，即 $M$ 的谱半径 $\rho(M)$
+            \item 因此 $\mu_{\Delta}(M) = 1 / \min|\delta| = \rho(M)$
+        \end{itemize}
+\end{researchnote}
+
+
+
+
+
+
+\section{结构奇异值的等价定义————谱半径}
+
+
+    \begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=\textwidth]{结构奇异值等价定义}
+        \captionsetup{labelformat=empty}
+        % \caption{}
+    \end{center}
+    \end{figure}
+
+这个引理是结构奇异值（$\mu$）理论中的核心结果。让我详细解释为什么这个引理成立。
+
+\subsection{结构奇异值 $\mu$ 的基本定义}
+
+首先回顾结构奇异值 $\mu$ 的定义：
+\[
+\mu_{\Delta}(M) = \frac{1}{\min\{\bar{\sigma}(\Delta) : \Delta \in \Delta, \det(I - M\Delta) = 0\}}
+\]
+如果没有这样的 $\Delta$ 存在，则 $\mu_{\Delta}(M) = 0$。
+
+换句话说：\textbf{$\mu$ 是使系统变得不稳定的最小不确定性 $\Delta$ 的范数的倒数}。
+
+\subsection{引理 10.1 的重新表述}
+
+引理声称：
+\[
+\mu_{\Delta}(M) = \max_{\Delta \in B\Delta} \rho(M\Delta)
+\]
+其中 $B\Delta = \{\Delta \in \Delta : \bar{\sigma}(\Delta) \leq 1\}$ 是单位球内的不确定性集合。
+
+\subsection{为什么这个等式成立？}
+
+\subsubsection{直观理解}
+
+考虑特征方程 $\det(I - M\Delta) = 0$，这等价于说 \textbf{1 是 $M\Delta$ 的特征值}。
+
+现在，谱半径 $\rho(M\Delta)$ 是 $M\Delta$ 的特征值的最大模。如果 $\rho(M\Delta) \geq 1$，意味着存在某个特征值的模至少为 1。
+
+\textbf{关键洞察}：
+\begin{itemize}
+    \item 如果 $\rho(M\Delta) < 1$，那么所有特征值的模都小于 1，系统稳定
+    \item 如果 $\rho(M\Delta) = 1$，那么系统处于稳定边界
+    \item 如果 $\rho(M\Delta) > 1$，那么系统不稳定
+\end{itemize}
+
+因此，\textbf{最大化 $\rho(M\Delta)$ 就相当于找到最坏情况的不确定性，使系统最接近不稳定}。
+
+\subsubsection{数学证明思路}
+
+从 $\mu$ 的定义出发：
+\[
+\mu_{\Delta}(M) = \frac{1}{\min\{\bar{\sigma}(\Delta) : \det(I - M\Delta) = 0\}}
+\]
+
+设 $\Delta_0$ 是达到这个最小值的 $\Delta$，即：
+\[
+\bar{\sigma}(\Delta_0) = \min\{\bar{\sigma}(\Delta) : \det(I - M\Delta) = 0\}
+\]
+那么：
+\[
+\mu_{\Delta}(M) = \frac{1}{\bar{\sigma}(\Delta_0)}
+\]
+
+现在考虑缩放后的不确定性 $\tilde{\Delta} = \frac{\Delta_0}{\bar{\sigma}(\Delta_0)}$，则：
+\begin{itemize}
+    \item $\bar{\sigma}(\tilde{\Delta}) = 1$，所以 $\tilde{\Delta} \in B\Delta$
+    \item $\det(I - M\tilde{\Delta}) = \det\left(I - \frac{M\Delta_0}{\bar{\sigma}(\Delta_0)}\right) = 0$
+\end{itemize}
+
+由于 $\det(I - M\tilde{\Delta}) = 0$，存在特征值 $\lambda$ 使得 $M\tilde{\Delta}v = \lambda v$ 且 $|\lambda| = 1$。
+
+因此：
+\[
+\rho(M\tilde{\Delta}) \geq 1
+\]
+
+实际上，可以证明对于这个特定的 $\tilde{\Delta}$，有 $\rho(M\tilde{\Delta}) = 1$。
+
+反过来，对于任意 $\Delta \in B\Delta$，如果 $\rho(M\Delta) = c$，那么通过缩放可以构造一个使系统不稳定的 $\Delta'$，其范数为 $1/c$。
+
+因此，\textbf{最大谱半径正好等于 $\mu$}。
+
+\subsection{两个极端情况的解释}
+
+\subsubsection{情况一：$\Delta = \{\delta I : \delta \in \mathbb{C}\}$}
+
+这时不确定性是标量乘单位矩阵。
+
+\textbf{为什么 $\mu_{\Delta}(M) = \rho(M)$？}
+
+\begin{itemize}
+    \item 特征方程：$\det(I - M(\delta I)) = \det(I - \delta M) = 0$
+    \item 这等价于 $\det(\frac{1}{\delta}I - M) = 0$，即 $1/\delta$ 是 $M$ 的特征值
+    \item 最小的 $|\delta|$ 对应最大的 $|1/\delta|$，即 $M$ 的谱半径 $\rho(M)$
+    \item 因此 $\mu_{\Delta}(M) = 1 / \min|\delta| = \rho(M)$
+\end{itemize}
+
+\subsubsection{情况二：$\Delta = \mathbb{C}^{n \times n}$}
+
+这时不确定性是任意复数矩阵。
+
+\textbf{为什么 $\mu_{\Delta}(M) = \bar{\sigma}(M)$？}
+
+\begin{itemize}
+    \item 根据小增益定理，最坏情况的不确定性沿着 $M$ 的最大增益方向
+    \item 最小的 $\bar{\sigma}(\Delta)$ 使得 $\det(I - M\Delta) = 0$ 是 $1/\bar{\sigma}(M)$
+    \item 因此 $\mu_{\Delta}(M) = \bar{\sigma}(M)$
+\end{itemize}
+
+\subsection{不等式关系的几何解释}
+
+\[
+\{\delta I_n : \delta \in \mathbb{C}\} \subset \Delta \subset \mathbb{C}^{n \times n}
+\]
+
+这个包含关系意味着：
+\begin{itemize}
+    \item 标量不确定性是最受限制的情况
+    \item 完全不确定性是最不受限制的情况
+    \item 一般的结构不确定性介于两者之间
+\end{itemize}
+
+因此谱半径和最大奇异值给出了 $\mu$ 的下界和上界：
+
+\[
+\rho(M) \leq \mu_{\Delta}(M) \leq \bar{\sigma}(M)
+\]
+
+\subsection{为什么这个引理重要？}
+
+\subsubsection{理论意义：}
+\begin{enumerate}
+    \item \textbf{连接了不同概念}：将结构奇异值与谱半径、奇异值联系起来
+    \item \textbf{提供了计算框架}：虽然直接计算 $\mu$ 很困难，但这个引理提供了上下界
+    \item \textbf{揭示了本质}：$\mu$ 衡量的是"在最坏结构不确定性下的最大增益"
+\end{enumerate}
+
+\subsubsection{实际应用：}
+\begin{enumerate}
+    \item \textbf{鲁棒稳定性分析}：如果 $\mu_{\Delta}(M) < 1$，系统对所有允许的不确定性鲁棒稳定
+    \item \textbf{控制器设计}：设计控制器使 $\mu$ 最小化
+    \item \textbf{性能鲁棒性}：类似的框架可用于分析性能鲁棒性
+\end{enumerate}
+
+\subsection{计算考虑}
+
+虽然这个引理给出了 $\mu$ 的表达式，但实际计算仍然困难：
+\begin{itemize}
+    \item 右边的最大化是非凸优化问题
+    \item 对于一般结构 $\Delta$，计算 $\mu$ 是 NP-hard 问题
+    \item 实践中使用上下界逼近：
+    \begin{itemize}
+        \item 下界：通过幂迭代等方法估计
+        \item 上界：通过求解 LMI 等问题得到
+    \end{itemize}
+\end{itemize}
+
+\subsection{总结}
+
+这个引理成立的原因是：
+\begin{enumerate}
+    \item \textbf{$\mu$ 本质上衡量的是最坏情况下的环路增益}
+    \item \textbf{谱半径 $\rho(M\Delta)$ 直接关联到稳定性边界}
+    \item \textbf{最大化谱半径等价于找到最危险的不确定性方向}
+    \item \textbf{极端情况对应着不确定性结构的极端限制}
+\end{enumerate}
+
+这个结果奠定了 $\mu$ 分析的理论基础，使得我们能够系统性地分析结构化不确定性对系统稳定性的影响。
+
+
+
+
+
+\end{document}

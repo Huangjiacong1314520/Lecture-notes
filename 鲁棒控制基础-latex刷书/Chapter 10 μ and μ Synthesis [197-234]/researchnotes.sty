@@ -1,0 +1,1123 @@
+% % % % ==============================================================================
+% % % % 使用方式，以及快捷添加笔记的方式
+% % % % ==============================================================================
+% % % % 使用方式：在main.tex的导言部分添加\usepackage{researchnotes}
+% % % % 由于在latex.json中设置了，所以直接打rn和qn然后直接tap就可以添加笔记
+
+
+% % % % ==============================================================================
+% % % % 第一部分：宏包声明
+% % % % ==============================================================================
+
+% % % % 指定需要的LaTeX格式版本（LaTeX2e是当前标准版本）
+% % % \NeedsTeXFormat{LaTeX2e}
+
+% % % % 声明宏包信息
+% % % % 格式：\ProvidesPackage{包名}[日期 版本信息]
+% % % % 这样用户使用时会看到宏包的版本信息
+% % % \ProvidesPackage{researchnotes}[2025/10/16 Research Notes Package]
+
+
+% % % % ==============================================================================
+% % % % 第二部分：加载依赖的宏包
+% % % % ==============================================================================
+
+% % % % \RequirePackage 相当于 \usepackage，但在宏包内部使用
+% % % % 加载xcolor宏包，用于定义和使用颜色
+% % % \RequirePackage{xcolor}
+
+% % % % 加载tcolorbox宏包，用于创建彩色文本框
+% % % % 这是实现笔记框的核心宏包
+% % % \RequirePackage{tcolorbox}
+
+% % % % 加载ifthen宏包，提供条件判断功能
+% % % % 用于实现"是否显示笔记"的逻辑判断
+% % % \RequirePackage{ifthen}
+
+% % % % 加载xkeyval宏包，提供键值对参数处理
+% % % % 用于实现 [author=JC, date=2025-10-16] 这样的可选参数
+% % % \RequirePackage{xkeyval}
+% % % % 中文支持
+% % % \usepackage[UTF8]{ctex}
+% % % \usepackage{amsmath, amssymb}
+
+% % % % ==============================================================================
+% % % % 第三部分：定义颜色
+% % % % ==============================================================================
+
+% % % % \definecolor{颜色名}{颜色模式}{颜色值}
+% % % % RGB模式：Red, Green, Blue，每个值范围0-255
+
+% % % % 定义研究笔记的边框颜色（青绿色）
+% % % \definecolor{researchcolor}{RGB}{21, 154, 144}
+
+% % % % 定义方法笔记的边框颜色（蓝色）
+% % % \definecolor{questioncolor}{RGB}{0, 159, 227}
+
+% % % % 定义笔记的背景颜色（浅青色）
+% % % \definecolor{lightbg}{RGB}{223, 240, 239}
+
+
+% % % % ==============================================================================
+% % % % 第四部分：定义计数器
+% % % % ==============================================================================
+
+% % % % \newcounter{计数器名} 创建一个新的计数器，初始值为0
+% % % % 计数器用于自动编号
+
+% % % % 研究笔记的计数器
+% % % \newcounter{researchnote}
+
+% % % % 方法笔记的计数器
+% % % \newcounter{questionnote}
+
+
+% % % % ==============================================================================
+% % % % 第五部分：定义布尔开关（控制显示/隐藏）
+% % % % ==============================================================================
+
+% % % % \newif\if开关名 定义一个新的布尔开关
+% % % % 自动创建三个命令：
+% % % %   \if开关名 - 用于条件判断
+% % % %   \开关名true - 设置为真
+% % % %   \开关名false - 设置为假
+
+% % % % 定义是否显示笔记的开关
+% % % \newif\ifshownotes
+
+% % % % 默认设置为显示（true）
+% % % \shownotestrue
+
+
+% % % % ==============================================================================
+% % % % 第六部分：定义用户控制命令
+% % % % ==============================================================================
+
+% % % % 用户命令：隐藏所有笔记
+% % % % 当调用这个命令时，将开关设为false
+% % % \newcommand{\hidenotes}{\shownotesfalse}
+
+% % % % 用户命令：显示所有笔记
+% % % % 当调用这个命令时，将开关设为true
+% % % \newcommand{\shownotes}{\shownotestrue}
+
+
+% % % % ==============================================================================
+% % % % 第七部分：定义键值对选项
+% % % % ==============================================================================
+
+% % % % \define@key{族名}{键名}{处理代码}
+% % % % 当用户写 [author=JC] 时，#1代表JC
+% % % % \def\note@author{#1} 将JC存储到\note@author这个宏中
+
+% % % % 定义author键，将值存储到\note@author
+% % % \define@key{notekeys}{author}{\def\note@author{#1}}
+
+% % % % 定义date键，将值存储到\note@date
+% % % \define@key{notekeys}{date}{\def\note@date{#1}}
+
+% % % % 定义class键，将值存储到\note@class
+% % % \define@key{notekeys}{class}{\def\note@class{#1}}
+
+
+% % % % ==============================================================================
+% % % % 第八部分：定义研究笔记环境
+% % % % ==============================================================================
+
+% % % % \newenvironment{环境名}[参数个数][默认值]{开始代码}{结束代码}
+% % % % [1][] 表示有1个可选参数，默认值为空
+
+% % % \newenvironment{researchnote}[1][]{%
+% % %     % ---开始部分---
+    
+% % %     % 判断是否显示笔记
+% % %     \ifshownotes
+% % %         % 如果要显示笔记，执行以下代码
+        
+% % %         % 设置默认值（如果用户没有提供，就使用这些）
+% % %         \def\note@author{JC}           % 默认作者
+% % %         \def\note@date{\today}         % 默认日期为今天
+% % %         % \def\note@class{}              % 默认班级为空
+        
+% % %         % 处理用户提供的可选参数
+% % %         % 例如用户写了 [author=张三, date=2025-10-16]
+% % %         % 这里会覆盖上面的默认值
+% % %         \setkeys{notekeys}{#1}
+        
+% % %         % 计数器加1
+% % %         % \stepcounter会自动增加计数器的值
+% % %         \stepcounter{researchnote}
+        
+% % %         % 开始创建彩色文本框
+% % %         \begin{tcolorbox}[
+% % %             % 背景颜色
+% % %             colback=lightbg,
+% % %             % 边框颜色
+% % %             colframe=researchcolor,
+% % %             % 标题字体：粗体、无衬线字体
+% % %             fonttitle=\bfseries\sffamily,
+% % %             % 标题文字：研究笔记 + 编号
+% % %             % \arabic{researchnote} 将计数器转换为阿拉伯数字
+% % %             title=笔记 \arabic{researchnote},
+% % %             % 标题文字颜色
+% % %             coltitle=white,
+% % %             % after upper：在内容之后添加的内容
+% % %             after upper={%
+% % %                 % 垂直间距2mm
+% % %                 \vspace{2mm}
+% % %                 % 不缩进
+% % %                 \noindent
+% % %                 % 灰色、小号字体显示作者、日期等信息
+% % %                 \textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date }
+% % %             },
+% % %             % before upper：在内容之前执行的代码
+% % %             % 设置段落首行缩进为2个汉字宽度
+% % %             before upper={\parindent=2em}
+% % %         ]
+% % %     \else
+% % %         % 如果不显示笔记，调用comment命令
+% % %         % comment命令会吞掉所有内容直到\endcomment
+% % %         \comment
+% % %     \fi
+% % % }{%
+% % %     % ---结束部分---
+    
+% % %     % 判断是否显示笔记
+% % %     \ifshownotes
+% % %         % 如果显示，关闭tcolorbox环境
+% % %         \end{tcolorbox}
+% % %     \else
+% % %         % 如果不显示，关闭comment
+% % %         \endcomment
+% % %     \fi
+% % % }
+
+
+% % % % ==============================================================================
+% % % % 第九部分：定义疑问环境
+% % % % ==============================================================================
+
+% % % % 与研究笔记几乎完全相同，只是：
+% % % % 1. 使用questionnote计数器
+% % % % 2. 使用questioncolor颜色
+% % % % 3. 标题显示"疑问"
+
+% % % \newenvironment{questionnote}[1][]{%
+% % %     \ifshownotes
+% % %         % 设置默认值
+% % %         \def\note@author{JC}
+% % %         \def\note@date{\today}
+% % %         % \def\note@class{}
+        
+% % %         % 处理可选参数
+% % %         \setkeys{notekeys}{#1}
+        
+% % %         % 增加计数器
+% % %         \stepcounter{questionnote}
+        
+% % %         % 开始tcolorbox
+% % %         \begin{tcolorbox}[
+% % %             colback=lightbg,
+% % %             colframe=questioncolor,    % 注意：这里使用不同的颜色
+% % %             fonttitle=\bfseries\sffamily,
+% % %             title=疑问 \arabic{questionnote},  % 注意：标题不同
+% % %             coltitle=white,
+% % %             after upper={%
+% % %                 \vspace{2mm}
+% % %                 \noindent\textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date }
+% % %             },
+% % %             before upper={\parindent=2em}
+% % %         ]
+% % %     \else
+% % %         \comment
+% % %     \fi
+% % % }{%
+% % %     \ifshownotes
+% % %         \end{tcolorbox}
+% % %     \else
+% % %         \endcomment
+% % %     \fi
+% % % }
+
+
+% % % % ==============================================================================
+% % % % 第十部分：定义comment命令
+% % % % ==============================================================================
+
+% % % % \long\def 定义一个可以包含多个段落的命令
+% % % % #1 代表所有内容
+% % % % \endcomment 是结束标记
+% % % % {} 空的大括号表示什么都不做，即丢弃所有内容
+
+% % % % 这个命令的作用：吞掉从\comment到\endcomment之间的所有内容
+% % % \long\def\comment#1\endcomment{}
+
+
+% % % % ==============================================================================
+% % % % 第十一部分：结束宏包
+% % % % ==============================================================================
+
+% % % % \endinput 表示宏包代码到此结束
+% % % % LaTeX会忽略此命令之后的所有内容
+% % % \endinput
+
+
+% % % % ==============================================================================
+% % % % 总结：整体逻辑
+% % % % ==============================================================================
+% % % % 
+% % % % 1. 当\ifshownotes为true时：
+% % % %    - 创建tcolorbox彩色框
+% % % %    - 显示笔记内容
+% % % %    - 显示作者、日期等信息
+% % % %
+% % % % 2. 当\ifshownotes为false时：
+% % % %    - 调用\comment命令
+% % % %    - \comment会吞掉所有内容直到\endcomment
+% % % %    - 相当于笔记"消失"了
+% % % %
+% % % % 3. 用户可以通过\hidenotes和\shownotes随时切换
+% % % %
+% % % % ==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% % % ==============================================================================
+% % % 使用方式，以及快捷添加笔记的方式
+% % % ==============================================================================
+% % % 使用方式：在main.tex的导言部分添加\usepackage{researchnotes}
+% % % 由于在latex.json中设置了，所以直接打rn和qn然后直接tap就可以添加笔记
+% % % 笔记和正文中的中英文以及公式都可以高亮显示
+
+
+% % % ==============================================================================
+% % % 第一部分：宏包声明
+% % % ==============================================================================
+
+% % \NeedsTeXFormat{LaTeX2e}
+% % \ProvidesPackage{researchnotes}[2025/10/16 Research Notes Package with Highlight]
+
+
+% % % ==============================================================================
+% % % 第二部分：加载依赖的宏包
+% % % ==============================================================================
+
+% % \RequirePackage{xcolor}
+% % \RequirePackage{tcolorbox}
+% % \RequirePackage{ifthen}
+% % \RequirePackage{xkeyval}
+
+% % % 中文支持
+% % \RequirePackage[UTF8]{ctex}
+% % \RequirePackage{amsmath, amssymb}
+
+% % % 高亮功能相关宏包
+% % % 注意：不使用soul宏包，因为它对中文支持不好
+% % % 改用\colorbox方法，完全兼容中英文
+
+
+% % % ==============================================================================
+% % % 第三部分：定义颜色
+% % % ==============================================================================
+
+% % % 笔记框颜色
+% % \definecolor{researchcolor}{RGB}{21, 154, 144}
+% % \definecolor{questioncolor}{RGB}{0, 159, 227}
+% % \definecolor{lightbg}{RGB}{223, 240, 239}
+
+% % % 高亮颜色定义
+% % \definecolor{hlcolor}{RGB}{255, 255, 0}      % 黄色高亮（默认）
+% % \definecolor{hlred}{RGB}{255, 200, 200}      % 红色高亮
+% % \definecolor{hlgreen}{RGB}{200, 255, 200}    % 绿色高亮
+% % \definecolor{hlblue}{RGB}{200, 230, 255}     % 蓝色高亮
+% % \definecolor{hlorange}{RGB}{255, 230, 180}   % 橙色高亮
+% % \definecolor{hlpink}{RGB}{255, 220, 240}     % 粉色高亮
+% % \definecolor{hlgray}{RGB}{220, 220, 220}     % 灰色高亮
+
+
+% % % ==============================================================================
+% % % 第四部分：定义高亮命令（完全兼容中英文）
+% % % ==============================================================================
+
+% % % 使用\colorbox方法，完美支持中文、英文
+% % % 这种方法比soul宏包更可靠，对中文完全兼容
+
+% % % 基本高亮命令
+% % \newcommand{\hl}[1]{\colorbox{hlcolor}{#1}}        % 黄色（默认）
+% % \newcommand{\hlr}[1]{\colorbox{hlred}{#1}}         % 红色
+% % \newcommand{\hlg}[1]{\colorbox{hlgreen}{#1}}       % 绿色
+% % \newcommand{\hlb}[1]{\colorbox{hlblue}{#1}}        % 蓝色
+% % \newcommand{\hlo}[1]{\colorbox{hlorange}{#1}}      % 橙色
+% % \newcommand{\hlp}[1]{\colorbox{hlpink}{#1}}        % 粉色
+% % \newcommand{\hlgr}[1]{\colorbox{hlgray}{#1}}       % 灰色
+
+% % % 数学公式高亮命令
+% % % soul宏包不能直接处理数学模式，所以需要特殊处理
+% % \newcommand{\hlm}[1]{\colorbox{hlcolor}{$\displaystyle #1$}}           % 黄色（默认）
+% % \newcommand{\hlmr}[1]{\colorbox{hlred}{$\displaystyle #1$}}            % 红色
+% % \newcommand{\hlmg}[1]{\colorbox{hlgreen}{$\displaystyle #1$}}          % 绿色
+% % \newcommand{\hlmb}[1]{\colorbox{hlblue}{$\displaystyle #1$}}           % 蓝色
+% % \newcommand{\hlmo}[1]{\colorbox{hlorange}{$\displaystyle #1$}}         % 橙色
+% % \newcommand{\hlmp}[1]{\colorbox{hlpink}{$\displaystyle #1$}}           % 粉色
+% % \newcommand{\hlmgr}[1]{\colorbox{hlgray}{$\displaystyle #1$}}          % 灰色
+
+% % % 行内数学公式高亮（不使用\displaystyle，保持行内大小）
+% % \newcommand{\hli}[1]{\colorbox{hlcolor}{$#1$}}                         % 黄色（默认）
+% % \newcommand{\hlir}[1]{\colorbox{hlred}{$#1$}}                          % 红色
+% % \newcommand{\hlig}[1]{\colorbox{hlgreen}{$#1$}}                        % 绿色
+% % \newcommand{\hlib}[1]{\colorbox{hlblue}{$#1$}}                         % 蓝色
+% % \newcommand{\hlio}[1]{\colorbox{hlorange}{$#1$}}                       % 橙色
+% % \newcommand{\hlip}[1]{\colorbox{hlpink}{$#1$}}                         % 粉色
+% % \newcommand{\hligr}[1]{\colorbox{hlgray}{$#1$}}                        % 灰色
+
+
+% % % ==============================================================================
+% % % 第五部分：定义计数器
+% % % ==============================================================================
+
+% % \newcounter{researchnote}
+% % \newcounter{questionnote}
+
+
+% % % ==============================================================================
+% % % 第六部分：定义布尔开关（控制显示/隐藏）
+% % % ==============================================================================
+
+% % \newif\ifshownotes
+% % \shownotestrue
+
+
+% % % ==============================================================================
+% % % 第七部分：定义用户控制命令
+% % % ==============================================================================
+
+% % \newcommand{\hidenotes}{\shownotesfalse}
+% % \newcommand{\shownotes}{\shownotestrue}
+
+
+% % % ==============================================================================
+% % % 第八部分：定义键值对选项
+% % % ==============================================================================
+
+% % \define@key{notekeys}{author}{\def\note@author{#1}}
+% % \define@key{notekeys}{date}{\def\note@date{#1}}
+% % \define@key{notekeys}{class}{\def\note@class{#1}}
+
+
+% % % ==============================================================================
+% % % 第九部分：定义研究笔记环境
+% % % ==============================================================================
+
+% % \newenvironment{researchnote}[1][]{%
+% %     \ifshownotes
+% %         \def\note@author{JC}
+% %         \def\note@date{\today}
+% %         \setkeys{notekeys}{#1}
+% %         \stepcounter{researchnote}
+% %         \begin{tcolorbox}[
+% %             colback=lightbg,
+% %             colframe=researchcolor,
+% %             fonttitle=\bfseries\sffamily,
+% %             title=笔记 \arabic{researchnote},
+% %             coltitle=white,
+% %             after upper={%
+% %                 \vspace{2mm}
+% %                 \noindent
+% %                 \textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+% %             },
+% %             before upper={\parindent=2em}
+% %         ]
+% %     \else
+% %         \comment
+% %     \fi
+% % }{%
+% %     \ifshownotes
+% %         \end{tcolorbox}
+% %     \else
+% %         \endcomment
+% %     \fi
+% % }
+
+
+% % % ==============================================================================
+% % % 第十部分：定义疑问环境
+% % % ==============================================================================
+
+% % \newenvironment{questionnote}[1][]{%
+% %     \ifshownotes
+% %         \def\note@author{JC}
+% %         \def\note@date{\today}
+% %         \setkeys{notekeys}{#1}
+% %         \stepcounter{questionnote}
+% %         \begin{tcolorbox}[
+% %             colback=lightbg,
+% %             colframe=questioncolor,
+% %             fonttitle=\bfseries\sffamily,
+% %             title=疑问 \arabic{questionnote},
+% %             coltitle=white,
+% %             after upper={%
+% %                 \vspace{2mm}
+% %                 \noindent\textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+% %             },
+% %             before upper={\parindent=2em}
+% %         ]
+% %     \else
+% %         \comment
+% %     \fi
+% % }{%
+% %     \ifshownotes
+% %         \end{tcolorbox}
+% %     \else
+% %         \endcomment
+% %     \fi
+% % }
+
+
+% % % ==============================================================================
+% % % 第十一部分：定义comment命令
+% % % ==============================================================================
+
+% % \long\def\comment#1\endcomment{}
+
+
+% % % ==============================================================================
+% % % 第十二部分：短别名（提高输入效率）
+% % % ==============================================================================
+
+% % % 笔记环境短别名
+% % \newenvironment{rn}[1][]{\begin{researchnote}[#1]}{\end{researchnote}}
+% % \newenvironment{qn}[1][]{\begin{questionnote}[#1]}{\end{questionnote}}
+
+
+% % % ==============================================================================
+% % % 第十三部分：结束宏包
+% % % ==============================================================================
+
+% % \endinput
+
+
+% % % ==============================================================================
+% % % 使用说明
+% % % ==============================================================================
+% % %
+% % % 1. 文本高亮（英文、中文）：
+% % %    \hl{普通高亮}         - 黄色（默认）
+% % %    \hlr{红色高亮}
+% % %    \hlg{绿色高亮}
+% % %    \hlb{蓝色高亮}
+% % %    \hlo{橙色高亮}
+% % %    \hlp{粉色高亮}
+% % %    \hlgr{灰色高亮}
+% % %
+% % % 2. 行内数学公式高亮：
+% % %    这个公式\hli{x^2 + y^2 = z^2}很重要
+% % %    \hlir{a+b}  - 红色
+% % %    \hlig{c+d}  - 绿色
+% % %    （其他颜色同理：hlib, hlio, hlip, hligr）
+% % %
+% % % 3. 独立数学公式高亮：
+% % %    \hlm{x^2 + y^2 = z^2}     - 黄色
+% % %    \hlmr{\int_0^1 f(x)dx}    - 红色
+% % %    \hlmg{\sum_{i=1}^n i}     - 绿色
+% % %    （其他颜色同理：hlmb, hlmo, hlmp, hlmgr）
+% % %
+% % % 4. 使用示例：
+% % %    \begin{researchnote}
+% % %    这是\hl{重要的文本}，这是\hlr{非常重要的文本}。
+% % %    
+% % %    行内公式：当\hli{n \to \infty}时，结果趋于\hlib{\pi}。
+% % %    
+% % %    独立公式：
+% % %    \[
+% % %    \hlm{E = mc^2}
+% % %    \]
+% % %    \end{researchnote}
+% % %
+% % % ==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% % ==============================================================================
+% % 使用方式，以及快捷添加笔记的方式
+% % ==============================================================================
+% % 使用方式：在main.tex的导言部分添加\usepackage{researchnotes}
+% % 由于在latex.json中设置了，所以直接打rn和qn然后直接tap就可以添加笔记
+% % 新发现，笔记里还可以插入图片
+% % 存在的问题：笔记不能超过一面，否则就会被吞，即无法自动跨页
+
+
+% % ==============================================================================
+% % 第一部分：宏包声明
+% % ==============================================================================
+
+% \NeedsTeXFormat{LaTeX2e}
+% \ProvidesPackage{researchnotes}[2025/10/20 Research Notes Package with Highlight]
+
+
+% % ==============================================================================
+% % 第二部分：加载依赖的宏包
+% % ==============================================================================
+
+% \RequirePackage{xcolor}
+% \RequirePackage{tcolorbox}
+% \RequirePackage{ifthen}
+% \RequirePackage{xkeyval}
+
+% % 中文支持（条件加载，避免与主文件冲突）
+% \@ifpackageloaded{ctex}{}{%
+%   \RequirePackage[UTF8]{ctex}%
+% }
+% \@ifpackageloaded{amsmath}{}{%
+%   \RequirePackage{amsmath}%
+% }
+% \@ifpackageloaded{amssymb}{}{%
+%   \RequirePackage{amssymb}%
+% }
+
+% % 高亮功能相关宏包
+% % 注意：不使用soul宏包，因为它对中文支持不好
+% % 改用\colorbox方法，完全兼容中英文
+
+
+% % ==============================================================================
+% % 第三部分：定义颜色
+% % ==============================================================================
+
+% % 笔记框颜色
+% \definecolor{researchcolor}{RGB}{21, 154, 144}
+% \definecolor{questioncolor}{RGB}{0, 159, 227}
+% \definecolor{lightbg}{RGB}{223, 240, 239}
+
+% % 高亮颜色定义
+% \definecolor{hlcolor}{RGB}{255, 255, 0}      % 黄色高亮（默认）
+% \definecolor{hlred}{RGB}{255, 200, 200}      % 红色高亮
+% \definecolor{hlgreen}{RGB}{200, 255, 200}    % 绿色高亮
+% \definecolor{hlblue}{RGB}{200, 230, 255}     % 蓝色高亮
+% \definecolor{hlorange}{RGB}{255, 230, 180}   % 橙色高亮
+% \definecolor{hlpink}{RGB}{255, 220, 240}     % 粉色高亮
+% \definecolor{hlgray}{RGB}{220, 220, 220}     % 灰色高亮
+
+
+% % ==============================================================================
+% % 第四部分：定义高亮命令（完全兼容中英文）
+% % ==============================================================================
+
+% % 使用\colorbox方法，完美支持中文、英文
+% % 这种方法比soul宏包更可靠，对中文完全兼容
+
+% % 基本高亮命令
+% \newcommand{\hl}[1]{\colorbox{hlcolor}{#1}}        % 黄色（默认）
+% \newcommand{\hlr}[1]{\colorbox{hlred}{#1}}         % 红色
+% \newcommand{\hlg}[1]{\colorbox{hlgreen}{#1}}       % 绿色
+% \newcommand{\hlb}[1]{\colorbox{hlblue}{#1}}        % 蓝色
+% \newcommand{\hlo}[1]{\colorbox{hlorange}{#1}}      % 橙色
+% \newcommand{\hlp}[1]{\colorbox{hlpink}{#1}}        % 粉色
+% \newcommand{\hlgr}[1]{\colorbox{hlgray}{#1}}       % 灰色
+
+% % 数学公式高亮命令
+% % soul宏包不能直接处理数学模式，所以需要特殊处理
+% \newcommand{\hlm}[1]{\colorbox{hlcolor}{$\displaystyle #1$}}           % 黄色（默认）
+% \newcommand{\hlmr}[1]{\colorbox{hlred}{$\displaystyle #1$}}            % 红色
+% \newcommand{\hlmg}[1]{\colorbox{hlgreen}{$\displaystyle #1$}}          % 绿色
+% \newcommand{\hlmb}[1]{\colorbox{hlblue}{$\displaystyle #1$}}           % 蓝色
+% \newcommand{\hlmo}[1]{\colorbox{hlorange}{$\displaystyle #1$}}         % 橙色
+% \newcommand{\hlmp}[1]{\colorbox{hlpink}{$\displaystyle #1$}}           % 粉色
+% \newcommand{\hlmgr}[1]{\colorbox{hlgray}{$\displaystyle #1$}}          % 灰色
+
+% % 行内数学公式高亮（不使用\displaystyle，保持行内大小）
+% \newcommand{\hli}[1]{\colorbox{hlcolor}{$#1$}}                         % 黄色（默认）
+% \newcommand{\hlir}[1]{\colorbox{hlred}{$#1$}}                          % 红色
+% \newcommand{\hlig}[1]{\colorbox{hlgreen}{$#1$}}                        % 绿色
+% \newcommand{\hlib}[1]{\colorbox{hlblue}{$#1$}}                         % 蓝色
+% \newcommand{\hlio}[1]{\colorbox{hlorange}{$#1$}}                       % 橙色
+% \newcommand{\hlip}[1]{\colorbox{hlpink}{$#1$}}                         % 粉色
+% \newcommand{\hligr}[1]{\colorbox{hlgray}{$#1$}}                        % 灰色
+
+
+% % ==============================================================================
+% % 第五部分：定义计数器
+% % ==============================================================================
+
+% \newcounter{researchnote}
+% \newcounter{questionnote}
+
+
+% % ==============================================================================
+% % 第六部分：定义布尔开关（控制显示/隐藏）
+% % ==============================================================================
+
+% \newif\ifshownotes
+% \shownotestrue
+
+
+% % ==============================================================================
+% % 第七部分：定义用户控制命令
+% % ==============================================================================
+
+% \newcommand{\hidenotes}{\shownotesfalse}
+% \newcommand{\shownotes}{\shownotestrue}
+
+
+% % ==============================================================================
+% % 第八部分：定义键值对选项
+% % ==============================================================================
+
+% \define@key{notekeys}{author}{\def\note@author{#1}}
+% \define@key{notekeys}{date}{\def\note@date{#1}}
+% \define@key{notekeys}{class}{\def\note@class{#1}}
+
+
+% % ==============================================================================
+% % 第九部分：定义研究笔记环境
+% % ==============================================================================
+
+% \newenvironment{researchnote}[1][]{%
+%     \ifshownotes
+%         \def\note@author{JC}
+%         \def\note@date{\today}
+%         \setkeys{notekeys}{#1}
+%         \stepcounter{researchnote}
+%         \begin{tcolorbox}[
+%             colback=lightbg,
+%             colframe=researchcolor,
+%             fonttitle=\bfseries\sffamily,
+%             title=笔记 \arabic{researchnote},
+%             coltitle=white,
+%             after upper={%
+%                 \vspace{2mm}
+%                 \noindent
+%                 \textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+%             },
+%             before upper={\parindent=2em}
+%         ]
+%     \else
+%         \comment
+%     \fi
+% }{%
+%     \ifshownotes
+%         \end{tcolorbox}
+%     \else
+%         \endcomment
+%     \fi
+% }
+
+
+% % ==============================================================================
+% % 第十部分：定义疑问环境
+% % ==============================================================================
+
+% \newenvironment{questionnote}[1][]{%
+%     \ifshownotes
+%         \def\note@author{JC}
+%         \def\note@date{\today}
+%         \setkeys{notekeys}{#1}
+%         \stepcounter{questionnote}
+%         \begin{tcolorbox}[
+%             colback=lightbg,
+%             colframe=questioncolor,
+%             fonttitle=\bfseries\sffamily,
+%             title=疑问 \arabic{questionnote},
+%             coltitle=white,
+%             after upper={%
+%                 \vspace{2mm}
+%                 \noindent\textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+%             },
+%             before upper={\parindent=2em}
+%         ]
+%     \else
+%         \comment
+%     \fi
+% }{%
+%     \ifshownotes
+%         \end{tcolorbox}
+%     \else
+%         \endcomment
+%     \fi
+% }
+
+
+% % ==============================================================================
+% % 第十一部分：定义comment命令
+% % ==============================================================================
+
+% \long\def\comment#1\endcomment{}
+
+
+% % ==============================================================================
+% % 第十二部分：短别名（提高输入效率）
+% % ==============================================================================
+
+% % 笔记环境短别名
+% \newenvironment{rn}[1][]{\begin{researchnote}[#1]}{\end{researchnote}}
+% \newenvironment{qn}[1][]{\begin{questionnote}[#1]}{\end{questionnote}}
+
+
+% % ==============================================================================
+% % 第十三部分：结束宏包
+% % ==============================================================================
+
+% \endinput
+
+
+% % ==============================================================================
+% % 使用说明
+% % ==============================================================================
+% %
+% % 1. 文本高亮（英文、中文）：
+% %    \hl{普通高亮}         - 黄色（默认）
+% %    \hlr{红色高亮}
+% %    \hlg{绿色高亮}
+% %    \hlb{蓝色高亮}
+% %    \hlo{橙色高亮}
+% %    \hlp{粉色高亮}
+% %    \hlgr{灰色高亮}
+% %
+% % 2. 行内数学公式高亮：
+% %    这个公式\hli{x^2 + y^2 = z^2}很重要
+% %    \hlir{a+b}  - 红色
+% %    \hlig{c+d}  - 绿色
+% %    （其他颜色同理：hlib, hlio, hlip, hligr）
+% %
+% % 3. 独立数学公式高亮：
+% %    \hlm{x^2 + y^2 = z^2}     - 黄色
+% %    \hlmr{\int_0^1 f(x)dx}    - 红色
+% %    \hlmg{\sum_{i=1}^n i}     - 绿色
+% %    （其他颜色同理：hlmb, hlmo, hlmp, hlmgr）
+% %
+% % 4. 使用示例：
+% %    \begin{researchnote}
+% %    这是\hl{重要的文本}，这是\hlr{非常重要的文本}。
+% %    
+% %    行内公式：当\hli{n \to \infty}时，结果趋于\hlib{\pi}。
+% %    
+% %    独立公式：
+% %    \[
+% %    \hlm{E = mc^2}
+% %    \]
+% %    \end{researchnote}
+% %
+% % ==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ==============================================================================
+% 使用方式、快捷添加笔记的方式以及做出的修改
+% ==============================================================================
+% 使用方式：在main.tex的导言部分添加\usepackage{researchnotes}
+% 由于在latex.json中设置了，所以直接打rn和qn然后直接tap就可以添加笔记
+% 新发现，笔记里还可以插入图片
+% 2025-10-20：增加了跨页库，笔记可以实现自动跨页
+% 2025-10-21：增加了强制固定图片位置的包
+% 问题：高亮部分没法自动换行，emmm其实可以算是强制只高亮关键词，不改也行
+
+
+
+
+% ==============================================================================
+% 第一部分：宏包声明
+% ==============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{researchnotes}[2025/10/16 Research Notes Package with Highlight]
+
+
+% ==============================================================================
+% 第二部分：加载依赖的宏包
+% ==============================================================================
+
+\RequirePackage{xcolor}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{breakable,skins}  % 加载 breakable 和 skins 库
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+\RequirePackage{float}% 用于强制固定图片位置
+
+% 中文支持（条件加载，避免与主文件冲突）
+\@ifpackageloaded{ctex}{}{%
+  \RequirePackage[UTF8]{ctex}%
+}
+\@ifpackageloaded{amsmath}{}{%
+  \RequirePackage{amsmath}%
+}
+\@ifpackageloaded{amssymb}{}{%
+  \RequirePackage{amssymb}%
+}
+
+% 高亮功能相关宏包
+% 注意：不使用soul宏包，因为它对中文支持不好
+% 改用\colorbox方法，完全兼容中英文
+
+
+% ==============================================================================
+% 第三部分：定义颜色
+% ==============================================================================
+
+% 笔记框颜色
+\definecolor{researchcolor}{RGB}{21, 154, 144}
+\definecolor{questioncolor}{RGB}{0, 159, 227}
+\definecolor{lightbg}{RGB}{223, 240, 239}
+
+% 高亮颜色定义
+\definecolor{hlcolor}{RGB}{255, 255, 0}      % 黄色高亮（默认）
+\definecolor{hlred}{RGB}{255, 200, 200}      % 红色高亮
+\definecolor{hlgreen}{RGB}{200, 255, 200}    % 绿色高亮
+\definecolor{hlblue}{RGB}{200, 230, 255}     % 蓝色高亮
+\definecolor{hlorange}{RGB}{255, 230, 180}   % 橙色高亮
+\definecolor{hlpink}{RGB}{255, 220, 240}     % 粉色高亮
+\definecolor{hlgray}{RGB}{220, 220, 220}     % 灰色高亮
+
+
+% ==============================================================================
+% 第四部分：定义高亮命令（完全兼容中英文）
+% ==============================================================================
+
+% 使用\colorbox方法，完美支持中文、英文
+% 这种方法比soul宏包更可靠，对中文完全兼容
+
+% 基本高亮命令
+\newcommand{\hl}[1]{\colorbox{hlcolor}{#1}}        % 黄色（默认）
+\newcommand{\hlr}[1]{\colorbox{hlred}{#1}}         % 红色
+\newcommand{\hlg}[1]{\colorbox{hlgreen}{#1}}       % 绿色
+\newcommand{\hlb}[1]{\colorbox{hlblue}{#1}}        % 蓝色
+\newcommand{\hlo}[1]{\colorbox{hlorange}{#1}}      % 橙色
+\newcommand{\hlp}[1]{\colorbox{hlpink}{#1}}        % 粉色
+\newcommand{\hlgr}[1]{\colorbox{hlgray}{#1}}       % 灰色
+
+% 数学公式高亮命令
+% soul宏包不能直接处理数学模式，所以需要特殊处理
+\newcommand{\hlm}[1]{\colorbox{hlcolor}{$\displaystyle #1$}}           % 黄色（默认）
+\newcommand{\hlmr}[1]{\colorbox{hlred}{$\displaystyle #1$}}            % 红色
+\newcommand{\hlmg}[1]{\colorbox{hlgreen}{$\displaystyle #1$}}          % 绿色
+\newcommand{\hlmb}[1]{\colorbox{hlblue}{$\displaystyle #1$}}           % 蓝色
+\newcommand{\hlmo}[1]{\colorbox{hlorange}{$\displaystyle #1$}}         % 橙色
+\newcommand{\hlmp}[1]{\colorbox{hlpink}{$\displaystyle #1$}}           % 粉色
+\newcommand{\hlmgr}[1]{\colorbox{hlgray}{$\displaystyle #1$}}          % 灰色
+
+% 行内数学公式高亮（不使用\displaystyle，保持行内大小）
+\newcommand{\hli}[1]{\colorbox{hlcolor}{$#1$}}                         % 黄色（默认）
+\newcommand{\hlir}[1]{\colorbox{hlred}{$#1$}}                          % 红色
+\newcommand{\hlig}[1]{\colorbox{hlgreen}{$#1$}}                        % 绿色
+\newcommand{\hlib}[1]{\colorbox{hlblue}{$#1$}}                         % 蓝色
+\newcommand{\hlio}[1]{\colorbox{hlorange}{$#1$}}                       % 橙色
+\newcommand{\hlip}[1]{\colorbox{hlpink}{$#1$}}                         % 粉色
+\newcommand{\hligr}[1]{\colorbox{hlgray}{$#1$}}                        % 灰色
+
+
+% ==============================================================================
+% 第五部分：定义计数器
+% ==============================================================================
+
+\newcounter{researchnote}
+\newcounter{questionnote}
+
+
+% ==============================================================================
+% 第六部分：定义布尔开关（控制显示/隐藏）
+% ==============================================================================
+
+\newif\ifshownotes
+\shownotestrue
+
+
+% ==============================================================================
+% 第七部分：定义用户控制命令
+% ==============================================================================
+
+\newcommand{\hidenotes}{\shownotesfalse}
+\newcommand{\shownotes}{\shownotestrue}
+
+
+% ==============================================================================
+% 第八部分：定义键值对选项
+% ==============================================================================
+
+\define@key{notekeys}{author}{\def\note@author{#1}}
+\define@key{notekeys}{date}{\def\note@date{#1}}
+\define@key{notekeys}{class}{\def\note@class{#1}}
+
+
+% ==============================================================================
+% 第九部分：定义研究笔记环境
+% ==============================================================================
+
+\newenvironment{researchnote}[1][]{%
+    \ifshownotes
+        \def\note@author{JC}
+        \def\note@date{\today}
+        \setkeys{notekeys}{#1}
+        \stepcounter{researchnote}
+        \begin{tcolorbox}[
+            colback=lightbg,
+            colframe=researchcolor,
+            fonttitle=\bfseries\sffamily,
+            title=笔记 \arabic{researchnote},
+            coltitle=white,
+            breakable,                    % 允许跨页
+            before upper={\parindent=2em},
+            after upper={%
+                \vspace{2mm}
+                \noindent
+                \textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+            }
+        ]
+    \else
+        \comment
+    \fi
+}{%
+    \ifshownotes
+        \end{tcolorbox}
+    \else
+        \endcomment
+    \fi
+}
+
+
+% ==============================================================================
+% 第十部分：定义疑问环境
+% ==============================================================================
+
+\newenvironment{questionnote}[1][]{%
+    \ifshownotes
+        \def\note@author{JC}
+        \def\note@date{\today}
+        \setkeys{notekeys}{#1}
+        \stepcounter{questionnote}
+        \begin{tcolorbox}[
+            colback=lightbg,
+            colframe=questioncolor,
+            fonttitle=\bfseries\sffamily,
+            title=疑问 \arabic{questionnote},
+            coltitle=white,
+            breakable,                    % 允许跨页
+            before upper={\parindent=2em},
+            after upper={%
+                \vspace{2mm}
+                \noindent\textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+            }
+        ]
+    \else
+        \comment
+    \fi
+}{%
+    \ifshownotes
+        \end{tcolorbox}
+    \else
+        \endcomment
+    \fi
+}
+
+
+% ==============================================================================
+% 第十一部分：定义comment命令
+% ==============================================================================
+
+\long\def\comment#1\endcomment{}
+
+
+% ==============================================================================
+% 第十二部分：短别名（提高输入效率）
+% ==============================================================================
+
+% 笔记环境短别名
+\newenvironment{rn}[1][]{\begin{researchnote}[#1]}{\end{researchnote}}
+\newenvironment{qn}[1][]{\begin{questionnote}[#1]}{\end{questionnote}}
+
+
+% ==============================================================================
+% 第十三部分：结束宏包
+% ==============================================================================
+
+\endinput
+
+
+% ==============================================================================
+% 使用说明
+% ==============================================================================
+%
+% 1. 文本高亮（英文、中文）：
+%    \hl{普通高亮}         - 黄色（默认）
+%    \hlr{红色高亮}
+%    \hlg{绿色高亮}
+%    \hlb{蓝色高亮}
+%    \hlo{橙色高亮}
+%    \hlp{粉色高亮}
+%    \hlgr{灰色高亮}
+%
+% 2. 行内数学公式高亮：
+%    这个公式\hli{x^2 + y^2 = z^2}很重要
+%    \hlir{a+b}  - 红色
+%    \hlig{c+d}  - 绿色
+%    （其他颜色同理：hlib, hlio, hlip, hligr）
+%
+% 3. 独立数学公式高亮：
+%    \hlm{x^2 + y^2 = z^2}     - 黄色
+%    \hlmr{\int_0^1 f(x)dx}    - 红色
+%    \hlmg{\sum_{i=1}^n i}     - 绿色
+%    （其他颜色同理：hlmb, hlmo, hlmp, hlmgr）
+%
+% 4. 使用示例：
+%    \begin{researchnote}
+%    这是\hl{重要的文本}，这是\hlr{非常重要的文本}。
+%    
+%    行内公式：当\hli{n \to \infty}时，结果趋于\hlib{\pi}。
+%    
+%    独立公式：
+%    \[
+%    \hlm{E = mc^2}
+%    \]
+%    \end{researchnote}
+%
+% ==============================================================================

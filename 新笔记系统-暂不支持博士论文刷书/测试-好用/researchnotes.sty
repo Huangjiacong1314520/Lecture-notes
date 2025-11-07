@@ -1,0 +1,252 @@
+% ==============================================================================
+% 使用方式，以及快捷添加笔记的方式
+% ==============================================================================
+% 使用方式：在main.tex的导言部分添加\usepackage{researchnotes}
+% 由于在latex.json中设置了，所以直接打rn和qn然后直接tap就可以添加笔记
+% 笔记和正文中的中英文以及公式都可以高亮显示
+
+
+% ==============================================================================
+% 第一部分：宏包声明
+% ==============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{researchnotes}[2025/10/16 Research Notes Package with Highlight]
+
+
+% ==============================================================================
+% 第二部分：加载依赖的宏包
+% ==============================================================================
+
+\RequirePackage{xcolor}
+\RequirePackage{tcolorbox}
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+
+% 中文支持
+\RequirePackage[UTF8]{ctex}
+\RequirePackage{amsmath, amssymb}
+
+% 高亮功能相关宏包
+% 注意：不使用soul宏包，因为它对中文支持不好
+% 改用\colorbox方法，完全兼容中英文
+
+
+% ==============================================================================
+% 第三部分：定义颜色
+% ==============================================================================
+
+% 笔记框颜色
+\definecolor{researchcolor}{RGB}{21, 154, 144}
+\definecolor{questioncolor}{RGB}{0, 159, 227}
+\definecolor{lightbg}{RGB}{223, 240, 239}
+
+% 高亮颜色定义
+\definecolor{hlcolor}{RGB}{255, 255, 0}      % 黄色高亮（默认）
+\definecolor{hlred}{RGB}{255, 200, 200}      % 红色高亮
+\definecolor{hlgreen}{RGB}{200, 255, 200}    % 绿色高亮
+\definecolor{hlblue}{RGB}{200, 230, 255}     % 蓝色高亮
+\definecolor{hlorange}{RGB}{255, 230, 180}   % 橙色高亮
+\definecolor{hlpink}{RGB}{255, 220, 240}     % 粉色高亮
+\definecolor{hlgray}{RGB}{220, 220, 220}     % 灰色高亮
+
+
+% ==============================================================================
+% 第四部分：定义高亮命令（完全兼容中英文）
+% ==============================================================================
+
+% 使用\colorbox方法，完美支持中文、英文
+% 这种方法比soul宏包更可靠，对中文完全兼容
+
+% 基本高亮命令
+\newcommand{\hl}[1]{\colorbox{hlcolor}{#1}}        % 黄色（默认）
+\newcommand{\hlr}[1]{\colorbox{hlred}{#1}}         % 红色
+\newcommand{\hlg}[1]{\colorbox{hlgreen}{#1}}       % 绿色
+\newcommand{\hlb}[1]{\colorbox{hlblue}{#1}}        % 蓝色
+\newcommand{\hlo}[1]{\colorbox{hlorange}{#1}}      % 橙色
+\newcommand{\hlp}[1]{\colorbox{hlpink}{#1}}        % 粉色
+\newcommand{\hlgr}[1]{\colorbox{hlgray}{#1}}       % 灰色
+
+% 数学公式高亮命令
+% soul宏包不能直接处理数学模式，所以需要特殊处理
+\newcommand{\hlm}[1]{\colorbox{hlcolor}{$\displaystyle #1$}}           % 黄色（默认）
+\newcommand{\hlmr}[1]{\colorbox{hlred}{$\displaystyle #1$}}            % 红色
+\newcommand{\hlmg}[1]{\colorbox{hlgreen}{$\displaystyle #1$}}          % 绿色
+\newcommand{\hlmb}[1]{\colorbox{hlblue}{$\displaystyle #1$}}           % 蓝色
+\newcommand{\hlmo}[1]{\colorbox{hlorange}{$\displaystyle #1$}}         % 橙色
+\newcommand{\hlmp}[1]{\colorbox{hlpink}{$\displaystyle #1$}}           % 粉色
+\newcommand{\hlmgr}[1]{\colorbox{hlgray}{$\displaystyle #1$}}          % 灰色
+
+% 行内数学公式高亮（不使用\displaystyle，保持行内大小）
+\newcommand{\hli}[1]{\colorbox{hlcolor}{$#1$}}                         % 黄色（默认）
+\newcommand{\hlir}[1]{\colorbox{hlred}{$#1$}}                          % 红色
+\newcommand{\hlig}[1]{\colorbox{hlgreen}{$#1$}}                        % 绿色
+\newcommand{\hlib}[1]{\colorbox{hlblue}{$#1$}}                         % 蓝色
+\newcommand{\hlio}[1]{\colorbox{hlorange}{$#1$}}                       % 橙色
+\newcommand{\hlip}[1]{\colorbox{hlpink}{$#1$}}                         % 粉色
+\newcommand{\hligr}[1]{\colorbox{hlgray}{$#1$}}                        % 灰色
+
+
+% ==============================================================================
+% 第五部分：定义计数器
+% ==============================================================================
+
+\newcounter{researchnote}
+\newcounter{questionnote}
+
+
+% ==============================================================================
+% 第六部分：定义布尔开关（控制显示/隐藏）
+% ==============================================================================
+
+\newif\ifshownotes
+\shownotestrue
+
+
+% ==============================================================================
+% 第七部分：定义用户控制命令
+% ==============================================================================
+
+\newcommand{\hidenotes}{\shownotesfalse}
+\newcommand{\shownotes}{\shownotestrue}
+
+
+% ==============================================================================
+% 第八部分：定义键值对选项
+% ==============================================================================
+
+\define@key{notekeys}{author}{\def\note@author{#1}}
+\define@key{notekeys}{date}{\def\note@date{#1}}
+\define@key{notekeys}{class}{\def\note@class{#1}}
+
+
+% ==============================================================================
+% 第九部分：定义研究笔记环境
+% ==============================================================================
+
+\newenvironment{researchnote}[1][]{%
+    \ifshownotes
+        \def\note@author{JC}
+        \def\note@date{\today}
+        \setkeys{notekeys}{#1}
+        \stepcounter{researchnote}
+        \begin{tcolorbox}[
+            colback=lightbg,
+            colframe=researchcolor,
+            fonttitle=\bfseries\sffamily,
+            title=笔记 \arabic{researchnote},
+            coltitle=white,
+            after upper={%
+                \vspace{2mm}
+                \noindent
+                \textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+            },
+            before upper={\parindent=2em}
+        ]
+    \else
+        \comment
+    \fi
+}{%
+    \ifshownotes
+        \end{tcolorbox}
+    \else
+        \endcomment
+    \fi
+}
+
+
+% ==============================================================================
+% 第十部分：定义疑问环境
+% ==============================================================================
+
+\newenvironment{questionnote}[1][]{%
+    \ifshownotes
+        \def\note@author{JC}
+        \def\note@date{\today}
+        \setkeys{notekeys}{#1}
+        \stepcounter{questionnote}
+        \begin{tcolorbox}[
+            colback=lightbg,
+            colframe=questioncolor,
+            fonttitle=\bfseries\sffamily,
+            title=疑问 \arabic{questionnote},
+            coltitle=white,
+            after upper={%
+                \vspace{2mm}
+                \noindent\textcolor{gray}{\small 作者: \note@author \quad 日期: \note@date}
+            },
+            before upper={\parindent=2em}
+        ]
+    \else
+        \comment
+    \fi
+}{%
+    \ifshownotes
+        \end{tcolorbox}
+    \else
+        \endcomment
+    \fi
+}
+
+
+% ==============================================================================
+% 第十一部分：定义comment命令
+% ==============================================================================
+
+\long\def\comment#1\endcomment{}
+
+
+% ==============================================================================
+% 第十二部分：短别名（提高输入效率）
+% ==============================================================================
+
+% 笔记环境短别名
+\newenvironment{rn}[1][]{\begin{researchnote}[#1]}{\end{researchnote}}
+\newenvironment{qn}[1][]{\begin{questionnote}[#1]}{\end{questionnote}}
+
+
+% ==============================================================================
+% 第十三部分：结束宏包
+% ==============================================================================
+
+\endinput
+
+
+% ==============================================================================
+% 使用说明
+% ==============================================================================
+%
+% 1. 文本高亮（英文、中文）：
+%    \hl{普通高亮}         - 黄色（默认）
+%    \hlr{红色高亮}
+%    \hlg{绿色高亮}
+%    \hlb{蓝色高亮}
+%    \hlo{橙色高亮}
+%    \hlp{粉色高亮}
+%    \hlgr{灰色高亮}
+%
+% 2. 行内数学公式高亮：
+%    这个公式\hli{x^2 + y^2 = z^2}很重要
+%    \hlir{a+b}  - 红色
+%    \hlig{c+d}  - 绿色
+%    （其他颜色同理：hlib, hlio, hlip, hligr）
+%
+% 3. 独立数学公式高亮：
+%    \hlm{x^2 + y^2 = z^2}     - 黄色
+%    \hlmr{\int_0^1 f(x)dx}    - 红色
+%    \hlmg{\sum_{i=1}^n i}     - 绿色
+%    （其他颜色同理：hlmb, hlmo, hlmp, hlmgr）
+%
+% 4. 使用示例：
+%    \begin{researchnote}
+%    这是\hl{重要的文本}，这是\hlr{非常重要的文本}。
+%    
+%    行内公式：当\hli{n \to \infty}时，结果趋于\hlib{\pi}。
+%    
+%    独立公式：
+%    \[
+%    \hlm{E = mc^2}
+%    \]
+%    \end{researchnote}
+%
+% ==============================================================================

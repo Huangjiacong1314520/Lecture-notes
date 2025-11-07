@@ -1,0 +1,181 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{ctex}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{mathrsfs}
+\usepackage{bbold}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{researchnotes}
+\usetikzlibrary{shapes,arrows,positioning}
+
+\title{koen classen博士论文第二章}
+
+\author{黄嘉聪}
+\date{2025.11.1}
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+
+
+
+\begin{abstract}
+主要介绍了在Koen的博士论文中，为什么要求解扰动矩阵下界，以及如何求解扰动矩阵下界
+\end{abstract}
+
+KEY WORDS: robust control; $\mu$; skew $\mu$; lower bound
+
+\section{扰动矩阵下界的求解方法}
+
+
+\begin{researchnote}[author=JC, date=2025-11-01]
+    \subsection*{对一个系统设计故障检测滤波器的完整步骤总结}\\
+    已知条件：
+\begin{itemize}
+  \item 系统的不确定性模型$G_{u}(s, \Delta)$
+  \item 系统的标称模型$G_{u}(s, 0)$
+\end{itemize}
+步骤如下
+\begin{enumerate}
+  \item 计算$\tilde{M}_{u}, \tilde{N}_{u} \in \mathcal{R} \mathcal{H}_{\infty}$ any $L C F$ of the nominal system $G_{u}(s, 0)$，后面计算不确定性传递矩阵也要用到
+  \item 计算系统的不确定性部分：$\tilde{G}_{u}(s, \Delta):=G_{u}(s, \Delta)-G_{u}(s, 0)$
+  \item 计算$rdf$到预残差$\tilde{\epsilon}$的不确定性传递矩阵$T_{\tilde{\epsilon} r}(s, \Delta)=\tilde{M}_{u} T_{\tilde{\epsilon} r}^       {\Delta}\\
+   T_{\tilde{\epsilon} d}(s, \Delta)=\tilde{M}_{u} T_{\tilde{\epsilon} d}^{\Delta}$ \\
+   and $T_{\tilde{\epsilon} f}(s, \Delta)=\tilde{M}_{u} T_{\tilde{\epsilon} f}^{\Delta}$
+        \begin{enumerate}
+           \item 其中$T_{\tilde{\epsilon} r}^{\Delta}:=\tilde{G}_{u}(s, \Delta) C S_{\Delta}$\\
+           $T_{\tilde{\epsilon} d}^{\Delta}:=G_{d}(s, \Delta)-\tilde{G}_{u}(s, \Delta) C S_{\Delta} G_{d}(s, \Delta)$\\
+           $T_{\tilde{\epsilon} f}^{\Delta}:=G_{f}(s, \Delta)-\tilde{G}_{u}(s, \Delta) C S_{\Delta} G_{f}(s, \Delta)$
+           \item 其中$C(s)$是robustly stabilizing feedback controller $u = C(r − y)$
+           \item 其中$S_{\Delta}=\left(I+G_{u}(s,\Delta) C\right)^{-1}$ is the uncertain sensitivity function 
+           \item 其中$S=(I+G(s, 0) C)^{-1}$ is the nominal sensitivity暂时没用到
+        \end{enumerate} 
+  \item 其中$T_{\tilde{\epsilon} r}^{\Delta}:=\tilde{G}_{u}(s, \Delta) C S_{\Delta}$，\\
+            $T_{\tilde{\epsilon} d}^{\Delta}:=G_{d}(s, \Delta)-\tilde{G}_{u}(s, \Delta) C S_{\Delta} G_{d}(s, \Delta)$\\
+            $T_{\tilde{\epsilon} f}^{\Delta}:=G_{f}(s, \Delta)-\tilde{G}_{u}(s, \Delta) C S_{\Delta} G_{f}(s, \Delta)$
+  \item 计算扩展扰动传递函数矩阵：$\tilde{G}_{d}(s, \Delta):=\left[\begin{array}{cc}T_{\tilde{\epsilon} r}(s, \Delta) & T_{\tilde{\epsilon} d}(s, \Delta)\end{array}\right]$
+  \item 求$\tilde{G}_{d}(s, \Delta)$的上界$\bar{G}_{d}(s)$：需要算法
+  \item 求上界$\bar{G}_{d}(s)$的共外因子$G_{do}(s)$
+  \item 求最优后置滤波器$R_{opt}(s)=\gamma G_{do}^{-1}$，在定理中还有状态空间表示的，需要解riccati方程
+  \item 最终的故障检测滤波器为\[\epsilon=R_{\mathrm{opt}}\left[\begin{array}{ll}\tilde{M}_{u} & -\tilde{N}_{u}\end{array}\right]\left[\begin{array}{l}y \\u\end{array}\right]\]
+\end{enumerate}
+\end{researchnote}
+
+\begin{questionnote}[author=JC, date=2025-11-01]
+    什么是扩展扰动矩阵？为什么要求解扩展扰动传递函数矩阵的上界？换句话说，求扩展扰动传递函数矩阵的上界究竟在解决什么问题？这个问题的数学本质是什么？要解决这个问题需要做哪些事情？\\
+    \subsection{什么是扩展扰动矩阵？}
+        扩展扰动矩阵的相关公式如下，可以看出，其本质是描述参考输入\(r\)和外界扰动\(d\)在系统存在不确定性的情况下，是如何影响残差的。
+            \[
+            \epsilon=R \underbrace{\left[\begin{array}{cc}
+            T_{\tilde{\epsilon} r}(s, \Delta) & T_{\tilde{\epsilon} d}(s, \Delta)
+            \end{array}\right]}_{\tilde{G}_{d}(s, \Delta)} \underbrace{\left[\begin{array}{c}
+            r  \tag{2.9}\\
+            d
+            \end{array}\right]}_{\tilde{d}}+R T_{\tilde{\epsilon} f}(s, \Delta) f
+            \]
+    \subsection{为什么要求解扩展扰动传递函数矩阵的上界？}
+        从定义式里可以看出，扩展扰动上界的作用在于：无论真实不确定性$\Delta$取何值，真实扰动到残差的通道$\tilde{G}_{d}(s, \Delta)$的有害能力都不应超过其上界$\bar{G}_{d}(s)$，这样后续用$\bar{G}_{d}(s)$的共外因子来加权就能保证扰动抑制不小于某个水平。
+
+        从故障诊断的角度来理解，就是在故障诊断时，我只想要诊断出故障，对于模型不确定性和外界扰动（也就是所谓的扩展扰动）带来的其他影响我并不想诊断出来，也就是说不想让他们在故障检测滤波器产生的残差中出现，尽量抑制扩展扰动。
+
+        这里提出的方法就是，我先把其余所有正常的情况包含在内，当故障出现并达到一定水平时，我就能把故障检测出来了。（但这里我认为，由于故障检测滤波器\(R\)是对\(r、d、f\)进行统一处理，所以必然会对故障产生影响，这种方法的好处就在于，如果我知道了所有的非故障扩展扰动，我就能保证完全不会出现把扰动当故障检测出来的情况，但是对故障的灵敏度并不是这个方法能够改变的）
+
+        当然，这个上界越紧，相当于对扩展扰动的抑制更精确（这里的精确指的是不会过度抑制也不会抑制的不够）。因此，任务就是构造一个尽可能紧的扩展扰动上界。这里的紧也可以理解为幅值小，对多输入多输出系统就是2范数或者说最大奇异值小？
+    \subsection{求扩展扰动传递函数矩阵的上界的数学本质是什么？}
+        相当于求解/找到一个传递函数矩阵，这个传递函数矩阵能够做到：在不同频率点\(\omega_{i}\)上，在不确定性块变化时产生不同的不确定性\(\Delta_{k}\)时，$\tilde{G}_{d}(\omega_{i}, \Delta_{k})$的2范数（用于衡量大小）都要小于等于我的这个上界传递函数$\bar{G}_{d}(s)$。
+
+        由于矩阵的2范数等于矩阵的最大奇异值（\(||A||_{2}=\bar{\sigma}\)），这个问题也就转换成了求一个传递函数矩阵，这个传递函数矩阵的最大奇异值，在不同频率点\(\omega_{i}\)上，不同的不确定性\(\Delta_{k}\)时都要大于等于扩展扰动传递函数矩阵。即
+            \[ 
+            \bar{\sigma}(\bar{G}_{d}(j\omega_{i})) \geq  \bar{\sigma}(\tilde{G}_{d}(j\omega_{i}, \Delta_{k}))
+            \]
+                
+        其实本质上也就是在每个频率点上，对$\tilde{G}_{d}$的不确定性进行搜索，找到一个不确定性，也就是得到一个矩阵，使得这个矩阵的最大奇异值奇异值达到最大，也就是论文中所谓的该频率点上的峰值增益。
+
+        \subsubsection{多输出系统的奇异值不能直接比较的原因}
+            我理解的是，奇异值分解是对某个具体矩阵进行分解，得到最适合的输入输出空间
+            对于单输出系统，由于输出只有一个，最大奇异值不代表方向，退化为幅值。
+            但是对于多输出系统，不确定性会导致椭圆发生旋转，使得直接比较奇异值失效。
+
+
+
+
+
+        但这个和\(\mu\)以及我的偏斜\(\mu\)幂算法有什么关系？
+        结构奇异值的定义是：
+        \[
+            \mu_{\Delta}(M):=\frac{1}{\min \{\bar{\sigma}(\Delta): \Delta \in \Delta, \operatorname{det}(I-M \Delta)=0\}}
+        \]
+        \(\mu\)不是求最小的不稳定的吗？看起来和这个求最小上界的需求不搭呀？我这里也没有不稳定，
+
+
+
+        偏斜μ幂迭代使用启发式方法确定特定频率下对应最坏情况下界的参数或复矩阵值。
+
+
+        如果这个不确定性是有结构的（对角的实复标块），那么问题就转换成了求这个矩阵的结构奇异值\(\mu\)。
+
+        但是有个问题：结构奇异值求的是最小不确定性使得系统不稳定，但是我这里求的是所有不确定性中使得最大奇异值最大的。感觉不太能对得上结构奇异值啊？
+
+        进一步，如果这个矩阵的不确定性中，一部分的变化范围是固定的，不能随意缩放（也就意味着不可能是由这个不确定块的变化来达到触碰不稳定边界，这在实际物理系统中是很常见的），只有另一些块的大小可以去变化到触碰不确定边界的程度，这样就转换成了求这个矩阵的skewed \(\mu\)问题。
+
+        然后把不同频率点的峰值增益连起来并进行插值拟合，就能得到上界的随频率变化的峰值增益曲线。
+
+
+
+        这个上界对应的是结构奇异值。上界的上界对应的是结构奇异值的下界？扩展扰动矩阵的上界的目的是要大于等于扩展扰动矩阵，结构奇异值是找最小的结构化的不确定性使系统刚好不稳定，也就是\(\Delta_{want}\)是小于等于所有的使得不稳定的不确定性的，那么结构奇异值的定义是最小的不确定性块的最大奇异值的倒数，所以这个结构奇异值want是大于等于其他使得系统不稳定的不确定性的结构奇异值的。因此我们要求的就是结构奇异值的下界，也即扩展扰动传递函数矩阵的上界的下界。
+
+        由于这个上界是不知道的，我们想尽量逼近这个上界，朴素的思想就是夹逼定理，也就是用上界的上界和下界去夹逼它。
+
+
+        由于结构奇异值的定义是最大奇异值的倒数，因此问题转化成了对扩展扰动矩阵求结构奇异值的下界（从上界增益问题转化为了结构奇异值下界问题）？
+
+        
+        以及对于不确定性系统，往往进行线性分式变换，将不确定性从系统中分离出来。
+    \subsection{要解决这个问题需要做哪些事情}
+        skewed\(\mu\)幂迭代算法是一种求skewed\(\mu\)下界的方法
+        \begin{enumerate}
+            \item 通过skewed\(\mu\)幂迭代算法得到扩展扰动矩阵的各个频率点的峰值增益
+            \item 对峰值增益进行插值拟合得到初始上界
+            \item 对初始上界进行加权，调节权重，得到更加贴合的上界，实现更好的故障检测滤波器效果
+        \end{enumerate}
+
+\end{questionnote}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

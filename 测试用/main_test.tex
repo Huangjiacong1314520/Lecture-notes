@@ -1,0 +1,88 @@
+% This LaTeX document needs to be compiled with XeLaTeX.
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{caption}
+\usepackage{bbold}
+\usepackage{fixltx2e}
+\usepackage[fallback]{xeCJK}
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{newunicodechar}
+% 加载你自己的笔记宏包
+% \usepackage{notes}  % 直接用 .sty 名字，不用写扩展名
+\usepackage{notebook}  % 直接用 .sty 名字，不用写扩展名
+\usepackage{notebook} % 载入笔记宏包
+\ShowNotes            % 显示所有笔记（默认可省略）
+% \HideNotes            % 不显示笔记，自动隐藏
+
+
+\IfFontExistsTF{Noto Serif CJK TC}
+{\setCJKmainfont{Noto Serif CJK TC}}
+{\IfFontExistsTF{STSong}
+  {\setCJKmainfont{STSong}}
+  {\IfFontExistsTF{Droid Sans Fallback}
+    {\setCJKmainfont{Droid Sans Fallback}}
+    {\setCJKmainfont{SimSun}}
+}}
+
+\setmainlanguage{english}
+\IfFontExistsTF{CMU Serif}
+{\setmainfont{CMU Serif}}
+{\IfFontExistsTF{DejaVu Sans}
+  {\setmainfont{DejaVu Sans}}
+  {\setmainfont{Georgia}}
+}
+
+\title{Fault Diagnosis for Uncertain Systems in Closed Loop }
+
+\author{Applied to Semiconductor Equipment}
+\date{}
+
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\newunicodechar{ı}{\ifmmode\imath\else{$\imath$}\fi}
+
+\begin{document}
+\maketitle
+
+
+\researchnote[作者=JC][2025-02-01]{这一部分需要加入故障诊断文献综述支持。}
+
+\methodnote[Student A]{尝试把H∞滤波器和多模型切换结合看看效果。}
+
+\resultnote{当前实验结果表明残差对噪声仍然敏感，需要改进鲁棒性。}
+
+\futurework[JC][计划]{下一步验证闭环系统情况，并考虑执行器故障情形。Consider uncertainties whose values on the imaginary axis admit the structure $\boldsymbol{\Delta}_{s}=\left\{\operatorname{diag}\left(p_{1} I, \ldots, p_{n_{r}} I, \delta_{1} I, \ldots, \delta_{n_{c}} I, \Delta_{1}, \ldots, \Delta_{n_{z}}\right) \in \mathbb{C}^{p \times q}\right.$ whose blocks satisfy $p_{j} \in \mathbb{R}$ with $\left|p_{j}\right| \leq 1$ for $j=1, \ldots, n_{r}, \delta_{j} \in \mathbb{C}$ with $\left|\delta_{j}\right| \leq 1$ for $j=1, \ldots, n_{c}$, and $\Delta_{j} \in \mathbb{C}^{p_{j} \times q_{j}}$ with $\left\|\Delta_{j}\right\|_{2} \leq 1$ for $j=1, \ldots, n_{z}$. The actual set of uncertainties $\boldsymbol{\Delta}:=\left\{\Delta(s) \in \mathcal{R} \mathcal{H}_{\infty} \mid \Delta(i \omega) \in \boldsymbol{\Delta}_{s}\right.$ for all $\left.\omega \in \mathbb{R} \cup\{\infty\}\right\}$.
+}
+
+
+\end{document}

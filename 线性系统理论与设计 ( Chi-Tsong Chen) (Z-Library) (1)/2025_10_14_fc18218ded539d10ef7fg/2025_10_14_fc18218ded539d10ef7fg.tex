@@ -1,0 +1,1155 @@
+% This LaTeX document needs to be compiled with XeLaTeX.
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{mathrsfs}
+\usepackage[fallback]{xeCJK}
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\IfFontExistsTF{Noto Serif CJK SC}
+{\setCJKmainfont{Noto Serif CJK SC}}
+{\IfFontExistsTF{STSong}
+  {\setCJKmainfont{STSong}}
+  {\IfFontExistsTF{Droid Sans Fallback}
+    {\setCJKmainfont{Droid Sans Fallback}}
+    {\setCJKmainfont{SimSun}}
+}}
+
+\setmainlanguage{english}
+\IfFontExistsTF{CMU Serif}
+{\setmainfont{CMU Serif}}
+{\IfFontExistsTF{DejaVu Sans}
+  {\setmainfont{DejaVu Sans}}
+  {\setmainfont{Georgia}}
+}
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\captionsetup{singlelinecheck=false}
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-041}
+\captionsetup{labelformat=empty}
+\caption{图 2.12 弹簧特性}
+\end{center}
+\end{figure}
+
+$$
+\hat{y}(s)=\frac{1}{m s^{2}+k_{1} s+k_{2}} \hat{u}(s)
+$$
+
+因此，该系统的传递函数为 $1 /\left(m s^{2}+k_{1} s+k_{2}\right)$ 。\\
+接下来推导该系统的状态空间方程描述，选择质点的位移和速度作为状态变量，即 $x_{1}(t)=y(t), x_{2}(t)=\dot{y}(t)$ ，借助式（2．41），有
+
+$$
+\dot{x}_{1}(t)=x_{2}(t), \quad m \dot{x}_{2}(t)=u(t)-k_{1} x_{2}(t)-k_{2} x_{1}(t)
+$$
+
+可以将其表示为矩阵形式
+
+$$
+\begin{gathered}
+{\left[\begin{array}{l}
+\dot{x}_{1}(t) \\
+\dot{x}_{2}(t)
+\end{array}\right]=\left[\begin{array}{cc}
+0 & 1 \\
+-\frac{k_{2}}{m} & -\frac{k_{1}}{m}
+\end{array}\right]\left[\begin{array}{l}
+x_{1}(t) \\
+x_{2}(t)
+\end{array}\right]+\left[\begin{array}{c}
+0 \\
+\frac{1}{m}
+\end{array}\right] u(t)} \\
+y(t)=\left[\begin{array}{ll}
+1 & 0
+\end{array}\right]\left[\begin{array}{l}
+x_{1}(t) \\
+x_{2}(t)
+\end{array}\right]
+\end{gathered}
+$$
+
+即为该系统的状态空间方程描述。\\
+【例 2．8】考虑图 2.13 所示的系统，系统包含质量为 $m_{1}$ 和 $m_{2}$ 的两个质点，这 2 个质点用 3 个弹性常数为 $k_{i}(i=1,2,3)$ 的弹簧连接起来，为了简化分析，假设质点与地面之间无摩擦。外作用力 $u_{1}$ 必须克服弹簧力，其余项使得质点获得加速度，因此有
+
+$$
+u_{1}(t)-k_{1} y_{1}(t)-k_{2}\left(y_{1}(t)-y_{2}(t)\right)=m_{1} \ddot{y}_{1}(t)
+$$
+
+或
+
+
+\begin{equation*}
+m_{1} \ddot{y}_{1}(t)+\left(k_{1}+k_{2}\right) y_{1}(t)-k_{2} y_{2}(t)=u_{1}(t) \tag{2.42}
+\end{equation*}
+
+
+对第 2 个质点，有
+
+
+\begin{equation*}
+m_{2} \ddot{y}_{2}(t)-k_{2} y_{1}(t)+\left(k_{1}+k_{2}\right) y_{2}(t)=u_{2}(t) \tag{2.43}
+\end{equation*}
+
+
+可以将二者合并为
+
+$$
+\left[\begin{array}{cc}
+m_{1} & 0 \\
+0 & m_{2}
+\end{array}\right]\left[\begin{array}{l}
+\ddot{y}_{1}(t) \\
+\ddot{y}_{2}(t)
+\end{array}\right]+\left[\begin{array}{cc}
+k_{1}+k_{2} & -k_{2} \\
+-k_{2} & k_{1}+k_{2}
+\end{array}\right]\left[\begin{array}{l}
+y_{1}(t) \\
+y_{2}(t)
+\end{array}\right]=\left[\begin{array}{l}
+u_{1}(t) \\
+u_{2}(t)
+\end{array}\right]
+$$
+
+该式为研究振动的标准方程，称为规范型，参见参考文献［21］。由定义
+
+$$
+x_{1}(t):=y_{1}(t), \quad x_{2}(t):=\dot{y}_{1}(t), \quad x_{3}(t):=y_{2}(t), \quad x_{4}(t):=\dot{y}_{2}(t)
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-042}
+\captionsetup{labelformat=empty}
+\caption{图 2.13 弹簧一质点系统}
+\end{center}
+\end{figure}
+
+则很容易得到
+
+$$
+\begin{gathered}
+{\left[\begin{array}{l}
+\dot{x}_{1}(t) \\
+\dot{x}_{2}(t) \\
+\dot{x}_{3}(t) \\
+\dot{x}_{4}(t)
+\end{array}\right]=\left[\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+\frac{-\left(k_{1}+k_{2}\right)}{m_{1}} & 0 & \frac{k_{2}}{m_{1}} & 0 \\
+0 & 0 & 0 & 1 \\
+\frac{k_{2}}{m_{2}} & 0 \frac{-\left(k_{1}+k_{2}\right)}{m_{1}} & 0
+\end{array}\right]\left[\begin{array}{l}
+x_{1}(t) \\
+x_{2}(t) \\
+x_{3}(t) \\
+x_{4}(t)
+\end{array}\right]+\left[\begin{array}{cc}
+0 & 0 \\
+\frac{1}{m_{1}} & 0 \\
+0 & 0 \\
+0 & \frac{1}{m_{2}}
+\end{array}\right]\left[\begin{array}{l}
+u_{1}(t) \\
+u_{2}(t)
+\end{array}\right]} \\
+y(t):=\left[\begin{array}{l}
+y_{1}(t) \\
+y_{2}(t)
+\end{array}\right]=\left[\begin{array}{llll}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0
+\end{array}\right] \boldsymbol{x}(t)
+\end{gathered}
+$$
+
+该双输人双输出状态空间方程描述了图 2.13 的系统。\\
+为了导出其输人输出描述，对式（2．42）和式（2．43）取拉普拉斯变换并设初始条件为零，可得
+
+$$
+\begin{aligned}
+& m_{1} s^{2} \hat{y}_{1}(s)+\left(k_{1}+k_{2}\right) \hat{y}_{1}(s)-k_{2} \hat{y}_{2}(s)=\hat{u}_{1}(s) \\
+& m_{2} s^{2} \hat{y}_{2}(s)-k_{2} \hat{y}_{1}(s)+\left(k_{1}+k_{2}\right) \hat{y}_{2}(s)=\hat{u}_{2}(s)
+\end{aligned}
+$$
+
+根据这两个方程，可以得出
+
+$$
+\left[\begin{array}{l}
+\hat{y}_{1}(s) \\
+\hat{y}_{2}(s)
+\end{array}\right]=\left[\begin{array}{cc}
+\frac{m_{2} s^{2}+k_{1}+k_{2}}{d(s)} & \frac{k_{2}}{d(s)} \\
+\frac{k_{2}}{d(s)} & \frac{m_{1} s^{2}+k_{1}+k_{2}}{d(s)}
+\end{array}\right]\left[\begin{array}{l}
+\hat{u}_{1}(s) \\
+\hat{u}_{2}(s)
+\end{array}\right]
+$$
+
+其中
+
+$$
+d(s):=\left(m_{1} s^{2}+k_{1}+k_{2}\right)\left(m_{2} s^{2}+k_{1}+k_{2}\right)-k_{2}^{2}
+$$
+
+该式为系统的传递矩阵描述，因此，可以将在本教材中讨论的内容直接应用于振动的研究中。
+
+【例 2．9】考虑图2．14 所示的小车，其上端有一倒立摆用铰链与之相连。简单起见，假设小车和倒立摆只能在同一平面内运动，且忽略摩擦、摆杆质量及阵风的影响。关注的问题是使该摆保持在垂直位置，比如，若倒立摆在图中所示方向下落，则小车向右运动并通过铰链施力，迫使倒立摆回到垂直位置。可以将这类简单的机构用作航天飞行器起飞时的模型。
+
+设 $H$ 和 $V$ 分别表示小车给倒立摆在水平方向和垂直方向施加的作用力，如图2．14所示。直线
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-043}
+\captionsetup{labelformat=empty}
+\caption{图2．14 带倒立摆的小车}
+\end{center}
+\end{figure}
+
+运动运用牛顿定律可得
+
+$$
+\begin{gathered}
+M \frac{\mathrm{~d}^{2} y}{\mathrm{~d} t^{2}}=u-H \\
+H=m \frac{\mathrm{~d}^{2}}{\mathrm{~d} t^{2}}(y+l \sin \theta)=m \ddot{y}+m l \ddot{\theta} \cos \theta-m l(\dot{\theta})^{2} \sin \theta \\
+m g-V=m \frac{\mathrm{~d}^{2}}{\mathrm{~d} t^{2}}(l \cos \theta)=m l\left[-\ddot{\theta} \sin \theta-(\dot{\theta})^{2} \cos \theta\right]
+\end{gathered}
+$$
+
+摆绕较链的旋转运动运用牛顿定律可得
+
+$$
+m g l \sin \theta=m l \ddot{\theta} \cdot l+m \ddot{y} l \cos \theta
+$$
+
+上述方程均为非线性方程。由于设计目标是保持摆在垂直位置，所以假设 $\theta$ 和 $\dot{\theta}$ 取值很小是合理的，在此假设条件下，可利用近似关系式 $\sin \theta=\theta$ 和 $\cos \theta=1$ 。仅保留 $\theta$ 和 $\dot{\theta}$ 中的线性项，即舍弃 $\theta^{2} 、(\dot{\theta})^{2} 、 \dot{\theta} \dot{\theta}$ 和 $\dot{\theta} \dot{\theta}$ 等项，可得 $V=m g$ 以及
+
+$$
+\begin{gathered}
+M \ddot{y}=u-m \ddot{y}-m l \ddot{\theta} \\
+g \theta=l \ddot{\theta}+\ddot{y}
+\end{gathered}
+$$
+
+由此可知
+
+
+\begin{gather*}
+M \ddot{y}=u-m g \theta  \tag{2.44}\\
+M i \ddot{\theta}=(M+m) g \theta-u \tag{2.45}
+\end{gather*}
+
+
+借助这些线性化方程，可以导出输人输出描述和状态空间描述。对式（2．44）和式（2．45）取拉普拉斯变换并假设初始条件为零，可得
+
+$$
+\begin{gathered}
+M s^{2} \hat{y}(s)=\hat{u}(s)-m g \hat{\theta}(s) \\
+M l s^{2} \hat{\theta}(s)=(M+m) g \hat{\theta}(s)-\hat{u}(s)
+\end{gathered}
+$$
+
+根据这些方程，很容易求出从 $u$ 到 $y$ 以及从 $u$ 到 $\theta$ 的传递函数 $\hat{g}_{y u}(s)$ 和 $\hat{g}_{\partial u}(s)$ 为
+
+$$
+\hat{g}_{y u}(s)=\frac{s^{2}-g}{s^{2}\left[M s^{2}-(M+m) g\right]}
+$$
+
+$$
+\hat{g}_{\theta_{u}}(s)=\frac{-1}{M s^{2}-(M+m) g}
+$$
+
+为了导出状态空间方程，选择状态变量为 $x_{1}(t)=y(t) 、 x_{2}(t)=\dot{y}(t) 、 x_{3}(t)=\theta(t)$和 $x_{4}(t)=\dot{\theta}(t)$ ，根据这些状态变量的选取结果及式（2．44）和式（2．45），很容易得出
+
+
+\begin{gather*}
+{\left[\begin{array}{l}
+\dot{x}_{1}(t) \\
+\dot{x}_{2}(t) \\
+\dot{x}_{3}(t) \\
+\dot{x}_{4}(t)
+\end{array}\right]=\left[\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+0 & 0 & \frac{-m g}{M} & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & \frac{(M+m) g}{M l} & 0
+\end{array}\right]\left[\begin{array}{l}
+x_{1}(t) \\
+x_{2}(t) \\
+x_{3}(t) \\
+x_{4}(t)
+\end{array}\right]+\left[\begin{array}{c}
+0 \\
+\frac{1}{M} \\
+0 \\
+-\frac{1}{M l}
+\end{array}\right] u(t)} \\
+y(t)=\left[\begin{array}{llll}
+1 & 0 & 0 & 0
+\end{array}\right] \boldsymbol{x}(t) \tag{2.46}
+\end{gather*}
+
+
+该状态空间方程维数为 4 ，是当 $\theta$ 和 $\dot{\theta}$ 取值很小时对系统的描述。\\
+【例 2．10】 图 2.15 所示为质量为 $m$ 、绕地球轨道运行的通信卫星，图中所示的 $r(t) 、 \theta(t)$ 和 $\phi(t)$ 确定了卫星姿态，三个正交的推力 $u_{r}(t) 、 u_{\theta}(t)$ 和 $u_{\phi}(t)$ 控制着卫星轨道，选择系统的状态、输入和输出为
+
+$$
+x(t)=\left[\begin{array}{l}
+r(t) \\
+\dot{r}(t) \\
+\theta(t) \\
+\dot{\theta}(t) \\
+\phi(t) \\
+\dot{\phi}(t)
+\end{array}\right], \quad \boldsymbol{u}(t)=\left[\begin{array}{l}
+u_{r}(t) \\
+u_{0}(t) \\
+u_{\phi}(t)
+\end{array}\right], \quad \boldsymbol{y}(t)=\left[\begin{array}{l}
+r(t) \\
+\theta(t) \\
+\phi(t)
+\end{array}\right]
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-044}
+\captionsetup{labelformat=empty}
+\caption{图2．15 在轨卫星}
+\end{center}
+\end{figure}
+
+则可以证明，通过方程
+
+\[
+\dot{\boldsymbol{x}}(t)=\boldsymbol{h}(\boldsymbol{x}, \boldsymbol{u})=\left[\begin{array}{c}
+\dot{r}  \tag{2.47}\\
+r \dot{\theta}^{2} \cos ^{2} \phi+r \dot{\phi}^{2}-\frac{k}{r^{2}}+\frac{u_{r}}{m} \\
+\frac{\dot{\theta}}{-2 \dot{r} \dot{\theta}}+\frac{2 \dot{\theta} \dot{\phi} \sin \phi}{\cos \phi}+\frac{u_{\theta}}{m r \cos \phi} \\
+\dot{\phi} \\
+-\dot{\theta}^{2} \cos \phi \sin \phi-\frac{2 \dot{r} \dot{\phi}}{r}+\frac{u_{\phi}}{m r}
+\end{array}\right]
+\]
+
+可以描述该系统。以上方程符合圆形近赤轨道的解由
+
+$$
+\boldsymbol{x}_{o}(t)=\left[\begin{array}{llllll}
+r_{o} & 0 & \omega_{o} t & \omega_{o} & 0 & 0
+\end{array}\right]^{\prime}, \quad b u_{o} \equiv \mathbf{0}
+$$
+
+给出，其中 $r_{o}^{3} \omega_{o}^{2}=k$ 为已知的物理常数。一旦卫星进人该轨道，只要不受干扰，卫星就保持在轨道上；若卫星偏离轨道，则必须施加推力迫使其返回轨道。定义
+
+$$
+\boldsymbol{x}(t)=\boldsymbol{x}_{o}(t)+\overline{\boldsymbol{x}}(t), \quad b \boldsymbol{u}(t)=\boldsymbol{u}_{o}(t)+\overline{\boldsymbol{u}}(t), \quad b \boldsymbol{y}(t)=\boldsymbol{y}_{o}+\overline{\boldsymbol{y}}(t)
+$$
+
+若摄动甚小，则可以将方程（2．47）线性化为
+
+$$
+\begin{aligned}
+\dot{\overline{\boldsymbol{x}}}(t)= & {\left[\begin{array}{ccccccc}
+0 & 1 & 0 & 0 & \vdots & 0 & 0 \\
+3 \omega_{o}^{2} & 0 & 0 & 2 \omega_{o} r_{o} & \vdots & 0 & 0 \\
+0 & 0 & 0 & 1 & \vdots & 0 & 0 \\
+0 & \frac{-2 \omega_{o}}{r_{o}} & 0 & 0 & \vdots & 0 & 0 \\
+\cdots & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+0 & 0 & 0 & 0 & \vdots & 0 & 1 \\
+0 & 0 & 0 & 0 & \vdots & -\omega_{o}^{2} & 0
+\end{array}\right]+} \\
+& {\left[\begin{array}{cccc}
+0 & 0 & \vdots & 0 \\
+\frac{1}{m} & 0 & \vdots & 0 \\
+0 & 0 & \vdots & 0 \\
+0 & \frac{1}{m r_{o}} & \vdots & 0 \\
+\cdots & \cdots & \cdots & \cdots \\
+0 & 0 & \vdots & 0 \\
+0 & 0 & \vdots & \frac{1}{m r_{o}}
+\end{array}\right] \overline{\boldsymbol{u}}(t) }
+\end{aligned}
+$$
+
+\[
+\overline{\boldsymbol{y}}(t)=\left[\begin{array}{ccccccc}
+1 & 0 & 0 & 0 & \vdots & 0 & 0  \tag{2.48}\\
+0 & 0 & 1 & 0 & \vdots & 0 & 0 \\
+\cdots & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+0 & 0 & 0 & 0 & \vdots & 1 & 0
+\end{array}\right] \overline{\boldsymbol{x}}(t)
+\]
+
+此六维状态方程描述了该卫星系统。该方程中 $\boldsymbol{A} 、 \boldsymbol{B}$ 和 $\boldsymbol{C}$ 恰好是常数，若轨道为椭圆轨道，则这些矩阵为时变矩阵。需要注意的是，这三个矩阵都是分块对角矩阵，因此可以将该方程分解为两个解耦分量：一个分量涉及 $r$ 和 $\theta$ ，另一个分量涉及 $\phi$ 。分开研究这两个分量可以简化系统的分析和设计。
+
+【例 2．11】在化工厂中，经常需要保持液位恒定。图2． 16 所示为两只水箱连接系统的简化模型。假定正常运行时，两只水箱的流人量和流出量均等于 $Q$ ，其液位等于 $H_{1}$ 和 $H_{2}$ ，设 $u$ 为第一只水箱的流人摄动，它会引起图中所示液位 $x_{1}$ 和流出量 $y_{1}$ 的变化。这些变化又会引起第二只水箱中液位 $x_{2}$ 和流出量 $y$ 的变化。假定
+
+$$
+y_{1}=\frac{x_{1}-x_{2}}{R_{1}} \quad \text { 且 } \quad y=\frac{x_{2}}{R_{2}}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-046}
+\captionsetup{labelformat=empty}
+\caption{图2，16 液压水箱}
+\end{center}
+\end{figure}
+
+其中 $R_{i}$ 为取决于标称高度 $H_{1}$ 和 $H_{2}$ 的流体阻力，也可通过阀门来控制流体阻力。方程
+
+$$
+A_{1} \mathrm{~d} x_{1}=\left(u-y_{1}\right) \mathrm{d} t \quad \text { 和 } \quad A_{2} \mathrm{~d} x_{2}=\left(y_{1}-y\right) \mathrm{d} t
+$$
+
+控制液位的变化，其中 $A_{i}$ 为水箱的截面。根据这些关系式，很容易得到
+
+$$
+\begin{gathered}
+\dot{x}_{1}=\frac{u}{A_{1}}-\frac{x_{1}-x_{2}}{A_{1} R_{1}} \\
+\dot{x}_{2}=\frac{x_{1}-x_{2}}{A_{2} R_{1}}-\frac{x_{2}}{A_{2} R_{2}}
+\end{gathered}
+$$
+
+因此，该系统的状态空间描述由
+
+$$
+\left[\begin{array}{l}
+\dot{x}_{1}(t) \\
+\dot{x}_{2}(t)
+\end{array}\right]=\left[\begin{array}{cc}
+-\frac{1}{A_{1} R_{1}} & \frac{1}{A_{1} R_{1}} \\
+\frac{1}{A_{2} R_{1}} & -\left(\frac{1}{A_{2} R_{1}}+\frac{1}{A_{2} R_{2}}\right)
+\end{array}\right]\left[\begin{array}{l}
+x_{1}(t) \\
+x_{2}(t)
+\end{array}\right]+\left[\begin{array}{c}
+\frac{1}{A_{1}} \\
+0
+\end{array}\right] u(t)
+$$
+
+$$
+y(t)=\left[\begin{array}{ll}
+0 & \frac{1}{R_{2}}
+\end{array}\right] \boldsymbol{x}(t)
+$$
+
+给出，可以求出其传递函数为
+
+$$
+\hat{g}(s)=\frac{1}{A_{1} A_{2} R_{1} R_{2} s^{2}+\left(A_{1} R_{1}+A_{1} R_{2}+A_{2} R_{2}\right) s+1}
+$$
+
+\section*{2.7 正则有理传递函数}
+例2．4和例2．5中遇到的传递函数为 $s$ 的非有理函数，而其余传递函数均为 $s$的有理函数。事实上，我们也可以借助传递函数来定义集总系统或分布系统，若传递函数是 $s$ 的有理函数，则系统为集总系统；若传递函数并非 $s$ 的有理函数，则系统为分布系统。换言之，分布系统的传递函数为 $s$ 的非有理函数，或不能将分布系统的传递函数表示为闭合形式。这里主要研究集总系统，因此遇到的传递函数大多是 $s$ 的有理函数。
+
+可以将任一有理传递函数表示为 $\hat{g}(s)=\frac{N(s)}{D(s)}$ ，其中 $N(s)$ 和 $D(s)$ 是 $s$ 的多项式，这里用 deg 来表示多项式的次数，则 $\dot{g}(s)$ 可分为以下类型：
+
+\begin{itemize}
+  \item $\hat{g}(s)$ 正则 $\Leftrightarrow \operatorname{deg} D(s) \geqslant \operatorname{deg} N(s) \Leftrightarrow \hat{g}(\infty)=$ 零或非零常数；
+  \item $\hat{g}(s)$ 严格正则 $\Leftrightarrow \operatorname{deg} D(s)>\operatorname{deg} N(s) \Leftrightarrow \hat{g}(\infty)=0$ ；
+  \item $\hat{g}(s)$ 上下双正则 $\Leftrightarrow \operatorname{deg} D(s)=\operatorname{deg} N(s) \Leftrightarrow \vec{g}(\infty)=$ 非零常数；
+  \item $\hat{g}(s)$ 非正则 $\Leftrightarrow \operatorname{deg} D(s)<\operatorname{deg} N(s) \Leftrightarrow|\hat{g}(\infty)|=\infty$ 。
+\end{itemize}
+
+例如，有理函数
+
+$$
+\frac{s^{3}-2 s-5}{s^{2}+1}, \quad s^{2}+2 s+1=\frac{s^{2}+2 s+1}{1}
+$$
+
+非正则，而有理函数
+
+$$
+\frac{s^{2}+1}{s^{3}-2 s-5}, \quad \frac{s+1}{s^{10}}, \quad \frac{s^{2}+1}{2 s^{2}+s-5}, \quad 10=\frac{10}{1}
+$$
+
+正则，并且前两个函数是严格正则的，后两个函数也是上下双正则的，因此，正则包括严格正则和上下双正则。需要注意的是，若 $\hat{g}(s)$ 上下双正则，则 $\frac{1}{\hat{g}(s)}$ 也上下双正则。非正则有理传递函数会放大高频噪声，高频噪声在现实世界中尤其在电子系统中普遍存在，因而，在电子系统中很少出现非正则有理传递函数。本教材只研究正则有理传递函数。
+
+定义多项式 $D(s)$ 的根为使多项式方程 $D(s)=0$ 的所有解，若 $D(s)$ 的次数为 $m$ ，则 $D(s)$ 有 $m$ 个根，可以是实根或复根；若 $D(s)$ 只有实系数，则其复根必以共轭形式成对出现。可以借助 MATLAB 的函数 roots 求多项式的根。在 MATLAB 中用行向量表示多项式，多项式按降幂次排列的系数为该行向量的元素，向量元素之间
+
+用逗号或空格隔开，并用一对括号限定向量范围。例如，针对多项式
+
+
+\begin{equation*}
+D(s)=s^{5}+6 s^{4}+29.25 s^{3}+93.25 s^{2}+134 s+65 \tag{2.49}
+\end{equation*}
+
+
+在 MATLAB 命令窗口中键入下述命令
+
+$$
+d=\left[\begin{array}{llllll}
+1 & 6 & 29.25 & 93.25 & 134 & 65
+\end{array}\right] ; \text { roots }(d)
+$$
+
+能得出其五个根为
+
+$$
+-0.5+4 i, \quad-0.5-4 i, \quad-2+0 i, \quad-2-0 i, \quad-1
+$$
+
+在 $-0.5 \pm 4 \mathrm{i}$ 处有一对共轭复根并在 $-2 、-2 、-1$ 处有三个实根。称这对复根和 -1的实根为＂单根＂，称 -2 为＂重根＂或重数为 2 的根。需要注意的是，在 MATLAB 中 i 和 j 均表示 $\sqrt{-1}$ 。
+
+称多项式幂次最高项的系数为＂首项系数＂。若其首项系数为 1 ，则称该多项式为＂首一多项式＂。例如式（2．49）的 $D(s)$ 为首一多项式，而
+
+$$
+D_{1}(s)=-3 s^{3}-12 s^{2}-39 s+150
+$$
+
+并非首一多项式，其首一多项式为 $D_{2}(s):=D_{1}(s) /(-3)=s^{3}+4 s^{2}+13 s-50$ 。在 MATLAB中键人 roots（［ $-3-12-39150$ ］）和 roots（［ $1413-50$ ］），会得到相同的三个根 2 和 $-3 \pm \mathrm{j} 4$ 。根据定义，$D_{1}(s)$ 的根是方程 $D_{1}(s)=0$ 的解。因此对任意非零常数 $k, k D_{1}(s)$ 与 $D_{1}(s)$ 有相同的一组根。正因为如此，对 $D_{1}(s)$ 进行因式分解时，必须包含其首项系数
+
+$$
+D_{1}(s)=-3 s^{3}-12 s^{2}-39 s+150=-3(s-2)(s+3-4 \mathrm{j})(s+3+4 \mathrm{j})
+$$
+
+若 $\hat{g}(\lambda)=\infty$ 或 $-\infty$ ，则称实数或复数 $\lambda$ 为正则传递函数 $\hat{g}(s)=\frac{N(s)}{D(s)}$ 的＂极点＂；若 $\hat{g}(\lambda)=0$ ，则称 $\lambda$ 为 $\hat{g}(s)$ 的＂零点＂。若两个多项式 $N(s)$ 和 $D(s)$ 没有共同的根，则定义这两个多项式＂互质＂；若 $N(s)$ 和 $D(s)$ 不互质或有共同的根 $a$ ，则式 $\hat{g}(a)=\frac{N(a)}{D(a)}=\frac{0}{0}$ 无定义。若 $N(s)$ 和 $D(s)$ 互质，且 $D(a)=0$ ，则 $N(a) \neq 0$ ，在这种情况下，$\hat{g}(a)=\frac{N(a)}{D(a)}=\frac{N(a)}{0}=\infty$ 或 $-\infty$ ，且 $a$ 是 $\hat{g}(s)$ 的极点。同理，若 $N(b)=$ 0 ，则 $D(b) \neq 0$ 且 $\hat{g}(b)=\frac{0}{D(b)}=0, b$ 是 $\hat{g}(s)$ 的零点。总之，若 $N(s)$ 和 $D(s)$ 互质，则 $N(s)$ 的每个根都是 $\hat{g}(s)$ 的零点，$D(s)$ 的每个根都是 $\hat{g}(s)$ 的极点。借助极点和零点，可以将传递函数表示为
+
+$$
+\hat{g}(s)=k \frac{\left(s-z_{1}\right)\left(s-z_{2}\right) \cdots\left(s-z_{m}\right)}{\left(s-p_{1}\right)\left(s-p_{2}\right) \cdots\left(s-p_{n}\right)}
+$$
+
+称该式为＂零点－极点－增益＂形式。在 MATLAB 中通过调用 $[z, p, k]=t f 2 z p(n u m, d e n)$可以根据传递函数得出零点－极点－增益形式。例如，考虑
+
+$$
+\hat{g}(s)=\frac{4 s^{4}-16 s^{3}+8 s^{2}-48 s+180}{s^{5}+6 s^{4}+29.25 s^{3}+93.25 s^{2}+134 s+65}
+$$
+
+在 MATLAB 命令窗口中键人
+
+$$
+\begin{aligned}
+& \mathrm{n}=\left[\begin{array}{lllll}
+4 & -16 & 8 & -48 & 180
+\end{array}\right] ; \mathrm{d}=\left[\begin{array}{lllllll}
+1 & 6 & 29.25 & 93.25 & 134 & 65
+\end{array}\right] ; \\
+& {[\mathrm{z}, \mathrm{p}, \mathrm{k}]=\mathrm{tf} 2 \mathrm{zp}(\mathrm{n}, \mathrm{~d})}
+\end{aligned}
+$$
+
+得到结果
+
+$$
+z=[-1+2 i-1-2 i 33] ; p=[-0.5+4 i-0.5-4 i-2+0 i-2-0 i-1] ; k=4
+$$
+
+这就意味着可以将传递函数表示为
+
+$$
+H(s)=\frac{4(s+1-2 \mathrm{j})(s+1+2 \mathrm{j})(s-3)^{2}}{(s+0.5-4 \mathrm{j})(s+0.5+4 \mathrm{j})(s+2)^{2}(s+1)}
+$$
+
+其零极点如式中所示，增益为 4 。需要注意的是，仅有零点和极点并没有唯一地确定某个传递函数，同时必须确定增益 $k$ 。
+
+若有理矩阵的每个元素均正则或 $\overrightarrow{\boldsymbol{G}}(\infty)$ 为零或非零的常数矩阵，则称有理矩阵 $\dot{\boldsymbol{G}}(s)$ 正则；若其每个元素均为严格正则或 $\dot{\boldsymbol{G}}(\infty)$ 为零矩阵，则 $\dot{\boldsymbol{G}}(s)$ 严格正则；若有理矩阵 $\hat{\boldsymbol{G}}(s)$ 为方阵且 $\hat{\boldsymbol{G}}(s)$ 和 $\hat{\boldsymbol{G}}^{-1}(s)$ 均正则，则称 $\hat{\boldsymbol{G}}(s)$ 上下双正则。若 $\lambda$ 为 $\hat{\boldsymbol{G}}(s)$某些元素的极点，则 $\lambda$ 称为 $\hat{\boldsymbol{G}}(s)$ 的极点，因此，$\hat{\boldsymbol{G}}(s)$ 每个元素的任一极点均为 $\hat{\boldsymbol{G}}(s)$的极点。有许多方法定义 $\hat{\boldsymbol{G}}(s)$ 的零点，若 $\lambda$ 是 $\hat{\boldsymbol{G}}(s)$ 每个非零元素的零点，则 $\lambda$ 称为 ＂阻塞零点＂，一种更有用的定义是＂传输零点＂。关于传输零点的内容将在第9章介绍。
+
+\section*{2.8 离散时间线性时不变系统}
+本节研究对应于连续时间系统的离散时间系统，由于连续时间系统中的大多数概念可以直接应用于离散时间的情形，所以对这部分内容仅作简要讨论。
+
+假定任一离散时间（DT）系统的输人和输出具有相同的采样周期 $T$ ，并用 $u[k]:=u(k T)$ 和 $y[k]:=y(k T)$ 表示输人和输出，其中 $k$ 为时间下标，是取值范围为 $-\infty \sim \infty$ 的整数。若当前输出取决于当前的输人和过去的输入，则离散时间系统为因果系统。 $k_{0}$ 时刻的状态记为 $x\left(k_{0}\right)$ ，是 $k_{0}$ 时刻的信息，它连同 $k \geqslant k_{0}$ 的输人 $u[k]$ 一起，唯一地确定了 $k \geqslant k_{0}$ 的输出 $y(k)$ 。 $x$ 的元素称为状态变量，若状态变量的数目有限，则离散时间系统为集总系统，否则为分布系统。任一包含时间延迟的连续时间系统，如例2．2和例2．3中的系统均为分布系统，在离散时间系统中，若时间延迟是采样周期 $T$ 的整数倍，则该离散时间系统为集总系统。
+
+若系统特性不随时间变化，则该 DT 系统为时不变系统，对于此类系统，无论何时外加输人，输出序列总归相同。因此，可以假定 $k_{0}=0$ 为初始时刻，初始时刻 $k_{0}=$ 0 并非绝对，可以人为选定。对 DT 时不变系统，通常限定时间下标 $k$ 的范围为\\
+$k \geqslant 0$ 。\\
+若满足可加性和齐次性，则 DT 时不变系统为线性系统。可以将任一 DT LTI系统的响应分解为
+
+$$
+\text { 响应 }=\text { 零状态响应 }+ \text { 零输入响应 }
+$$
+
+零状态响应满足叠加原理，零输入响应也是如此。在进一步讨论之前，先引入脉冲序列的概念。
+
+设 $\delta_{\mathrm{d}}[k]$ 是定义为
+
+$$
+\delta_{\mathrm{d}}[k-m]= \begin{cases}1, & k=m \\ 0, & k \neq m\end{cases}
+$$
+
+的＂脉冲序列＂，其中 $k$ 为时间下标，$m$ 为固定整数。 ${ }^{(4)}$ 因而有 $\delta_{\mathrm{d}}[0]=1 、 \delta_{\mathrm{d}}[4]=0$ 和 $\delta_{\mathrm{d}}[56]=0$ 。脉冲序列是冲击函数 $\delta\left(t-t_{1}\right)$ 对应的离散情形。冲击函数 $\delta\left(t-t_{1}\right)$ 宽度为零、高度为无穷大且在实践中无法产生，但脉冲序列 $\delta_{\mathrm{d}}[k-m]$ 却很容易产生。
+
+考虑序列 $u[k]$ ，其在 $k=m$ 处的值等于 $u[m]$ 或遍历所有 $k$ 的 $u[m] \delta_{\mathrm{d}}[k-m]$ ，因此，可以将 $u[k]$ 表示为脉冲序列之和
+
+$$
+u[k]=\sum_{m=-\infty}^{\infty} u[m] \delta_{\mathrm{d}}[k-m]
+$$
+
+例如，若 $k=10$ ，则无限求和项中除 $m=10$ 之外，其余所有项都等于零，于是归结为 $u[10]$ 。该式为式（2．2）对应的 DT 情形。
+
+\section*{1．卷 积}
+考虑输人序列为 $u[k]$ 且输出序列为 $y[k]$ 的 DT LTI 系统，推导描述系统零状态响应的数学方程，即系统在 $k_{0}=0$ 初始松弛，输出响应由 $k_{0}=0$ 开始外加的输人序列引起。若对所有 $k<0$ 均有 $u[k]=0$ ，则系统初始松弛。
+
+考虑从 $k=0$ 开始外加的输人序列 $u[k]$ ，如前所述，可以将输人序列表示为
+
+$$
+u[k]=\sum_{m=0}^{\infty} u[m] \delta_{d}[k-m]
+$$
+
+设 $g[k]$ 为 $k_{0}=0$ 时刻外加脉冲序列引起的 $k$ 时刻的输出，则有
+
+$$
+\begin{aligned}
+\delta_{\mathrm{d}}[k] & \rightarrow g[k] \quad \text { (定义) } \\
+\delta_{\mathrm{d}}[k-m] & \rightarrow g[k-m] \quad \text { (时移) } \\
+\delta_{\mathrm{d}}[k-m] u[m] & \rightarrow g[k-m] u[m] \quad \text { (齐次性) } \\
+\sum_{m} \delta_{\mathrm{d}}[k-m] u[m] & \rightarrow \sum_{m} g[k-m] u[m] \quad \text { (可加性) }
+\end{aligned}
+$$
+
+因此，由 $k \geqslant 0$ 时的输人 $u[k]$ 引起 $k \geqslant 0$ 时的输出 $y[k]$ 为
+
+
+\begin{equation*}
+y[k]=\sum_{m=0}^{\infty} g[k-m] u[m] \tag{2.50}
+\end{equation*}
+
+
+\footnotetext{（6）也可以将 $m$ 当做时间下标而固定 $k$ 。
+}若系统同时也是因果系统，则
+
+$$
+g[k]=0 \quad \text { (对所有 } k<0 \text { ) }
+$$
+
+由此可知，对所有 $m>k$ ，均有 $g[k-m]=0$ ，因此，可以将式（2．50）的求和上限 $\infty$ 替换为 $k$ ，式（2．50）归结为
+
+
+\begin{equation*}
+y[k]=\sum_{m=0}^{k} g[k-m] u[m]=\sum_{m=0}^{k} g[m] u[k-m] \tag{2.51}
+\end{equation*}
+
+
+该式称为＂离散卷积＂。通过定义 $\bar{m}:=k-m$ ，再将 $\bar{m}$ 重命名为 $m$ 即可根据第一个等式得出第二个等式，该式为式（2．5）对应的离散时间情形，但是由于其中未涉及任何近似处理和极限处理，所以推导过程更简单，序列 $g[k]$ 称为＂脉冲响应序列＂。
+
+\section*{2．传递函数}
+$z$ 变换是研究 DT LTI 系统的重要工具，设 $\hat{y}(z)$ 是 $y[k]$ 的 $z$ 变换，定义为
+
+
+\begin{equation*}
+\hat{y}(z):=\mathscr{Z}[y[k]]:=\sum_{k=0}^{\infty} y[k] z^{-k} \tag{2.52}
+\end{equation*}
+
+
+代人式（2．50）并交换求和顺序可得
+
+$$
+\begin{aligned}
+\hat{y}(z)= & \sum_{k=0}^{\infty}\left(\sum_{m=0}^{\infty} g[k-m] u[m]\right) z^{-(k-m)} z^{-m}= \\
+& \sum_{m=0}^{\infty}\left(\sum_{k=0}^{\infty} g[k-m] z^{-(k-m)}\right) u[m] z^{-m}
+\end{aligned}
+$$
+
+其中第一重求和项固定 $m$ 引人新变量 $l=k-m$ 之后，上式变为
+
+$$
+\hat{y}(z)=\sum_{m=0}^{\infty}\left(\sum_{l=-m}^{\infty} g[l] z^{-l}\right) u[m] z^{-m}
+$$
+
+利用因果性条件 $l<0$ 时 $g[l]=0$ ，将求和下限从 $-m$ 替换为 0 ，则第一重求和项不再依赖于 $m$ ，双重求和变为
+
+$$
+\hat{y}(z)=\left(\sum_{l=0}^{\infty} g[l] z^{-l}\right)\left(\sum_{m=0}^{\infty} u[m] z^{-m}\right)
+$$
+
+或
+
+
+\begin{equation*}
+\hat{y}(z)=\hat{g}(z) \hat{u}(z) \tag{2.53}
+\end{equation*}
+
+
+其中
+
+$$
+\hat{g}(z):=\mathscr{L}[g[k]]=\sum_{k=0}^{\infty} g[k] z^{-k}
+$$
+
+称为＂离散传递函数＂，为脉冲响应序列的 $z$ 变换，借助式（2．53），也可以将离散传递函数定义为
+
+$$
+\hat{g}(z)=\frac{\hat{y}(z)}{\hat{u}(z)}=\left.\frac{\mathscr{Z}[\text { 输出 }]}{\mathscr{Z}[\text { 输入 }]}\right|_{\text {初始松张 }}
+$$
+
+该传递函数为式（2．8）对应的 DT 情形。值得再次强调的是，离散卷积和离散传递函数仅描述零状态响应，它们既适用于 LTI 集总系统又适用于 LTI 分布系统。
+
+【例 2．12】考虑通过
+
+$$
+y[k]=u[k-1]
+$$
+
+定义的单位采样周期延迟系统，输出等于输入的单位采样周期延迟，系统的脉冲响应序列为 $g[k]=\delta_{d}[k-1]$ ，系统的离散传递函数为
+
+$$
+\dot{g}(z)=\mathscr{L}\left[\delta_{\mathrm{d}}[k-1]\right]=z^{-1}=\frac{1}{z}
+$$
+
+该式为 $z$ 的有理函数，需要注意的是，任一含时间延迟的连续时间系统均为分布系统，但离散时间系统并非如此。
+
+借助传递函数把输入和输出通过 $\hat{y}(z)=\hat{g}(z) \hat{u}(z)=z^{-1} \hat{u}(z)$ 联系起来，其结果是，单位采样周期的延迟等价于在 $z$ 变换域乘以 $z^{-1}$ ，通常将 $z^{-1}$ 称为＂单位采样周期延迟算子＂。因此，若对所有 $k<0$ 都有 $x[k]=0$ ，并且若 $\dot{x}(z)=\mathscr{F}[x[k]$ ，则对任意正整数 $m$ 均有
+
+$$
+\mathscr{L}[x[k-m]]=z^{-m} \dot{x}(z)
+$$
+
+【例 2．13】考虑图 2．17（a）所示的离散时间反馈系统，该系统是图 2.5 （a）对应的离散情形，根据式（2．6），系统的脉冲响应序列为
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-052}
+\captionsetup{labelformat=empty}
+\caption{图2．17 离散时间反馈系统}
+\end{center}
+\end{figure}
+
+$$
+g_{f}[k]=a \delta_{\mathrm{d}}[k-1]+a^{2} \delta_{\mathrm{d}}[k-2]+\cdots=\sum_{m=1}^{\infty} a^{m} \delta_{\mathrm{d}}[k-m]
+$$
+
+由于 $\delta_{\mathrm{d}}[k-m]$ 的 $z$ 变换为 $z^{-m}$ ，所以该反馈系统的传递函数为
+
+$$
+\begin{gathered}
+\hat{g}_{f}(z)=\mathscr{Z}\left[g_{f}[k]\right]=a z^{-1}+a^{2} z^{-2}+a^{3} z^{-3}+\cdots= \\
+a z^{-1} \sum_{m=0}^{\infty}\left(a z^{-1}\right)^{m}=\frac{a z^{-1}}{1-a z^{-1}}
+\end{gathered}
+$$
+
+该传递函数为 $z$ 的有理函数，这点有别于例 2.5 中的 CT 非有理传递函数。\\
+若用其传递函数 $z^{-1}$ 代替单位采样时间延迟元件，则方框图变为图2．17（b），借助类似于例 2.5 的代数方法，可以求出从 $r$ 到 $y$ 的传递函数为
+
+$$
+\hat{g}(z)=\frac{\hat{y}(z)}{\hat{r}(z)}=\frac{a z^{-1}}{1-a z^{-1}}=\frac{a}{z-a}
+$$
+
+该传递函数与前面求出的结果相同。\\
+以上两个例子的离散传递函数均为 $z$ 的有理函数，但通常情况并非如此，例如，考察脉冲响应序列为
+
+$$
+g[k]= \begin{cases}0, & k \leqslant 0 \\ \frac{1}{k} & k=1,2, \cdots\end{cases}
+$$
+
+的系统，借助麦克劳林级数
+
+$$
+\ln (1-x)=-\sum_{m=1}^{\infty} \frac{x^{m}}{m}
+$$
+
+可以求出传递函数或 $g[k]=\frac{1}{k}$ 的 $z$ 变换为
+
+
+\begin{equation*}
+\hat{g}(z)=\sum_{k=1}^{\infty} \frac{z^{-k}}{k}=-\ln \left(1-z^{-1}\right) \tag{2.54}
+\end{equation*}
+
+
+该传递函数不是 $z$ 的有理函数，此类系统为分布系统。在本教材中只研究集总系统，集总系统的离散传递函数均为 $z$ 的有理函数。
+
+离散有理传递函数可以正则或非正则，若传递函数非正则，例如 $\hat{g}(z)= \frac{z^{2}+2 z-1}{z-0.5}$ ，则
+
+$$
+\frac{\hat{y}(z)}{\hat{u}(z)}=\frac{z^{2}+2 z-1}{z-0.5}=\frac{1+2 z^{-1}-z^{-2}}{z^{-1}-0.5 z^{-2}}
+$$
+
+由此可知
+
+$$
+z^{-1} \hat{y}(z)-0.5 z^{-2} \hat{y}(z)=\hat{u}(z)+2 z^{-1} \hat{u}(z)-z^{-2} \hat{u}(z)
+$$
+
+或，其时域表达式为
+
+$$
+y[k-1]-0.5 y[k-2]=u[k]+2 u[k-1]-u[k-2]
+$$
+
+因此，对 $k \geqslant 1$ 的所有整数，均有
+
+$$
+y[k-1]=0.5 y[k-2]+u[k]+2 u[k-1]-u[k-2]
+$$
+
+成立。需要注意的是，已经隐含地假设对所有 $k<0$ 均有 $y[k]=0$ 。若 $k=1$ ，则 $y[0]$依赖于 $u[1]$ ，即未来的输人，该系统非因果。通常而言，由非正则传递函数描述的离散时间系统均非因果，本教材仅研究因果系统，因此，所有离散有理传递函数均正则。前文提到过，本教材也只研究连续时间情形下 $s$ 的正则有理传递函数，但原因不同。考虑 $\hat{g}(s)=s$ 或 $y(t)=\mathrm{d} u(t) / \mathrm{d} t$ 表示的纯微分器。若将微分定义为
+
+$$
+y(t)=\frac{\mathrm{d} u(t)}{\mathrm{d} t}=\lim _{\Delta \rightarrow 0} \frac{u(t+\Delta)-u(t)}{\Delta}
+$$
+
+其中 $\Delta>0$ ，则输出 $y(t)$ 取决于未来的输人 $u(t+\Delta)$ ，该微分器非因果。然而，若将微分器定义为
+
+$$
+y(t)=\frac{\mathrm{d} u(t)}{\mathrm{d} t}=\lim _{\Delta \rightarrow 0} \frac{u(t)-u(t-\Delta)}{\Delta}
+$$
+
+则输出 $y(t)$ 不依赖于未来的输入，该微分器因果。于是，连续时间系统面临的是一个非正则传递函数是否代表一个非因果系统之争。但是，$s$ 的非正则传递函数会放大高频噪声，而高频噪声在电子系统中普遍存在。因而，电子系统中应避免出现非正
+
+则传递函数。
+
+\section*{3．状态空间方程}
+可以使用
+
+
+\begin{gather*}
+\boldsymbol{x}[k+1]=\boldsymbol{A} \boldsymbol{x}[k]+\boldsymbol{b} u[k] \\
+y[k]=\boldsymbol{c} \boldsymbol{x}[k]+d u[k] \tag{2.55}
+\end{gather*}
+
+
+描述任一 DT SISO 线性时不变集总系统，其中 $\boldsymbol{A} 、 \boldsymbol{b} 、 \boldsymbol{c}$ 和 $d$ 不依赖于时间下标 $k$ 。设 $\hat{\boldsymbol{x}}(z)$ 是 $\boldsymbol{x}[k]$ 的 $z$ 变换，或
+
+$$
+\hat{\boldsymbol{x}}(z)=\mathscr{Z}[\boldsymbol{x}[k]]:=\sum_{k=0}^{\infty} \boldsymbol{x}[k] z^{-k}
+$$
+
+则有
+
+$$
+\begin{aligned}
+\mathscr{Z}[\boldsymbol{x}[k+1]]= & \sum_{k=0}^{\infty} \boldsymbol{x}[k+1] z^{-k}=z \sum_{k=0}^{\infty} \boldsymbol{x}[k+1] z^{-(k+1)}= \\
+& z\left[\sum_{l=1}^{\infty} \boldsymbol{x}[l] z^{-l}+\boldsymbol{x}[0]-\boldsymbol{x}[0]\right]=\boldsymbol{z}(\hat{\boldsymbol{x}}(z)-\boldsymbol{x}[0])
+\end{aligned}
+$$
+
+式（2．55）取 $z$ 变换可得
+
+$$
+\begin{aligned}
+& z \hat{x}(z)-z \boldsymbol{x}[0]=\boldsymbol{A} \hat{\boldsymbol{x}}(z)+\boldsymbol{b} \hat{u}(z) \\
+& \hat{y}(z)=c \hat{x}(z)+d \hat{u}(z)
+\end{aligned}
+$$
+
+由此可知
+
+
+\begin{equation*}
+\hat{\boldsymbol{x}}(z)=(z \boldsymbol{I}-\boldsymbol{A})^{-1} z \boldsymbol{x}[0]+(z \boldsymbol{I}-\boldsymbol{A})^{-1} \boldsymbol{b} \hat{u}(z) \tag{2.56}
+\end{equation*}
+
+
+及
+
+
+\begin{equation*}
+\hat{y}(z)=\boldsymbol{c}(z \boldsymbol{I}-\boldsymbol{A})^{-1} z \boldsymbol{x}[0]+\boldsymbol{c}(z \boldsymbol{I}-\boldsymbol{A})^{-1} \boldsymbol{b} \hat{u}(z)+d \hat{u}(z) \tag{2.57}
+\end{equation*}
+
+
+该式为式（2．11）对应的离散时间情形。需要注意的是，在 $x[0]$ 前面额外多一项 $z$ 。若 $\boldsymbol{x}[0]=\boldsymbol{0}$ ，则式（2．57）归结为
+
+
+\begin{equation*}
+\hat{y}(z)=\left[\boldsymbol{c}(z \boldsymbol{I}-\boldsymbol{A})^{-1} \boldsymbol{b}+d\right] \hat{u}(z) \tag{2.58}
+\end{equation*}
+
+
+与 $\hat{y}(z)=\hat{g}(z) \hat{u}(z)$ 对比可得
+
+
+\begin{equation*}
+\hat{g}(z)=c(z \boldsymbol{I}-\boldsymbol{A})^{-1} b+d \tag{2.59}
+\end{equation*}
+
+
+该式是式（2．12）对应的离散时间情形。若用 $z$ 变换变量 $z$ 替换拉普拉斯变换变量 $s$ ，则两个方程完全相同。
+
+【例 2．14】考虑经纪公司的货币市场账户，设 $u[k]$ 为第 $k$ 天账户中存人或取出的金额，$y[k]$ 为第 $k$ 天结束时账户中的总金额，则可将该账户视作输人为 $u[k]$ 且输出为 $y[k]$ 的离散时间系统。
+
+若利率取决于账户金额，则该系统非线性；若无论账号金额多少利率固定，则为线性系统。若利率随时间变化，则为时变系统；若利率固定，则为时不变系统。这里只考虑 LTI 的情形，其中每天利率为 $r=0.015 \%$ ，日结算。
+
+若首日存人 1 美元（即，$u[0]=1$ ）且此后没有存人 $(u[k]=0, k=1,2, \cdots)$ ，则 $y[0]=u[0]=1 、 y[1]=1+0.00015=1.00015$ 。由于金额日结算，所以有
+
+$$
+y[2]=y[1]+y[1] \times 0.00015=y[1] \times 1.00015=(1.00015)^{2}
+$$
+
+总之，
+
+$$
+y[k]=(1.00015)^{k}
+$$
+
+由于输人 $\{1,0,0, \cdots\}$ 为脉冲序列，所以根据定义，输出为脉冲响应序列
+
+$$
+g[k]=(1.00015)^{k}
+$$
+
+账户的输人输出描述为
+
+
+\begin{equation*}
+y[k]=\sum_{m=0}^{k} g[k-m] u[m]=\sum_{m=0}^{k}(1.00015)^{k-m} u[m] \tag{2.60}
+\end{equation*}
+
+
+离散传递函数为脉冲响应序列的 $z$ 变换
+
+
+\begin{align*}
+\hat{g}(z)= & \mathscr{Z}[g[k]]=\sum_{k=0}^{\infty}(1.00015)^{k} z^{-k}=\sum_{k=0}^{\infty}\left(1.00015 z^{-1}\right)^{k}= \\
+& \frac{1}{1-1.00015 z^{-1}}=\frac{z}{z-1.00015} \tag{2.61}
+\end{align*}
+
+
+只要使用式（2．60）或式（2．61），则初始状态必须为零，也就是说，初始账户金额为零。\\
+接下来推导该账户的状态空间方程描述，假设 $y[k]$ 为第 $k$ 天结束时的总金额，则有
+
+
+\begin{equation*}
+y[k+1]=y[k]+0.00015 y[k]+u[k+1]=1.00015 y[k]+u[k+1] \tag{2.62}
+\end{equation*}
+
+
+若定义状态变量为 $x[k]:=y[k]$ ，则
+
+
+\begin{gather*}
+x[k+1]=1.00015 x[k]+u[k+1] \\
+y[k]=x[k] \tag{2.63}
+\end{gather*}
+
+
+由于有 $u[k+1]$ 这一项，式（2．63）并非式（2．55）的标准形式，因此不能选择 $x[k]:= y[k]$ 作为状态变量，下面选择另一个状态变量
+
+$$
+x[k]:=y[k]-u[k]
+$$
+
+将 $y[k+1]=x[k+1]+u[k+1]$ 和 $y[k]=x[k]+u[k]$ 代人式（2．62）得出
+
+
+\begin{gather*}
+x[k+1]=1.00015 x[k]+1.00015 u[k] \\
+y[k]=x[k]+u[k] \tag{2.64}
+\end{gather*}
+
+
+该式为标准形式，是对该货币市场账户的描述。\\
+截至目前，只讨论了 DT LTI SISO 系统，将其推广到 MIMO 的情形，与 CT 情况非常类似，这里不再赘述。
+
+\section*{2.9 小 结}
+本章介绍了因果性、集总性、时不变性（TI）和线性性（L）的概念。讨论了用来描述 LTI 集总、因果系统的以下四类方程：\\
+（1）卷积；\\
+（2）传递函数；\\
+（3）状态空间方程；\\
+（4）高阶微分方程。\\
+卷积是显式地利用了时不变性和线性性的条件导出的，因此其推导过程具有启发性，卷积公式取拉普拉斯变换引出传递函数的概念，第 5 章中还要借助卷积来建立一个重要的稳定性条件，因此，卷积的引人非常重要。此外，正如第 24 页的说明，卷积的实际使用非常复杂，因此，在分析或设计中并不使用卷积。通常很难推导高阶微分方程，并且高阶微分方程也不适于计算机运算。因此，本教材主要研究传递函数和状态空间方程。
+
+从本章的例子来看，若系统包含非线性元件，则必须首先推导出一组一阶非线性微分方程，再做线性化使之转化为状态空间方程，然后，才可以使用式（2．12）或式（2．16）来计算其传递函数。直接推导传递函数难度很大或不可行。因此，状态空间方程的建立至关重要。
+
+\section*{习 题}
+2.1 考虑具有如图2．18所示特性的无记忆系统，图中 $u$ 表示输入，$y$ 表示输出。试问具有这些特性的系统，哪个是线性系统？能否引人一个新的输出使图 2.18 （b）的系统成为线性系统？
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-056}
+\captionsetup{labelformat=empty}
+\caption{图2．18 习题2．1的图}
+\end{center}
+\end{figure}
+
+2.2 理想低通滤波器的冲击响应由
+
+$$
+g(t)=2 \omega \frac{\sin 2 \omega\left(t-t_{0}\right)}{2 \omega\left(t-t_{0}\right)} \text { (对所有 } t \text { ) }
+$$
+
+给出，其中 $\omega$ 和 $t_{0}$ 为常数。试问，该理想低通滤波器是否因果？能否在现实世界中搭建出该滤波器？\\
+2.3 考虑某系统，其输人 $u$ 和输出 $y$ 通过
+
+$$
+y(t)=\left(P_{\alpha} u\right)(t):= \begin{cases}u(t), & t \leqslant \alpha \\ 0, & t>\alpha\end{cases}
+$$
+
+建立联系，其中 $\alpha$ 为固定常数。该系统称为＂截断算子＂，它截断 $\alpha$ 时刻之后的输入。试问，该系统是否线性？是否时不变？是否因果？\\
+2.4 可以通过 $y=H u$ 来表达初始松弛系统输人和输出间的关系，其中 $H$ 为某些数学算子。试证明，若系统因果，则有
+
+$$
+P_{\mathrm{a}} y=P_{\mathrm{a}} H u=P_{\mathrm{a}} H P_{\mathrm{a}} u
+$$
+
+其中 $P_{\alpha}$ 为习题2．3中定义的截断算子。试问 $P_{\alpha} H u=H P_{\alpha} u$ 是否正确？\\
+2.5 考虑具有输人 $u$ 和输出 $y$ 的系统，在该系统上借助输人 $u_{1}(t) 、 u_{2}(t)$ 和 $u_{3}(t)(t \geqslant 0)$ 实施三次实验。每种情况下，$t=0$ 时刻的初始状态 $x(0)$ 均相同，相应的输出记为 $y_{1} 、 y_{2}$ 和 $y_{3}$ 。若 $\boldsymbol{x}(0) \neq \mathbf{0}$ ，试问，以下陈述哪些是正确的？\\
+（1）若 $u_{3}=u_{1}+u_{2}$ ，则 $y_{3}=y_{1}+y_{2}$ ；\\
+（2）若 $u_{3}=0.5\left(u_{1}+u_{2}\right)$ ，则 $y_{3}=0.5\left(y_{1}+y_{2}\right)$ ；\\
+（3）若 $u_{3}=u_{1}-u_{2}$ ，则 $y_{3}=y_{1}-y_{2}$ 。\\
+若 $\boldsymbol{x}(0)=\mathbf{0}$ ，哪些是正确的？\\
+2.6 考虑某系统，对所有 $t$ ，其输人和输出的关系通过
+
+$$
+y(t)= \begin{cases}\frac{u^{2}(t)}{u(t-1)}, & u(t-1) \neq 0 \\ 0, & u(t-1)=0\end{cases}
+$$
+
+给出。试证明，该系统满足齐次性，但不满足可加性。\\
+2.7 试证明，若可加性成立，则对所有有理数 $\alpha$ ，齐次性也成立。因此，若系统具有某种＂连续＂性，则由可加性可知齐次性。\\
+2.8 试求图 2.2 所示电路的状态空间方程描述及其传递矩阵描述。\\
+2.9 试求图 2.19 所示电路的状态空间方程描述及其传递函数描述。
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-057}
+\captionsetup{labelformat=empty}
+\caption{图2．19习题2．9的图}
+\end{center}
+\end{figure}
+
+2.10 试求图2．20所示电路的状态空间方程描述及其传递函数描述。\\
+2.11 试推导图 2．21（a）所示电路的一维状态空间方程描述和二维状态空间方程描述，并利用式（2．12）求该电路的传递函数。参见习题 7．4。\\
+2.12 试推导图 2．21（b）所示电路的一维状态空间方程描述和二维状态空间方程描述，并利用阻抗求该电路的传递函数。参见习题 7.5 。
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-058(2)}
+\captionsetup{labelformat=empty}
+\caption{图2．20 习题 2.10 的图}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-058(1)}
+\captionsetup{labelformat=empty}
+\caption{图2．21（a）并非所有电容电压都取为状态变量的电路、（b）并非所有电感电流都取为状态变量的电路}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-058}
+\captionsetup{labelformat=empty}
+\caption{图2．22 不能由标准状态空间方程描述的电路网络}
+\end{center}
+\end{figure}
+
+2.13 考虑图2．22所示的电路，（1）试证明，若选择 1 F 的电容电压为 $x_{1}(t)$ 、电感电流为 $x_{2}(t)$ ，以及 2 F 的电容电压为 $x_{3}(t)$ ，则可以通过
+
+$$
+\begin{gathered}
+\dot{\boldsymbol{x}}(t)=\left[\begin{array}{ccc}
+0 & \frac{1}{3} & 0 \\
+0 & -2 & 1 \\
+0 & -\frac{1}{3} & 0
+\end{array}\right] \boldsymbol{x}(t)+\left[\begin{array}{c}
+\frac{2}{3} \\
+0 \\
+\frac{1}{3}
+\end{array}\right] \dot{u}(t) \\
+y(t)=\left[\begin{array}{lll}
+0 & -2 & 1
+\end{array}\right] x(t)
+\end{gathered}
+$$
+
+来描述该电路，其中 $x=\left[\begin{array}{lll}x_{1} & x_{2} & x_{3}\end{array}\right]^{\prime}$ 。试问，该方程是否为状态空间方程的标准形式？（2）试证明，若仅选择 $x_{1}(t)$ 和 $x_{2}(t)$（未选择 $\left.x_{3}(t)\right)$ 作为状态变量，则可以通过
+
+$$
+\begin{gathered}
+\dot{\boldsymbol{x}}(t)=\left[\begin{array}{cc}
+0 & \frac{1}{3} \\
+-1 & -2
+\end{array}\right] \boldsymbol{x}(t)+\left[\begin{array}{l}
+0 \\
+1
+\end{array}\right] u(t)+\left[\begin{array}{l}
+\frac{2}{3} \\
+0
+\end{array}\right] \dot{u}(t) \\
+y(t)=\left[\begin{array}{ll}
+-1 & -2
+\end{array}\right] \boldsymbol{x}(t)+u(t)
+\end{gathered}
+$$
+
+来描述该电路，其中 $x=\left[\begin{array}{ll}x_{1} & x_{2}\end{array}\right]^{\prime}$ 。试问，该方程是否为状态空间方程的标准形式？需要注意的是，对所有 $t$ 均有 $x_{1}(t)+x_{3}(t)=u(t)$ 成立，因此，从某种意义上而言， 2 F 的电容是冗余的。参见习题7．6。\\
+2.14 考虑通过
+
+$$
+\ddot{y}+2 \dot{y}-3 y=\dot{u}-u
+$$
+
+描述的系统，试求系统的传递函数和冲击响应。\\
+2.15 设 $\bar{y}(t)$ 为线性时不变系统的单位阶跃响应，试证明系统的冲击响应等于 $\frac{\mathrm{d} \bar{y}(t)}{\mathrm{d} t}$ 。
+
+2． 16 考虑通过
+
+$$
+\begin{aligned}
+& D_{11}(p) y_{1}(t)+D_{12}(p) y_{2}(t)=N_{11}(p) u_{1}(t)+N_{12}(p) u_{2}(t) \\
+& D_{21}(p) y_{1}(t)+D_{22}(p) y_{2}(t)=N_{21}(p) u_{1}(t)+N_{22}(p) u_{2}(t)
+\end{aligned}
+$$
+
+描述的双输人双输出系统，其中 $N_{i j}$ 和 $D_{i j}$ 是 $p:=\frac{\mathrm{d}}{\mathrm{d} t}$ 的多项式，试问系统的传递函数是什么？\\
+2.17 考虑图2．5所示的反馈系统，试证明：正反馈系统的单位阶跃响应，当 $a=1$ 时如图2．23（a）所示，当 $a=0.5$ 时如图2．23（b）所示；负反馈系统的单位阶跃响应，当 $a=1$ 和 $a=0.5$ 时分别如图 2．23（c）和图 2．23（d）所示。
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-059}
+\captionsetup{labelformat=empty}
+\caption{图2． 23 习题2． 17 的图}
+\end{center}
+\end{figure}
+
+2.18 试求图2．24中摆系统的状态空间方程描述。该系统可用于模拟一级或两级连杆机器人的操作器。若 $\theta 、 \theta_{1}$ 和 $\theta_{2}$ 取值甚小，能否将这两个系统视为线性系统？
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-060}
+\captionsetup{labelformat=empty}
+\caption{图2．24 习题 2.18 的图}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_14_fc18218ded539d10ef7fg-060(1)}
+\captionsetup{labelformat=empty}
+\caption{图2．25 习题 2.19 的图}
+\end{center}
+\end{figure}
+
+2.19 考虑图2．25所示的飞行器简化模型，假设飞行器在俯仰角 $\theta_{0}$ 、升降舵偏角 $u_{0}$ 、高度 $h_{0}$ 和巡航速度 $v_{0}$ 情况下处于平衡状态。设相对于 $\theta_{0}$ 和 $u_{0}$ 的微小偏差 $\theta$ 和 $u$ 产生如图所示的推力 $f_{1}=k_{1} \theta$ 和 $f_{2}=k_{2} u$ 。设 $m$ 为飞行器质量，$I$ 为绕重心 $P$ 的转动惯量，$b \dot{\theta}$ 为气动阻尼，$h$ 是相对于 $h_{0}$ 的高度偏差。试求系统的状态空间方程描述。试证明，当忽略转动惯量 $I$ 的影响时，从 $u$ 到 $h$ 的传递函数为
+
+$$
+\hat{g}(s)=\frac{\hbar(s)}{\hat{u}(s)}=\frac{k_{1} k_{2} l_{2}-k_{2} b s}{m s^{2}\left(b s+k_{1} l_{1}\right)}
+$$
+
+2.20 登月舱在月球上降落的软着陆阶段可以建模为如图 2.26 所示的系统。假设产生的推力正比于 $\dot{m}$ ，其中 $m$ 为登月舱的质量，则该系统可以通过 $m \ddot{y}=-k \dot{m}- m g$ 来描述，其中 $g$ 为月球表面的重力常数。定义系统的状态变量为 $x_{1}=y 、 x_{2}=\dot{y}$ 、 $x_{3}=m$ 及 $u=\dot{m}$ 。试求该系统的状态空间方程描述。
+
+
+\end{document}

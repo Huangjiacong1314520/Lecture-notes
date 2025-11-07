@@ -1,0 +1,85 @@
+% This LaTeX document needs to be compiled with XeLaTeX.
+\documentclass[10pt]{article}
+
+\begin{document}
+\maketitle
+
+
+
+
+
+\usepackage{amsmath,amssymb}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+
+
+
+
+
+
+
+
+
+
+\subsection{Verification of Left Coprime Factorization via Singular Value Analysis}
+
+For a multi-input multi-output (MIMO) system $G(s)$, the left coprime factorization (LCF) is expressed as
+\begin{equation}
+G(s) = M_l^{-1}(s) N_l(s),
+\end{equation}
+where both $M_l(s)$ and $N_l(s)$ are stable, minimal, and proper transfer matrices.  
+They satisfy the normalization condition
+\begin{equation}
+M_l(s)M_l^*(s) + N_l(s)N_l^*(s) = I,
+\end{equation}
+which ensures that $\begin{bmatrix} M_l & N_l \end{bmatrix}$ forms an \emph{inner system}, i.e.,
+\begin{equation}
+\begin{bmatrix} M_l(j\omega) & N_l(j\omega) \end{bmatrix}^*
+\begin{bmatrix} M_l(j\omega) & N_l(j\omega) \end{bmatrix} = I.
+\end{equation}
+Thus, this decomposition is ``normalized.''
+
+\subsubsection{Verification Principle}
+
+To verify that the computed factors satisfy $G(s)=M_l^{-1}(s)N_l(s)$, one can compare the singular value plots of both systems:
+\begin{equation}
+\sigma\big(G(j\omega)\big) \quad \text{and} \quad 
+\sigma\big(M_l^{-1}(j\omega)N_l(j\omega)\big),
+\end{equation}
+where $\sigma(\cdot)$ denotes the vector of singular values of a matrix.
+
+If the two sets of singular values coincide over the entire frequency range, it implies that
+\begin{equation}
+\sigma_i(G(j\omega)) = \sigma_i(M_l^{-1}(j\omega)N_l(j\omega)),
+\quad \forall i,\;\forall \omega,
+\end{equation}
+which confirms that the two systems exhibit identical gain characteristics across all input–output directions.  
+Because the LCF guarantees consistent phase behavior (through the unitary property of the inner factor), this equality of singular values is sufficient to conclude
+\begin{equation}
+G(s) = M_l^{-1}(s)N_l(s).
+\end{equation}
+
+\subsubsection{Physical Interpretation}
+
+For a MIMO transfer matrix $G(j\omega)$, each singular value $\sigma_i(G(j\omega))$ represents the gain of the system along a specific input–output direction at frequency $\omega$.  
+Hence, matching singular value spectra between $G$ and $M_l^{-1}N_l$ means the two systems amplify all directions identically at every frequency.
+
+In MATLAB, this verification is typically performed as:
+\begin{verbatim}
+sigma(sys,'b-', Ml\Nl,'r--')
+\end{verbatim}
+where the blue line represents the original system $G(s)$ and the red dashed line represents the reconstructed system $M_l^{-1}(s)N_l(s)$.  
+If the two curves completely overlap, the factorization is confirmed to be correct.
+
+\subsubsection{Summary}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!60!black,title=\textbf{Conclusion}]
+Comparing the singular value spectra of $G(s)$ and $M_l^{-1}(s)N_l(s)$ provides a numerical validation of the left coprime factorization.
+Because the normalized property ensures phase consistency, identical singular values across all frequencies imply
+\[
+G(s) = M_l^{-1}(s)N_l(s).
+\]
+\end{tcolorbox}
+
+
+\end{document}

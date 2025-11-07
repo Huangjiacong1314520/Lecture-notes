@@ -1,0 +1,236 @@
+\documentclass[cn,10pt,math=newtx,citestyle=gb7714-2015,bibstyle=gb7714-2015]{0-figure/elegantbook}
+
+\usepackage{CJKfntef}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage[utf8]{inputenc}
+%\usepackage{caption}
+\usepackage{chemformula}
+\usepackage{svg}
+\usepackage{extarrows}
+%\usepackage{0-figure/extrarelation}
+\usepackage{tikz-3dplot}
+% 加载你自己的笔记宏包
+\usepackage{notes}  % 直接用 .sty 名字，不用写扩展名
+
+
+
+% \usepackage[utf8]{inputenc}
+% \usepackage{xcolor}
+% \usepackage{tcolorbox}
+% \usepackage[colorinlistoftodos]{todonotes}  % 保留用于列表
+
+% % 重新定义笔记类型 - 使用美观柔和的色彩
+% \newcommand{\researchnote}[1]{%
+%     \begin{tcolorbox}[
+%         colback=teal!8!white,
+%         colframe=teal!50!black,
+%         title=研究笔记,
+%         fonttitle=\scriptsize\bfseries\color{teal!70!black},
+%         coltitle=teal!70!black,
+%         arc=3pt,
+%         boxrule=0.8pt,
+%         left=6pt,
+%         right=6pt,
+%         top=4pt,
+%         bottom=4pt
+%     ]
+%         \scriptsize\color{gray!60!black} #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\methodnote}[1]{%
+%     \begin{tcolorbox}[
+%         colback=blue!8!white,
+%         colframe=blue!50!black,
+%         title=方法笔记,
+%         fonttitle=\scriptsize\bfseries\color{blue!70!black},
+%         coltitle=blue!70!black,
+%         arc=3pt,
+%         boxrule=0.8pt,
+%         left=6pt,
+%         right=6pt,
+%         top=4pt,
+%         bottom=4pt
+%     ]
+%         \scriptsize\color{gray!60!black} #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\resultnote}[1]{%
+%     \begin{tcolorbox}[
+%         colback=orange!8!white,
+%         colframe=orange!45!brown,
+%         title=结果笔记,
+%         fonttitle=\scriptsize\bfseries\color{orange!60!brown},
+%         coltitle=orange!60!brown,
+%         arc=3pt,
+%         boxrule=0.8pt,
+%         left=6pt,
+%         right=6pt,
+%         top=4pt,
+%         bottom=4pt
+%     ]
+%         \scriptsize\color{gray!60!black} #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\futurework}[1]{%
+%     \begin{tcolorbox}[
+%         colback=violet!8!white,
+%         colframe=violet!50!black,
+%         title=后续工作,
+%         fonttitle=\scriptsize\bfseries\color{violet!70!black},
+%         coltitle=violet!70!black,
+%         arc=3pt,
+%         boxrule=0.8pt,
+%         left=6pt,
+%         right=6pt,
+%         top=4pt,
+%         bottom=4pt
+%     ]
+%         \scriptsize\color{gray!60!black} #1
+%     \end{tcolorbox}%
+% }
+
+% % % 同时保留原始todo命令用于列表（可选）
+% % \newcommand{\researchnotetodo}[1]{\todo[color=teal!25]{\scriptsize 研究: #1}}
+% % \newcommand{\methodnotetodo}[1]{\todo[color=blue!25]{\scriptsize 方法: #1}}
+% % \newcommand{\resultnotetodo}[1]{\todo[color=orange!25]{\scriptsize 结果: #1}}
+% % \newcommand{\futureworktodo}[1]{\todo[color=violet!25]{\scriptsize 后续: #1}}
+% \documentclass{article}
+% \usepackage[utf8]{inputenc}
+% \usepackage{xcolor}
+% \usepackage{tcolorbox}
+% \usepackage[colorinlistoftodos]{todonotes}
+
+% % 改良学术风格配色
+% \definecolor{notegreen}{RGB}{214,243,226}
+% \definecolor{notegreenframe}{RGB}{46,139,87}
+
+% \definecolor{noteblue}{RGB}{222,235,247}
+% \definecolor{noteblueframe}{RGB}{23,74,117}
+
+% \definecolor{noteyellow}{RGB}{255,249,219}
+% \definecolor{noteyellowframe}{RGB}{193,141,0}
+
+% \definecolor{notepurple}{RGB}{237,230,246}
+% \definecolor{notepurpleframe}{RGB}{109,76,147}
+
+% % 改进后的笔记环境
+% \newcommand{\researchnote}[1]{%
+%     \begin{tcolorbox}[colback=notegreen,colframe=notegreenframe,title=研究笔记,fonttitle=\scriptsize]
+%         \scriptsize #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\methodnote}[1]{%
+%     \begin{tcolorbox}[colback=noteblue,colframe=noteblueframe,title=方法笔记,fonttitle=\scriptsize]
+%         \scriptsize #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\resultnote}[1]{%
+%     \begin{tcolorbox}[colback=noteyellow,colframe=noteyellowframe,title=结果笔记,fonttitle=\scriptsize]
+%         \scriptsize #1
+%     \end{tcolorbox}%
+% }
+
+% \newcommand{\futurework}[1]{%
+%     \begin{tcolorbox}[colback=notepurple,colframe=notepurpleframe,title=后续工作,fonttitle=\scriptsize]
+%         \scriptsize #1
+%     \end{tcolorbox}%
+% }
+
+% % 仍保留todo列表功能
+% \newcommand{\researchnotetodo}[1]{\todo[color=notegreen]{\scriptsize 研究: #1}}
+% \newcommand{\methodnotetodo}[1]{\todo[color=noteblue]{\scriptsize 方法: #1}}
+% \newcommand{\resultnotetodo}[1]{\todo[color=noteyellow]{\scriptsize 结果: #1}}
+% \newcommand{\futureworktodo}[1]{\todo[color=notepurple]{\scriptsize 后续: #1}}
+
+
+\maketitle
+
+\section{引言}
+这是引言部分。
+
+\researchnote{需要添加更多背景文献引用，特别是近三年的研究成果。}
+
+\section{方法}
+我们采用了先进的研究方法。
+
+\methodnote{考虑与其他方法对比，特别是与传统方法的优缺点分析。}
+
+\section{结果}
+实验结果如图1所示。
+
+\resultnote{异常数据点需要检查，可能由于设备校准问题导致。}
+
+\section{讨论}
+基于以上结果，我们得出重要结论。
+
+\futurework{需要长期跟踪研究，建议设置6个月和12个月的随访点。}
+
+% 显示所有笔记的汇总列表（如果需要）
+\newpage
+\section*{研究笔记汇总}
+\listoftodos
+
+% 默认：如果作者或日期留空，宏会自动补上 \today
+\researchnote[JC][]{high}{需要补充最近三年的关键综述，建议查阅 IEEE T-... 的相关文章。}
+
+\section{方法}
+简要描述方法。
+
+\methodnote[Li]{2025-02-01}[med]{建议在实验对比中加入基线 B，并说明参数选择理由。}
+
+\section{结果}
+实验结果如图所示。
+
+\resultnote[][2025-02-02][high]{某些试验存在离群点，怀疑为设备标定问题，请复测并记录环境温度。}
+
+\section{讨论}
+讨论与结论。
+
+\futurework[JC][\today][low]{长期随访：建议 6 个月、12 个月进行性能回归测试。}
+
+% 也可以留空作者/日期，优先级可写成 high/med/low（大小写不敏感）
+\researchnote{无需作者信息的快速备注示例，默认会标注为"作者: "并使用当天日期。}
+
+
+
+\usetikzlibrary{cd}
+\cover{0-figure/cover.jpg}
+\logo{0-figure/science-and-mind.jpg}
+\input{newcommand}
+
+\title{LaTeX+Overleaf教程}
+\author{Maki's Lab}
+\date{\today}
+
+\begin{document}
+\maketitle
+\frontmatter
+
+\newpage
+
+\tableofcontents
+\mainmatter
+
+
+\input{1}
+\newpage
+
+\input{2}
+\newpage
+
+\input{3}
+\newpage
+\input{4}
+\newpage
+
+\input{5}
+\newpage
+
+\printbibliography
+\end{document}

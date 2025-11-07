@@ -1,0 +1,197 @@
+% main.tex - 使用示例
+\documentclass[12pt]{article}
+
+% 中文支持
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath, amssymb}
+
+% 导入笔记宏包
+\usepackage{researchnotes}
+
+% 如果想隐藏所有笔记，取消下面一行的注释
+% \hidenotes
+
+% 如果之前隐藏了笔记，想重新显示，使用
+% \shownotes
+
+\begin{document}
+
+\section{示例章节}
+
+\hl{这是正文内容。下面是一个研究笔记的例子。}这里是不支持中文高亮的表现，返回看代码你就会发现左边是中文。
+\hl{important} 
+
+\begin{researchnote}[author=JC, date=2025-10-16, class=]
+\textbf{包含关系:}
+\[
+Q_d \subset \{\tilde{\Delta}_d(j\omega) : \|\tilde{\Delta}_d(s)\|_\infty \leq 1\}
+\]
+
+但关键是：在计算最坏情况增益时，这个包含关系实际上是"充分"的。
+
+\textbf{等价性定理:}
+
+对于最坏情况增益计算，有：
+\[
+\sup_{\tilde{\Delta}_d \in \Delta_d} \sigma(\mathcal{F}_u(D(j\omega), \tilde{\Delta}_d(j\omega))) 
+= \sup_{Q_d \in Q_d} \sigma(\mathcal{F}_u(D(j\omega), Q_d))
+\]
+
+这意味着：
+\begin{itemize}
+\item 虽然 $Q_d$ 是 $\tilde{\Delta}_d(j\omega)$ 的一个子集
+\item 但在寻找最大增益时，我们不会丢失任何信息
+\item 因为本质上这个 $Q_d$ 就是所有最坏增益对应的不确定性的集合
+\end{itemize}
+\end{researchnote}
+
+medhighmedlow
+
+\begin{questionnote}[author=JC, date=2025-10-16, class=]
+如何找到这个最坏增益对应的不确定性的集合 $Q_d$？其实本质上也就是找 $Q_d$ 中的各个元素 $Q_j$
+\end{questionnote}
+
+\subsection{Example 2.24}
+
+Consider the uncertain system
+\begin{align*}
+\tilde{G}_d(s,\Delta) &= (7G_1(s)(0.25+\delta_1) + 3G_2(s)(1-\delta_1) \\
+&\quad + 3G_3(s)(0.75-\delta_1))(1+W(s)\Delta_1(s))
+\end{align*}
+
+with $G_1 = \frac{1}{(s+2)^2}$, $G_2 = \frac{10\pi s}{(s+200\pi)^2}$, and $G_3 = \frac{100\pi s}{(s+200\pi)^2}$, dynamic weight $W(s) = 0.2\frac{s+10\pi}{s+0.1\pi}$, and uncertain parameters $\delta_1 \in \mathbb{R}$ with $|\delta_1| \leq 1$, and $\Delta_1(s)$ with $\|\Delta_1\|_\infty \leq 1$.
+
+% 更多示例笔记
+\begin{researchnote}[author=张三, date=2025-10-18]
+这是另一个研究笔记的例子，展示了如何使用不同的作者和日期。
+
+可以包含：
+\begin{itemize}
+\item 数学公式
+\item 列表
+\item 各种文本格式
+\end{itemize}
+\end{researchnote}
+
+
+
+
+
+% 高亮使用示例
+\section{高亮功能演示}
+
+\subsection{1. 文本高亮（中英文）}
+
+\begin{rn}
+\textbf{不同颜色的文本高亮：}
+
+\begin{itemize}
+    \item 这是\hl{黄色高亮（默认）}的文字
+    \item 这是\hlr{红色高亮}的文字，用于标注错误或重要警告
+    \item 这是\hlg{绿色高亮}的文字，用于标注正确或补充
+    \item 这是\hlb{蓝色高亮}的文字，用于标注定义或概念
+    \item 这是\hlo{橙色高亮}的文字，用于标注需要注意
+    \item 这是\hlp{粉色高亮}的文字，用于标注问题
+    \item 这是\hlgr{灰色高亮}的文字，用于标注次要信息
+\end{itemize}
+
+\textbf{英文高亮示例：}
+
+This is \hl{important} information. The \hlr{critical error} needs attention.
+\end{rn}
+
+\subsection{2. 行内数学公式高亮}
+
+\begin{rn}
+\textbf{行内公式高亮：}
+
+当\hli{n \to \infty}时，级数\hlig{\sum_{i=1}^n \frac{1}{i^2}}收敛到\hlib{\frac{\pi^2}{6}}。
+
+这个不等式\hlir{x^2 + y^2 \geq 2xy}是\hlio{柯西不等式}的特殊情况。
+
+注意：\hlip{\delta > 0}这个条件很重要！
+\end{rn}
+
+\subsection{3. 独立数学公式高亮}
+
+\begin{qn}
+\textbf{如何证明欧拉公式？}
+
+欧拉公式：\hlm{e^{i\pi} + 1 = 0}
+
+泰勒展开：
+\[
+\hlmg{e^{ix} = \sum_{n=0}^{\infty} \frac{(ix)^n}{n!} = \cos x + i\sin x}
+\]
+
+当\hlmo{x = \pi}时，得到：
+\[
+\hlmr{e^{i\pi} = \cos\pi + i\sin\pi = -1}
+\]
+
+因此：\hlmb{e^{i\pi} + 1 = 0}
+\end{qn}
+
+\subsection{4. 混合使用示例}
+
+\begin{rn}[author=张三, date=2025-10-20]
+\textbf{包含关系：}
+
+对于\hl{最坏情况分析}，我们有\hli{Q_d \subset \{\tilde{\Delta}_d(j\omega)\}}。
+
+\textbf{关键定理：}
+
+\hlr{等价性定理}告诉我们：
+\[
+\hlm{\sup_{\tilde{\Delta}_d \in \Delta_d} \sigma(\mathcal{F}_u) = \sup_{Q_d \in Q_d} \sigma(\mathcal{F}_u)}
+\]
+
+这意味着：
+\begin{itemize}
+    \item 虽然\hli{Q_d}是\hlg{真子集}
+    \item 但在\hlo{寻找最大增益}时，\hlb{不会丢失信息}
+    \item 因为\hlp{$Q_d$就是所有最坏情况的集合}
+\end{itemize}
+\end{rn}
+
+\subsection{5. 复杂公式高亮}
+
+\begin{rn}
+考虑不确定系统：
+\[
+\tilde{G}_d(s,\Delta) = \hlm{(7G_1(s)(0.25+\delta_1) + 3G_2(s)(1-\delta_1))}
+\]
+
+其中传递函数定义为：
+\begin{align*}
+G_1 &= \hlmg{\frac{1}{(s+2)^2}} \\
+G_2 &= \hlmb{\frac{10\pi s}{(s+200\pi)^2}}
+\end{align*}
+
+不确定参数满足\hlir{|\delta_1| \leq 1}和\hlio{\|\Delta_1\|_\infty \leq 1}。
+\end{rn}
+
+\subsection{6. 实用技巧}
+
+\begin{qn}
+\textbf{高亮使用建议：}
+
+\begin{enumerate}
+    \item \hlr{红色}：错误、警告、最重要的内容
+    \item \hlo{橙色}：需要注意、有疑问的地方
+    \item \hl{黄色}：一般重要内容（默认）
+    \item \hlg{绿色}：补充说明、正确的答案
+    \item \hlb{蓝色}：定义、概念、术语
+    \item \hlp{粉色}：问题、待解决的事项
+    \item \hlgr{灰色}：次要信息、参考资料
+\end{enumerate}
+
+\textbf{注意事项：}
+\begin{itemize}
+    \item 不要过度使用高亮，\hlr{太多高亮等于没有高亮}
+    \item 保持\hlg{同一种颜色表示同一类信息}
+    \item 对于\hlb{长公式}，只高亮\hlo{关键部分}
+\end{itemize}
+\end{qn}
+
+\end{document}

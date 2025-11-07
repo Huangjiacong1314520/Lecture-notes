@@ -1,0 +1,801 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{bbold}
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\captionsetup{singlelinecheck=false}
+\section*{Chapter 5}
+\section*{Internal Stability}
+This chapter introduces the feedback structure and discusses its stability and various stability tests. The arrangement of this chapter is as follows: Section 5.1 discusses the necessity for introducing feedback structure and describes the general feedback configuration. Section 5.2 defines the well-posedness of the feedback loop. Section 5.3 introduces the notion of internal stability and various stability tests. Section 5.4 introduces the stable coprime factorizations of rational matrices. The stability conditions in terms of various coprime factorizations are also considered in this section.
+
+\subsection*{5.1 Feedback Structure}
+In designing control systems, there are several fundamental issues that transcend the boundaries of specific applications. Although they may differ for each application and may have different levels of importance, these issues are generic in their relationship to control design objectives and procedures. Central to these issues is the requirement to provide satisfactory performance in the face of modeling errors, system variations, and uncertainty. Indeed, this requirement was the original motivation for the development of feedback systems. Feedback is only required when system performance cannot be achieved because of uncertainty in system characteristics. A more detailed treatment of model uncertainties and their representations will be discussed in Chapter 8.
+
+For the moment, assuming we are given a model including a representation of uncertainty that we believe adequately captures the essential features of the plant, the next step in the controller design process is to determine what structure is necessary to achieve the desired performance. Prefiltering input signals (or open-loop control) can change the dynamic response of the model set but cannot reduce the effect of uncertainty. If the uncertainty is too great to achieve the desired accuracy of response, then a feedback structure is required. The mere assumption of a feedback structure, however, does not guarantee a reduction of uncertainty, and there are many obstacles to achieving the uncertainty-reducing benefits of feedback. In particular, since for any\\
+reasonable model set representing a physical system uncertainty becomes large and the phase is completely unknown at sufficiently high frequencies, the loop gain must be small at those frequencies to avoid destabilizing the high-frequency system dynamics. Even worse is that the feedback system actually increases uncertainty and sensitivity in the frequency ranges where uncertainty is significantly large. In other words, because of the type of sets required to model physical systems reasonably and because of the restriction that our controllers be causal, we cannot use feedback (or any other control structure) to cause our closed-loop model set to be a proper subset of the open-loop model set. Often, what can be achieved with intelligent use of feedback is a significant reduction of uncertainty for certain signals of importance with a small increase spread over other signals. Thus, the feedback design problem centers around the tradeoff involved in reducing the overall impact of uncertainty. This tradeoff also occurs, for example, when using feedback to reduce command/disturbance error while minimizing response degradation due to measurement noise. To be of practical value, a design technique must provide means for performing these tradeoffs. We shall discuss these tradeoffs in more detail in the next chapter.
+
+To focus our discussion, we shall consider the standard feedback configuration shown in Figure 5.1. It consists of the interconnected plant $P$ and controller $K$ forced by command $r$, sensor noise $n$, plant input disturbance $d_{i}$, and plant output disturbance $d$. In general, all signals are assumed to be multivariable, and all transfer matrices are assumed to have appropriate dimensions.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_23_a0bf0525de3c0bb05f1eg-02}
+\captionsetup{labelformat=empty}
+\caption{Figure 5.1: Standard feedback configuration}
+\end{center}
+\end{figure}
+
+\subsection*{5.2 Well-Posedness of Feedback Loop}
+Assume that the plant $P$ and the controller $K$ in Figure 5.1 are fixed real rational proper transfer matrices. Then the first question one would ask is whether the feedback interconnection makes sense or is physically realizable. To be more specific, consider a simple example where
+
+$$
+P=-\frac{s-1}{s+2}, \quad K=1
+$$
+
+are both proper transfer functions. However,
+
+$$
+u=\frac{(s+2)}{3}(r-n-d)+\frac{s-1}{3} d_{i} .
+$$
+
+That is, the transfer functions from the external signals $r-n-d$ and $d_{i}$ to $u$ are not proper. Hence, the feedback system is not physically realizable.
+
+Definition 5.1 A feedback system is said to be well-posed if all closed-loop transfer matrices are well-defined and proper.
+
+Now suppose that all the external signals $r, n, d$, and $d_{i}$ are specified and that the closed-loop transfer matrices from them to $u$ are, respectively, well-defined and proper. Then $y$ and all other signals are also well-defined and the related transfer matrices are proper. Furthermore, since the transfer matrices from $d$ and $n$ to $u$ are the same and differ from the transfer matrix from $r$ to $u$ by only a sign, the system is well-posed if and only if the transfer matrix from $\left[\begin{array}{c}d_{i} \\ d\end{array}\right]$ to $u$ exists and is proper.
+
+To be consistent with the notation used in the rest of this book, we shall denote
+
+
+\begin{equation*}
+\hat{K}:=-K \tag{5.1}
+\end{equation*}
+
+
+and regroup the external input signals into the feedback loop as $w_{1}$ and $w_{2}$ and regroup the input signals of the plant and the controller as $e_{1}$ and $e_{2}$. Then the feedback loop with the plant and the controller can be simply represented as in Figure 5.2 and the system is well-posed if and only if the transfer matrix from $\left[\begin{array}{l}w_{1} \\ w_{2}\end{array}\right]$ to $e_{1}$ exists and is proper.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_23_a0bf0525de3c0bb05f1eg-03}
+\captionsetup{labelformat=empty}
+\caption{Figure 5.2: Internal stability analysis diagram}
+\end{center}
+\end{figure}
+
+Lemma 5.1 The feedback system in Figure 5.2 is well-posed if and only if
+
+
+\begin{equation*}
+I-\hat{K}(\infty) P(\infty) \tag{5.2}
+\end{equation*}
+
+
+is invertible.
+
+Proof. The system in Figure 5.2 can be represented in equation form as
+
+$$
+\begin{aligned}
+e_{1} & =w_{1}+\hat{K} e_{2} \\
+e_{2} & =w_{2}+P e_{1}
+\end{aligned}
+$$
+
+Then an expression for $e_{1}$ can be obtained as
+
+$$
+(I-\hat{K} P) e_{1}=w_{1}+\hat{K} w_{2}
+$$
+
+Thus well-posedness is equivalent to the condition that $(I-\hat{K} P)^{-1}$ exists and is proper. But this is equivalent to the condition that the constant term of the transfer function $I-\hat{K} P$ is invertible.
+
+It is straightforward to show that equation (5.2) is equivalent to either one of the following two conditions:
+
+
+\begin{gather*}
+{\left[\begin{array}{cc}
+I & -\hat{K}(\infty) \\
+-P(\infty) & I
+\end{array}\right] \text { is invertible; }}  \tag{5.3}\\
+I-P(\infty) \hat{K}(\infty) \text { is invertible. }
+\end{gather*}
+
+
+The well-posedness condition is simple to state in terms of state-space realizations. Introduce realizations of $P$ and $\hat{K}$ :
+
+$$
+P=\left[\begin{array}{c|c}
+A & B \\
+\hline C & D
+\end{array}\right], \quad \hat{K}=\left[\begin{array}{c|c}
+\hat{A} & \hat{B} \\
+\hline \hat{C} & \hat{D}
+\end{array}\right] .
+$$
+
+Then $P(\infty)=D, \hat{K}(\infty)=\hat{D}$ and the well-posedness condition in equation (5.3) is equivalent to the invertibility of $\left[\begin{array}{cc}I & -\hat{D} \\ -D & I\end{array}\right]$. Fortunately, in most practical cases we shall have $D=0$, and hence well-posedness for most practical control systems is guaranteed.
+
+\subsection*{5.3 Internal Stability}
+Consider a system described by the standard block diagram in Figure 5.2 and assume that the system is well-posed.
+
+Definition 5.2 The system of Figure 5.2 is said to be internally stable if the transfer matrix
+
+
+\begin{align*}
+{\left[\begin{array}{cc}
+I & -\hat{K} \\
+-P & I
+\end{array}\right]^{-1} } & =\left[\begin{array}{cc}
+(I-\hat{K} P)^{-1} & \hat{K}(I-P \hat{K})^{-1} \\
+P(I-\hat{K} P)^{-1} & (I-P \hat{K})^{-1}
+\end{array}\right]  \tag{5.4}\\
+& =\left[\begin{array}{cc}
+I+\hat{K}(I-P \hat{K})^{-1} P & \hat{K}(I-P \hat{K})^{-1} \\
+(I-P \hat{K})^{-1} P & (I-P \hat{K})^{-1}
+\end{array}\right]
+\end{align*}
+
+
+from ( $w_{1}, w_{2}$ ) to ( $e_{1}, e_{2}$ ) belongs to $\mathcal{R} \mathcal{H}_{\infty}$.
+
+Note that to check internal stability, it is necessary (and sufficient) to test whether each of the four transfer matrices in equation (5.4) is in $\mathcal{H}_{\infty}$. Stability cannot be concluded even if three of the four transfer matrices in equation (5.4) are in $\mathcal{H}_{\infty}$. For example, let an interconnected system transfer function be given by
+
+$$
+P=\frac{s-1}{s+1}, \quad \hat{K}=-\frac{1}{s-1}
+$$
+
+Then it is easy to compute
+
+$$
+\left[\begin{array}{l}
+e_{1} \\
+e_{2}
+\end{array}\right]=\left[\begin{array}{cc}
+\frac{s+1}{s+2} & -\frac{s+1}{(s-1)(s+2)} \\
+\frac{s-1}{s+2} & \frac{s+1}{s+2}
+\end{array}\right]\left[\begin{array}{l}
+w_{1} \\
+w_{2}
+\end{array}\right]
+$$
+
+which shows that the system is not internally stable although three of the four transfer functions are stable.
+
+Remark 5.1 Internal stability is a basic requirement for a practical feedback system. This is because all interconnected systems may be unavoidably subject to some nonzero initial conditions and some (possibly small) errors, and it cannot be tolerated in practice that such errors at some locations will lead to unbounded signals at some other locations in the closed-loop system. Internal stability guarantees that all signals in a system are bounded provided that the injected signals (at any locations) are bounded.
+
+However, there are some special cases under which determining system stability is simple.
+
+Corollary 5.2 Suppose $\hat{K} \in \mathcal{R} \mathcal{H}_{\infty}$. Then the system in Figure 5.2 is internally stable if and only if it is well-posed and $P(I-\hat{K} P)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$.
+
+Proof. The necessity is obvious. To prove the sufficiency, it is sufficient to show that $(I-P \hat{K})^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$. But this follows from
+
+$$
+(I-P \hat{K})^{-1}=I+(I-P \hat{K})^{-1} P \hat{K}
+$$
+
+and $(I-P \hat{K})^{-1} P, \hat{K} \in \mathcal{R} \mathcal{H}_{\infty}$.\\
+Also, we have the following:\\
+Corollary 5.3 Suppose $P \in \mathcal{R} \mathcal{H}_{\infty}$. Then the system in Figure 5.2 is internally stable if and only if it is well-posed and $\hat{K}(I-P \hat{K})^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$.
+
+Corollary 5.4 Suppose $P \in \mathcal{R} \mathcal{H}_{\infty}$ and $\hat{K} \in \mathcal{R} \mathcal{H}_{\infty}$. Then the system in Figure 5.2 is internally stable if and only if $(I-P \hat{K})^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$, or, equivalently, $\operatorname{det}(I-P(s) \hat{K}(s))$ has no zeros in the closed right-half plane.
+
+Note that all the previous discussions and conclusions apply equally to infinite dimensional plants and controllers. To study the more general case, we shall limit our discussions to finite dimensional systems and define
+
+$$
+\begin{aligned}
+& n_{k}:=\text { number of open right-half plane (rhp) poles of } \hat{K}(s) \\
+& n_{p}:=\text { number of open right-half plane (rhp) poles of } P(s) .
+\end{aligned}
+$$
+
+Theorem 5.5 The system is internally stable if and only if it is well-posed and\\
+(i) the number of open rhp poles of $P(s) \hat{K}(s)=n_{k}+n_{p}$;\\
+(ii) $(I-P(s) \hat{K}(s))^{-1}$ is stable.
+
+Proof. It is easy to show that $P \hat{K}$ and $(I-P \hat{K})^{-1}$ have the following realizations:
+
+$$
+P \hat{K}=\left[\begin{array}{cc|c}
+A & B \hat{C} & B \hat{D} \\
+0 & \hat{A} & \hat{B} \\
+\hline C & D \hat{C} & D \hat{D}
+\end{array}\right], \quad(I-P \hat{K})^{-1}=\left[\begin{array}{c|c}
+\bar{A} & \bar{B} \\
+\hline \bar{C} & \bar{D}
+\end{array}\right]
+$$
+
+where
+
+$$
+\begin{aligned}
+\bar{A} & =\left[\begin{array}{cc}
+A & B \hat{C} \\
+0 & \hat{A}
+\end{array}\right]+\left[\begin{array}{c}
+B \hat{D} \\
+\hat{B}
+\end{array}\right](I-D \hat{D})^{-1}\left[\begin{array}{ll}
+C & D \hat{C}
+\end{array}\right] \\
+\bar{B} & =\left[\begin{array}{c}
+B \hat{D} \\
+\hat{B}
+\end{array}\right](I-D \hat{D})^{-1} \\
+\bar{C} & =(I-D \hat{D})^{-1}\left[\begin{array}{ll}
+C & D \hat{C}
+\end{array}\right] \\
+\bar{D} & =(I-D \hat{D})^{-1}
+\end{aligned}
+$$
+
+Hence, the system is internally stable iff $\bar{A}$ is stable. (see Problem 5.2.)\\
+Now suppose that the system is internally stable; then $(I-P \hat{K})^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$. So we only need to show that given condition (ii), condition (i) is necessary and sufficient for the internal stability. This follows by noting that $(\bar{A}, \bar{B})$ is stabilizable iff
+
+\[
+\left(\left[\begin{array}{cc}
+A & B \hat{C}  \tag{5.5}\\
+0 & \hat{A}
+\end{array}\right],\left[\begin{array}{c}
+B \hat{D} \\
+\hat{B}
+\end{array}\right]\right)
+\]
+
+is stabilizable; and ( $\bar{C}, \bar{A}$ ) is detectable iff
+
+\[
+\left(\left[\begin{array}{ll}
+C & D \hat{C}
+\end{array}\right],\left[\begin{array}{cc}
+A & B \hat{C}  \tag{5.6}\\
+0 & \hat{A}
+\end{array}\right]\right)
+\]
+
+is detectable. But conditions (5.5) and (5.6) are equivalent to condition (i).\\
+Condition (i) in the preceding theorem implies that there is no unstable pole/zero cancellation in forming the product $P \hat{K}$.
+
+The preceding theorem is, in fact, the basis for the classical control theory, where the stability is checked only for one closed-loop transfer function with the implicit assumption that the controller itself is stable (and most probably also minimum phase; or at least marginally stable and minimum phase with the condition that any imaginary axis pole of the controller is not in the same location as any zero of the plant).
+
+Example 5.1 Let $P$ and $\hat{K}$ be two-by-two transfer matrices
+
+$$
+P=\left[\begin{array}{cc}
+\frac{1}{s-1} & 0 \\
+0 & \frac{1}{s+1}
+\end{array}\right], \quad \hat{K}=\left[\begin{array}{cc}
+\frac{1-s}{s+1} & -1 \\
+0 & -1
+\end{array}\right]
+$$
+
+Then
+
+$$
+P \hat{K}=\left[\begin{array}{cc}
+\frac{-1}{s+1} & \frac{-1}{s-1} \\
+0 & \frac{-1}{s+1}
+\end{array}\right], \quad(I-P \hat{K})^{-1}=\left[\begin{array}{cc}
+\frac{s+1}{s+2} & -\frac{(s+1)^{2}}{(s+2)^{2}(s-1)} \\
+0 & \frac{s+1}{s+2}
+\end{array}\right]
+$$
+
+So the closed-loop system is not stable even though
+
+$$
+\operatorname{det}(I-P \hat{K})=\frac{(s+2)^{2}}{(s+1)^{2}}
+$$
+
+has no zero in the closed right-half plane and the number of unstable poles of $P \hat{K}= n_{k}+n_{p}=1$. Hence, in general, $\operatorname{det}(I-P \hat{K})$ having no zeros in the closed right-half plane does not necessarily imply $(I-P \hat{K})^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$.
+
+\subsection*{5.4 Coprime Factorization over $\mathcal{R} \mathcal{H}_{\infty}$}
+Recall that two polynomials $m(s)$ and $n(s)$, with, for example, real coefficients, are said to be coprime if their greatest common divisor is 1 (equivalent, they have no common zeros). It follows from Euclid's algorithm ${ }^{1}$ that two polynomials $m$ and $n$ are coprime iff there exist polynomials $x(s)$ and $y(s)$ such that $x m+y n=1$; such an equation is called a Bezout identity. Similarly, two transfer functions $m(s)$ and $n(s)$ in $\mathcal{R} \mathcal{H}_{\infty}$ are said to be coprime over $\mathcal{R} \mathcal{H}_{\infty}$ if there exists $x, y \in \mathcal{R} \mathcal{H}_{\infty}$ such that
+
+$$
+x m+y n=1
+$$
+
+\footnotetext{${ }^{1}$ See, for example, Kailath [1980], pages 140-141.
+}The more primitive, but equivalent, definition is that $m$ and $n$ are coprime if every common divisor of $m$ and $n$ is invertible in $\mathcal{R} \mathcal{H}_{\infty}$; that is,
+
+$$
+h, m h^{-1}, n h^{-1} \in \mathcal{R} \mathcal{H}_{\infty} \Longrightarrow h^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+More generally, we have the following:\\
+Definition 5.3 Two matrices $M$ and $N$ in $\mathcal{R} \mathcal{H}_{\infty}$ are right coprime over $\mathcal{R} \mathcal{H}_{\infty}$ if they have the same number of columns and if there exist matrices $X_{r}$ and $Y_{r}$ in $\mathcal{R} \mathcal{H}_{\infty}$ such that
+
+$$
+\left[\begin{array}{ll}
+X_{r} & Y_{r}
+\end{array}\right]\left[\begin{array}{c}
+M \\
+N
+\end{array}\right]=X_{r} M+Y_{r} N=I
+$$
+
+Similarly, two matrices $\tilde{M}$ and $\tilde{N}$ in $\mathcal{R} \mathcal{H}_{\infty}$ are left coprime over $\mathcal{R} \mathcal{H}_{\infty}$ if they have the same number of rows and if there exist matrices $X_{l}$ and $Y_{l}$ in $\mathcal{R} \mathcal{H}_{\infty}$ such that
+
+$$
+\left[\begin{array}{ll}
+\tilde{M} & \tilde{N}
+\end{array}\right]\left[\begin{array}{c}
+X_{l} \\
+Y_{l}
+\end{array}\right]=\tilde{M} X_{l}+\tilde{N} Y_{l}=I
+$$
+
+Note that these definitions are equivalent to saying that the matrix $\left[\begin{array}{c}M \\ N\end{array}\right]$ is left invertible in $\mathcal{R} \mathcal{H}_{\infty}$ and the matrix [ $\tilde{M} \tilde{N}$ ] is right invertible in $\mathcal{R} \mathcal{H}_{\infty}$. These two equations are often called Bezout identities.
+
+Now let $P$ be a proper real rational matrix. A right coprime factorization (rcf) of $P$ is a factorization $P=N M^{-1}$, where $N$ and $M$ are right coprime over $\mathcal{R} \mathcal{H}_{\infty}$. Similarly, a left coprime factorization (lcf) has the form $P=\tilde{M}^{-1} \tilde{N}$, where $\tilde{N}$ and $\tilde{M}$ are left-coprime over $\mathcal{R} \mathcal{H}_{\infty}$. A matrix $P(s) \in \mathcal{R}_{p}(s)$ is said to have double coprime factorization if there exist a right coprime factorization $P=N M^{-1}$, a left coprime factorization $P=\tilde{M}^{-1} \tilde{N}$, and $X_{r}, Y_{r}, X_{l}, Y_{l} \in \mathcal{R} \mathcal{H}_{\infty}$ such that
+
+\[
+\left[\begin{array}{cc}
+X_{r} & Y_{r}  \tag{5.7}\\
+-\tilde{N} & \tilde{M}
+\end{array}\right]\left[\begin{array}{cc}
+M & -Y_{l} \\
+N & X_{l}
+\end{array}\right]=I
+\]
+
+Of course, implicit in these definitions is the requirement that both $M$ and $\tilde{M}$ be square and nonsingular.
+
+Theorem 5.6 Suppose $P(s)$ is a proper real rational matrix and
+
+$$
+P=\left[\begin{array}{l|l}
+A & B \\
+\hline C & D
+\end{array}\right]
+$$
+
+is a stabilizable and detectable realization. Let $F$ and $L$ be such that $A+B F$ and $A+L C$ are both stable, and define
+
+\[
+\left[\begin{array}{cc}
+M & -Y_{l}  \tag{5.8}\\
+N & X_{l}
+\end{array}\right]=\left[\begin{array}{c|cc}
+A+B F & B & -L \\
+\hline F & I & 0 \\
+C+D F & D & I
+\end{array}\right]
+\]
+
+\[
+\left[\begin{array}{cc}
+X_{r} & Y_{r}  \tag{5.9}\\
+-\tilde{N} & \tilde{M}
+\end{array}\right]=\left[\begin{array}{c|cc}
+A+L C & -(B+L D) & L \\
+\hline F & I & 0 \\
+C & -D & I
+\end{array}\right]
+\]
+
+Then $P=N M^{-1}=\tilde{M}^{-1} \tilde{N}$ are rcf and lcf, respectively, and, furthermore, equation (5.7) is satisfied.
+
+Proof. The theorem follows by verifying equation (5.7).
+
+Remark 5.2 Note that if $P$ is stable, then we can take $X_{r}=X_{l}=I, Y_{r}=Y_{l}=0$, $N=\tilde{N}=P, M=\tilde{M}=I$.
+
+Remark 5.3 The coprime factorization of a transfer matrix can be given a feedbackcontrol interpretation. For example, right coprime factorization comes out naturally from changing the control variable by a state feedback. Consider the state-space equations for a plant $P$ :
+
+$$
+\begin{aligned}
+\dot{x} & =A x+B u \\
+y & =C x+D u
+\end{aligned}
+$$
+
+Next, introduce a state feedback and change the variable
+
+$$
+v:=u-F x
+$$
+
+where $F$ is such that $A+B F$ is stable. Then we get
+
+$$
+\begin{aligned}
+\dot{x} & =(A+B F) x+B v \\
+u & =F x+v \\
+y & =(C+D F) x+D v
+\end{aligned}
+$$
+
+Evidently, from these equations, the transfer matrix from $v$ to $u$ is
+
+$$
+M(s)=\left[\begin{array}{c|c}
+A+B F & B \\
+\hline F & I
+\end{array}\right]
+$$
+
+and that from $v$ to $y$ is
+
+$$
+N(s)=\left[\begin{array}{l|l}
+A+B F & B \\
+\hline C+D F & D
+\end{array}\right]
+$$
+
+Therefore,
+
+$$
+u=M v, \quad y=N v
+$$
+
+so that $y=N M^{-1} u$; that is, $P=N M^{-1}$.
+
+We shall now see how coprime factorizations can be used to obtain alternative characterizations of internal stability conditions. Consider again the standard stability analysis diagram in Figure 5.2. We begin with any rcf's and lcf's of $P$ and $\hat{K}$ :
+
+
+\begin{align*}
+& P=N M^{-1}=\tilde{M}^{-1} \tilde{N}  \tag{5.10}\\
+& \hat{K}=U V^{-1}=\tilde{V}^{-1} \tilde{U} \tag{5.11}
+\end{align*}
+
+
+Lemma 5.7 Consider the system in Figure 5.2. The following conditions are equivalent:
+
+\begin{enumerate}
+  \item The feedback system is internally stable.
+  \item $\left[\begin{array}{cc}M & U \\ N & V\end{array}\right]$ is invertible in $\mathcal{R} \mathcal{H}_{\infty}$.
+  \item $\left[\begin{array}{cc}\tilde{V} & -\tilde{U} \\ -\tilde{N} & \tilde{M}\end{array}\right]$ is invertible in $\mathcal{R} \mathcal{H}_{\infty}$.
+  \item $\tilde{M} V-\tilde{N} U$ is invertible in $\mathcal{R} \mathcal{H}_{\infty}$.
+  \item $\tilde{V} M-\tilde{U} N$ is invertible in $\mathcal{R} \mathcal{H}_{\infty}$.
+\end{enumerate}
+
+Proof. Note that the system is internally stable if
+
+$$
+\left[\begin{array}{cc}
+I & -\hat{K} \\
+-P & I
+\end{array}\right]^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+or, equivalently,
+
+\[
+\left[\begin{array}{cc}
+I & \hat{K}  \tag{5.12}\\
+P & I
+\end{array}\right]^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+\]
+
+Now
+
+$$
+\left[\begin{array}{cc}
+I & \hat{K} \\
+P & I
+\end{array}\right]=\left[\begin{array}{cc}
+I & U V^{-1} \\
+N M^{-1} & I
+\end{array}\right]=\left[\begin{array}{cc}
+M & U \\
+N & V
+\end{array}\right]\left[\begin{array}{cc}
+M^{-1} & 0 \\
+0 & V^{-1}
+\end{array}\right]
+$$
+
+so that
+
+$$
+\left[\begin{array}{cc}
+I & \hat{K} \\
+P & I
+\end{array}\right]^{-1}=\left[\begin{array}{cc}
+M & 0 \\
+0 & V
+\end{array}\right]\left[\begin{array}{cc}
+M & U \\
+N & V
+\end{array}\right]^{-1}
+$$
+
+Since the matrices
+
+$$
+\left[\begin{array}{cc}
+M & 0 \\
+0 & V
+\end{array}\right],\left[\begin{array}{cc}
+M & U \\
+N & V
+\end{array}\right]
+$$
+
+are right coprime (this fact is left as an exercise for the reader), equation (5.12) holds iff
+
+$$
+\left[\begin{array}{ll}
+M & U \\
+N & V
+\end{array}\right]^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+This proves the equivalence of conditions 1 and 2 . The equivalence of conditions 1 and 3 is proved similarly.
+
+Conditions 4 and 5 are implied by conditions 2 and 3 from the following equation:
+
+$$
+\left[\begin{array}{cc}
+\tilde{V} & -\tilde{U} \\
+-\tilde{N} & \tilde{M}
+\end{array}\right]\left[\begin{array}{cc}
+M & U \\
+N & V
+\end{array}\right]=\left[\begin{array}{cc}
+\tilde{V} M-\tilde{U} N & 0 \\
+0 & \tilde{M} V-\tilde{N} U
+\end{array}\right]
+$$
+
+Since the left-hand side of the above equation is invertible in $\mathcal{R} \mathcal{H}_{\infty}$, so is the right-hand side. Hence, conditions 4 and 5 are satisfied. We only need to show that either condition 4 or condition 5 implies condition 1 . Let us show that condition 5 implies condition 1 ; this is obvious since
+
+$$
+\begin{aligned}
+{\left[\begin{array}{cc}
+I & \hat{K} \\
+P & I
+\end{array}\right]^{-1} } & =\left[\begin{array}{cc}
+I & \tilde{V}^{-1} \tilde{U} \\
+N M^{-1} & I
+\end{array}\right]^{-1} \\
+& =\left[\begin{array}{cc}
+M & 0 \\
+0 & I
+\end{array}\right]\left[\begin{array}{cc}
+\tilde{V} M & \tilde{U} \\
+N & I
+\end{array}\right]^{-1}\left[\begin{array}{cc}
+\tilde{V} & 0 \\
+0 & I
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+\end{aligned}
+$$
+
+if $\left[\begin{array}{cc}\tilde{V} M & \tilde{U} \\ N & I\end{array}\right]^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ or if condition 5 is satisfied.\\
+Combining Lemma 5.7 and Theorem 5.6, we have the following corollary.\\
+Corollary 5.8 Let $P$ be a proper real rational matrix and $P=N M^{-1}=\tilde{M}^{-1} \tilde{N}$ be the corresponding rcf and lcf over $\mathcal{R} \mathcal{H}_{\infty}$. Then there exists a controller
+
+$$
+\hat{K}_{0}=U_{0} V_{0}^{-1}=\tilde{V}_{0}^{-1} \tilde{U}_{0}
+$$
+
+with $U_{0}, V_{0}, \tilde{U}_{0}$, and $\tilde{V}_{0}$ in $\mathcal{R} \mathcal{H}_{\infty}$ such that
+
+\[
+\left[\begin{array}{cc}
+\tilde{V}_{0} & -\tilde{U}_{0}  \tag{5.13}\\
+-\tilde{N} & \tilde{M}
+\end{array}\right]\left[\begin{array}{ll}
+M & U_{0} \\
+N & V_{0}
+\end{array}\right]=\left[\begin{array}{ll}
+I & 0 \\
+0 & I
+\end{array}\right]
+\]
+
+Furthermore, let $F$ and $L$ be such that $A+B F$ and $A+L C$ are stable. Then a particular set of state-space realizations for these matrices can be given by
+
+
+\begin{gather*}
+{\left[\begin{array}{cc}
+M & U_{0} \\
+N & V_{0}
+\end{array}\right]=\left[\begin{array}{c|cc}
+A+B F & B & -L \\
+\hline F & I & 0 \\
+C+D F & D & I
+\end{array}\right]}  \tag{5.14}\\
+{\left[\begin{array}{cc}
+\tilde{V}_{0} & -\tilde{U}_{0} \\
+-\tilde{N} & \tilde{M}
+\end{array}\right]=\left[\begin{array}{c|cc}
+A+L C & -(B+L D) & L \\
+\hline F & I & 0 \\
+C & -D & I
+\end{array}\right]} \tag{5.15}
+\end{gather*}
+
+
+Proof. The idea behind the choice of these matrices is as follows. Using the observer theory, find a controller $\hat{K}_{0}$ achieving internal stability; for example
+
+\[
+\hat{K}_{0}:=\left[\begin{array}{c|c}
+A+B F+L C+L D F & -L  \tag{5.16}\\
+\hline F & 0
+\end{array}\right]
+\]
+
+Perform factorizations
+
+$$
+\hat{K}_{0}=U_{0} V_{0}^{-1}=\tilde{V}_{0}^{-1} \tilde{U}_{0}
+$$
+
+which are analogous to the ones performed on $P$. Then Lemma 5.7 implies that each of the two left-hand side block matrices of equation (5.13) must be invertible in $\mathcal{R} \mathcal{H}_{\infty}$. In fact, equation (5.13) is satisfied by comparing it with equation (5.7).
+
+Finding a coprime factorization for a scalar transfer function is fairly easy. Let $P(s)=\operatorname{num}(s) / \operatorname{den}(s)$ where $\operatorname{num}(s)$ and $\operatorname{den}(s)$ are the numerator and the denominator polynomials of $P(s)$, and let $\alpha(s)$ be a stable polynomial of the same order as $\operatorname{den}(s)$. Then $P(s)=n(s) / m(s)$ with $n(s)=\operatorname{num}(s) / \alpha(s)$ and $m(s)=\operatorname{den}(s) / \alpha(s)$ is a coprime factorization. However, finding an $x(s) \in \mathcal{H}_{\infty}$ and a $y(s) \in \mathcal{H}_{\infty}$ such that $x(s) n(s)+y(s) m(s)=1$ needs much more work.
+
+Example 5.2 Let $P(s)=\frac{s-2}{s(s+3)}$ and $\alpha=(s+1)(s+3)$. Then $P(s)=n(s) / m(s)$ with $n(s)=\frac{s-2}{(s+1)(s+3)}$ and $m(s)=\frac{s}{s+1}$ forms a coprime factorization. To find an $x(s) \in \mathcal{H}_{\infty}$ and a $y(s) \in \mathcal{H}_{\infty}$ such that $x(s) n(s)+y(s) m(s)=1$, consider a stabilizing controller for $P: \hat{K}=-\frac{s-1}{s+10}$. Then $\hat{K}=u / v$ with $u=\hat{K}$ and $v=1$ is a coprime factorization and
+
+$$
+m(s) v(s)-n(s) u(s)=\frac{(s+11.7085)(s+2.214)(s+0.077)}{(s+1)(s+3)(s+10)}=: \beta(s)
+$$
+
+Then we can take
+
+$$
+\begin{aligned}
+x(s) & =-u(s) / \beta(s)=\frac{(s-1)(s+1)(s+3)}{(s+11.7085)(s+2.214)(s+0.077)} \\
+y(s) & =v(s) / \beta(s)=\frac{(s+1)(s+3)(s+10)}{(s+11.7085)(s+2.214)(s+0.077)}
+\end{aligned}
+$$
+
+Matlab programs can be used to find the appropriate $F$ and $L$ matrices in statespace so that the desired coprime factorization can be obtained. Let $A \in \mathbb{R}^{n \times n}, B \in \mathbb{R}^{n \times m}$ and $C \in \mathbb{R}^{p \times n}$. Then an $F$ and an $L$ can be obtained from
+
+$$
+\gg \mathbf{F}=-\operatorname{lqr}(\mathbf{A}, \mathbf{B}, \operatorname{eye}(\mathbf{n}), \operatorname{eye}(\mathbf{m})) ; \% \text { or }
+$$
+
+\begin{verbatim}
+>> F=-place(A, B, Pf); % Pf= poles of A +BF
+>> L = -lqr(A', 供', eye(n), eye(p))'; % or
+>> L = -place(A', 偿,Pl)'; % Pl=poles of A +LC.
+\end{verbatim}
+
+\subsection*{5.5 Notes and References}
+The presentation of this chapter is based primarily on Doyle [1984]. The discussion of internal stability and coprime factorization can also be found in Francis [1987], Vidyasagar [1985], and Nett, Jacobson, and Balas [1984].
+
+\subsection*{5.6 Problems}
+Problem 5.1 Recall that a feedback system is said to be internally stable if all closedloop transfer functions are stable. Describe the conditions for internal stability of the following feedback system:\\
+\includegraphics[max width=\textwidth, center]{2025_10_23_a0bf0525de3c0bb05f1eg-13}
+
+How can the stability conditions be simplified if $H(s)$ and $G_{1}(s)$ are both stable?\\
+Problem 5.2 Show that $\left[\begin{array}{cc}I & -\hat{K} \\ -P & I\end{array}\right]^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ if and only if
+
+$$
+\bar{A}:=\left[\begin{array}{cc}
+A & B \hat{C} \\
+0 & \hat{A}
+\end{array}\right]+\left[\begin{array}{c}
+B \hat{D} \\
+\hat{B}
+\end{array}\right](I-D \hat{D})^{-1}\left[\begin{array}{ll}
+C & D \hat{C}
+\end{array}\right]
+$$
+
+is stable.\\
+Problem 5.3 Suppose $N, M, U, V \in \mathcal{R} \mathcal{H}_{\infty}$ and $N M^{-1}$ and $U V^{-1}$ are right coprime factorizations, respectively. Show that
+
+$$
+\left[\begin{array}{cc}
+M & 0 \\
+0 & V
+\end{array}\right]\left[\begin{array}{cc}
+M & U \\
+N & V
+\end{array}\right]^{-1}
+$$
+
+is also a right coprime factorization.\\
+Problem 5.4 Let $G(s)=\frac{s-1}{(s+2)(s-3)}$. Find a stable coprime factorization $G= n(s) / m(s)$ and $x, y \in \mathcal{R} \mathcal{H}_{\infty}$ such that $x n+y m=1$.
+
+Problem 5.5 Let $N(s)=\frac{(s-1)(s+\alpha)}{(s+2)(s+3)(s+\beta)}$ and $M(s)=\frac{(s-3)(s+\alpha)}{(s+3)(s+\beta)}$. Show that ( $N, M$ ) is also a coprime factorization of the $G$ in Problem 5.4 for any $\alpha>0$ and $\beta>0$.
+
+Problem 5.6 Let $G=N M^{-1}$ be a right coprime factorization over $\mathcal{R} \mathcal{H}_{\infty}$. It is called a normalized coprime factorization if $N^{\sim} N+M^{\sim} M=I$. Now consider scalar transfer function $G$. Then the following procedure can be used to find a normalized coprime factorization: (a) Let $G=n / m$ be any coprime factorization over $\mathcal{R} \mathcal{H}_{\infty}$. (b) Find a stable and minimum phase spectral factor $w$ such that $w^{\sim} w=n^{\sim} n+m^{\sim} m$. Let $N=n / w$ and $M=m / w$; then $G=N / M$ is a normalized coprime factorization. Find a normalized coprime factorization for Problem 5.4.
+
+Problem 5.7 The following procedure constructs a normalized right coprime factorization when $G$ is strictly proper:
+
+\begin{enumerate}
+  \item Get a stabilizable, detectable realization $A, B, C$.
+  \item Do the Matlab command $F=-\operatorname{lqr}\left(A, B, C^{\prime} C, I\right)$.
+  \item Set
+\end{enumerate}
+
+$$
+\left[\begin{array}{l}
+N \\
+M
+\end{array}\right](s)=\left[\begin{array}{c|c}
+A+B F & B \\
+\hline C & 0 \\
+F & I
+\end{array}\right]
+$$
+
+Verify that the procedure produces factors that satisfy $G=N M^{-1}$. Now try the procedure on
+
+$$
+G(s)=\left[\begin{array}{cc}
+\frac{1}{s-1} & \frac{1}{s-2} \\
+\frac{2}{s} & \frac{1}{s+2}
+\end{array}\right]
+$$
+
+Verify numerically that
+
+
+\begin{equation*}
+N(j \omega)^{*} N(j \omega)+M(j \omega)^{*} M(j \omega)=I, \quad \forall \omega \tag{5.17}
+\end{equation*}
+
+
+Problem 5.8 Use the procedure in Problem 5.7 to find the normalized right coprime factorization for
+
+$$
+\begin{gathered}
+G_{1}(s)=\left[\begin{array}{cc}
+\frac{1}{s+1} & \frac{s+3}{(s+1)(s-2)} \\
+\frac{10}{s-2} & \frac{5}{s+3}
+\end{array}\right] \\
+G_{2}(s)=\left[\begin{array}{ll}
+\frac{2(s+1)(s+2)}{s(s+3)(s+4)} & \frac{s+2}{(s+1)(s+3)}
+\end{array}\right]
+\end{gathered}
+$$
+
+$$
+\begin{gathered}
+G_{3}(s)=\left[\begin{array}{ccc|ccc}
+-1 & -2 & 1 & 1 & 2 & 3 \\
+0 & 2 & -1 & 3 & 2 & 1 \\
+-4 & -3 & -2 & 1 & 1 & 1 \\
+\hline 1 & 1 & 1 & 0 & 0 & 0 \\
+2 & 3 & 4 & 0 & 0 & 0
+\end{array}\right] \\
+G_{4}(s)=\left[\begin{array}{cc|cc}
+-1 & -2 & 1 & 2 \\
+0 & 1 & 2 & 1 \\
+\hline 1 & 1 & 0 & 0 \\
+1 & 1 & 0 & 0
+\end{array}\right]
+\end{gathered}
+$$
+
+Problem 5.9 Define the normalized left coprime factorization and describe a procedure to find such factorizations for strictly proper transfer matrices.
+
+
+\end{document}

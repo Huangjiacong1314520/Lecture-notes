@@ -1,0 +1,178 @@
+%% =====================================================================
+%% notebook.sty  —— 学术笔记增强包（ElegantBook风格 + 中文 + 笔记开关）
+%% 作者：ChatGPT 定制版
+%% 功能：支持科研笔记（研究/方法/结果/后续）、开关控制、作者、日期
+%% =====================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{notebook}[2025/01/20 Elegant Notebook System]
+
+%% --------------------- 必需宏包 ---------------------
+\RequirePackage{xcolor}
+\RequirePackage{tcolorbox}
+\RequirePackage{ifthen}
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage{fontspec} % 中文/XeLaTeX 支持
+\RequirePackage{geometry}
+
+%% --------------------- 全局开关 ---------------------
+%% 默认显示笔记，如要隐藏用户可在 main.tex 设置 \shownotesfalse
+\newif\ifshownotes
+\shownotestrue  % 默认显示
+
+%% ================= ElegantBook 风格配色 ==================
+%% 标准 ElegantBook 样式颜色
+\definecolor{elegantblue}{RGB}{41, 105, 176}
+\definecolor{elegantgreen}{RGB}{0, 140, 114}
+\definecolor{elegantorange}{RGB}{200, 120, 0}
+\definecolor{elegantpurple}{RGB}{120, 72, 128}
+\definecolor{notegray}{RGB}{248,248,248}
+
+%% ================== tcolorbox 样式设置 ==================
+\tcbset{
+  notebookstyle/.style={
+    enhanced,
+    arc=2mm,
+    boxrule=0.6pt,
+    left=6pt,right=6pt,top=6pt,bottom=6pt,
+    colback=#1!4,
+    colframe=#1,
+    coltitle=white,
+    fonttitle=\bfseries,
+    title filled,
+    attach boxed title to top left={xshift=0.5cm,yshift=-2mm},
+    boxed title style={arc=2mm,boxrule=0pt},
+  }
+}
+
+%% ============ 通用笔记命令定义（带作者、日期） ============
+%% 语法支持：
+%%   \researchnote{内容}
+%%   \researchnote[张三]{内容}
+%%   \researchnote[张三][2025-01-20]{内容}
+%%
+\NewDocumentCommand{\notebookbox}{ O{} O{} m O{elegantblue} O{研究笔记} }{%
+  \ifshownotes
+    \begin{tcolorbox}[notebookstyle=#4,title={#5 \ \small #1\ifthenelse{\equal{#2}{}}{}{（#2）}}]
+      \small #3
+    \end{tcolorbox}
+  \fi
+}
+
+%% =====================================================================
+%% notebook.sty  —— Part 2/2
+%% 继续：定义具体笔记命令（研究/方法/结果/后续）、汇总存储与文末输出
+%% =====================================================================
+
+%% ----------------- 记录集合与追加接口 -----------------
+\providecommand{\AllNotebookNotes}{} % 用于存放所有笔记的宏（汇总）
+\newcommand{\AppendNotebookNotes}[1]{%
+  \gappto\AllNotebookNotes{#1}%
+}
+
+%% ----------------- 单项笔记命令（用户接口） -----------------
+%% 语法：\researchnote[作者][日期]{内容}
+%% 说明：作者、日期均可省略；若省略日期则不显示日期（保持简洁）
+%%       这些命令仅在 \shownotestrue 时有输出；否则完全不输出并且不记录汇总
+
+% 研究笔记（蓝色）
+\NewDocumentCommand{\researchnote}{ O{} O{} m }{%
+  \ifshownotes
+    % 构造标题与元信息
+    \def\RNauthor{#1}%
+    \def\RNdate{#2}%
+    \def\RNcontent{#3}%
+    \def\RNmeta{}%
+    \ifx\RNauthor\empty\else
+      \edef\RNmeta{\RNmeta 作者：\RNauthor}%
+    \fi
+    \ifx\RNdate\empty\else
+      \edef\RNmeta{\RNmeta\ \ 日期：\RNdate}%
+    \fi
+    % 正文中显示彩色盒子
+    \notebookbox[\RNauthor][\RNdate]{\RNcontent}[elegantblue][研究笔记]%
+    % 同时追加到汇总（保持简单排版）
+    \AppendNotebookNotes{%
+      \par\noindent\textbf{研究笔记}\quad \RNmeta\\\noindent\small \RNcontent\par\medskip
+    }%
+  \fi
+}
+
+% 方法笔记（绿色）
+\NewDocumentCommand{\methodnote}{ O{} O{} m }{%
+  \ifshownotes
+    \def\MNauthor{#1}\def\MNdate{#2}\def\MNcontent{#3}%
+    \def\MNmeta{}%
+    \ifx\MNauthor\empty\else \edef\MNmeta{\MNmeta 作者：\MNauthor}\fi
+    \ifx\MNdate\empty\else \edef\MNmeta{\MNmeta\ \ 日期：\MNdate}\fi
+    \notebookbox[\MNauthor][\MNdate]{\MNcontent}[elegantgreen][方法笔记]%
+    \AppendNotebookNotes{%
+      \par\noindent\textbf{方法笔记}\quad \MNmeta\\\noindent\small \MNcontent\par\medskip
+    }%
+  \fi
+}
+
+% 结果笔记（紫色 / 扩展色）
+\NewDocumentCommand{\resultnote}{ O{} O{} m }{%
+  \ifshownotes
+    \def\ResNauthor{#1}\def\ResNdate{#2}\def\ResNcontent{#3}%
+    \def\ResNmeta{}%
+    \ifx\ResNauthor\empty\else \edef\ResNmeta{\ResNmeta 作者：\ResNauthor}\fi
+    \ifx\ResNdate\empty\else \edef\ResNmeta{\ResNmeta\ \ 日期：\ResNdate}\fi
+    \notebookbox[\ResNauthor][\ResNdate]{\ResNcontent}[elegantpurple][结果笔记]%
+    \AppendNotebookNotes{%
+      \par\noindent\textbf{结果笔记}\quad \ResNmeta\\\noindent\small \ResNcontent\par\medskip
+    }%
+  \fi
+}
+
+% 后续工作（橙色）
+\NewDocumentCommand{\futurework}{ O{} O{} m }{%
+  \ifshownotes
+    \def\FWauthor{#1}\def\FWdate{#2}\def\FWcontent{#3}%
+    \def\FWmeta{}%
+    \ifx\FWauthor\empty\else \edef\FWmeta{\FWmeta 作者：\FWauthor}\fi
+    \ifx\FWdate\empty\else \edef\FWmeta{\FWmeta\ \ 日期：\FWdate}\fi
+    \notebookbox[\FWauthor][\FWdate]{\FWcontent}[elegantorange][后续工作]%
+    \AppendNotebookNotes{%
+      \par\noindent\textbf{后续工作}\quad \FWmeta\\\noindent\small \FWcontent\par\medskip
+    }%
+  \fi
+}
+
+%% ----------------- 文末汇总输出（受 \shownotes 控制） -----------------
+%% 在文档结束时输出汇总章节（仅当 \shownotestrue）
+\AtEndDocument{%
+  \ifshownotes
+    \clearpage
+    % 汇总标题风格保持简洁
+    \section*{研究笔记汇总}
+    \addcontentsline{toc}{section}{研究笔记汇总}
+    \noindent\AllNotebookNotes
+  \fi
+}
+
+%% ----------------- 便捷开关命令（可在 main.tex 使用） -----------------
+% 用户可以在 main.tex 中写 \shownotesfalse 来隐藏所有笔记
+% 或写 \shownotestrue 恢复显示。为便捷可定义更直观的别名：
+\ProvideDocumentCommand{\ShowNotes}{}{\shownotestrue}
+\ProvideDocumentCommand{\HideNotes}{}{\shownotesfalse}
+
+%% ----------------- 兼容性与小技巧（注释） -----------------
+% 1) 使用 XeLaTeX 编译（fontspec 已被加载），确保主文档使用 UTF-8 编码。
+% 2) 把 notebook.sty 放在与 main.tex 同一目录，然后在 main.tex 中：
+%      \usepackage{notebook}
+%    或者在加载包之前先设置：
+%      \HideNotes   % 若希望默认隐藏
+% 3) 示例使用（在主文档正文）：
+%      \researchnote[JC][2025-02-01]{这里写研究笔记内容。}
+%      \methodnote[Li]{建议加入对比实验}     % 日期省略
+%      \resultnote{观察到某些离群点，需要复测。}
+%      \futurework[JC][2025-03-01]{长期随访计划。}
+% 4) 若你不希望在汇总中重复显示作者或日期信息，可在上面的 AppendNotebookNotes 中修改格式。
+% 5) 若想完全移除注释/中文说明，可手动删减本文件注释行（不影响功能）。
+
+%% =====================================================================
+%% End of notebook.sty
+%% =====================================================================

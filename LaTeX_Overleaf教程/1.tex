@@ -1,0 +1,335 @@
+\chapter{LaTeX基础用法}
+
+%——————————————————————————————————%
+
+\section{章节设置}
+
+
+在LaTeX中，我们可以分章、节、小节、小小节等等。下面，我们看一个例子。
+
+\subsection{LaTeX章节的优势}
+
+在LaTeX中，章节是自动编号的，我们只需要输入反斜杠chapter, section, subsection, subsubsection，系统就会帮我们自动分节。
+
+\subsection{分章节的方法}
+
+一本书/讲义的Chapter数不会太多，一般是3-10章。每一章的内容基本独立，但好的讲义可以做到承前启后，章节之间彼此有联系。
+
+一般来说，chapter和section就足够使用了。假如一个section的内容太多，我们才会考虑加入subsection，甚至subsubsection。
+
+\subsection{换页的方法}
+
+假如我们想要换一页，一种简单的方法就是输入反斜杠newpage的指令。要注意，一般来说我们只会在chapter间换页。为了举例，我们给大家看一下换页的效果。
+
+\newpage
+
+
+
+%——————————————————————————————————%
+
+\section{行内公式与行间公式}
+\researchnote{需要添加更多背景文献引用}
+
+假如我们想要在一段话中插入数学公式，我们就需要用行内公式的用法，用一对dollar号围住公式就可以了。比如我们可以令$f(x)=x^2+3x+1$。打完公式以后，可以继续在同一段中写作。
+
+有的时候，为了强调、为了美观，或者为了容易辨认，我们会使用行间公式。行间公式就是单独成一行，居中显示，默认用展示模式（display模式）。我们可以用两对dollar号围住公式，也可以用反斜杠加左右中括号的形式（我偏爱后一种用法）。比如我们令
+
+\[ g(x)=\frac{ax^2+bx+c}{dx^2+ex+f}     \]
+
+
+在这里，反斜杠frac加上两组花括号表示分式的形式。注意行间公式的分式形式是很美观的，但是行内公式的分式性质可能过于紧凑了。再次定义$g(x)=\frac{ax^2+bx+c}{dx^2+ex+f}$。很显然，行内公式不适合显示分式的公式。如果我们一定要在行内公式中输入分式，我们不妨直接用斜杠的写法。第三次定义$g(x)=\z(ax^2+bx+c\y)/\z(dx^2+ex+f\y)$。
+
+大家看到了奇怪的反斜杠z和反斜杠y的记号。这是什么意思呢？这里，我们使用了newcommand的用法，这个记号并不是Overleaf或者LaTeX自带的，而是我们自己加上的。z和y分别指代了中文的“左”和“右”。本来的符号是反斜杠left和反斜杠right。用一对反斜杠的左、右框柱的一整个部分会被LaTeX识别为一个整体。当你要加括号的时候，LaTeX会自动调整括号的大小。
+
+我们来看几个例子。
+
+\[  g(x)^2=(\frac{ax^2+bx+c}{dx^2+ex+f})^2    \]
+6.4.4 模型数学公式与解释现在，我们来详细阐述综合动态路径规划与优化模型的数学公式及其解释。
+
+$\begin{aligned}\text{首先，我们需要定义螺线的参数方程。对于给定的螺距 p}&=1.7\text{ 米，螺线方程}\\\text{可以表示为：}\end{aligned}$
+$$\begin{aligned}&r=a\theta\\&x=a\theta\mathrm{cos}\theta\\&y=a\theta\mathrm{sin}\theta\end{aligned}$$
+其中，$a=\frac p{2\pi}=\frac{1.7}{2\pi}\approx0.2706$米是螺线参数，$\theta$是极角，$(x,y)$是笛卡尔坐标。
+对于盘入螺线，我们可以定义其参数方程为：
+$$\begin{array}{c}x_{in}(\theta)=a\theta\mathrm{cos}\theta\\y_{in}(\theta)=a\theta\mathrm{sin}\theta\end{array}$$
+对于盘出螺线，考虑到它与盘入螺线中心对称，其参数方程为：
+$$x_{out}(\theta)=-a\theta\mathrm{cos}\theta\\y_{out}(\theta)=-a\theta\mathrm{sin}\theta $$
+上式是很丑陋的。这是因为LaTeX并没有识别括号指代的范围。
+
+\[ g(x)^2=\z(\frac{ax^2+bx+c}{dx^2+ex+f}\y)^2     \]
+
+上式就很美观了。
+
+类似地，我们也有其它用法。
+
+\[  h(x)=\z| \frac{\sqrt{x}}{x^2+1} \y|    \]
+
+在这里，反斜杠sqrt（square root）表示平方根。一个自然的问题是我们如何表示立方根或者$n$次方根。（在这里，$n$也用行内公式，这是因为我们的规范：任何数学符号、公式都要用公式的形式，不能用字母的形式）。
+
+答案是用反斜杠sqrt中括号再加花括号的形式。
+
+\[  k(x)=\z| \frac{\sqrt[5]{x^3+4}}{x^2+1} \y|    \]
+
+再举几个例子。为了表并列，我们用枚举的用法，即反斜杠begin enumerate，每一个小点都用反斜杠item来表示。
+
+\begin{enumerate}
+    \item 
+    \[  A=\z[a^2,a^2+1\y)    \]
+    
+    \item 
+    \[ B=\z[\frac{a^2}{\sqrt[3]{b}},\frac{a^2+1}{\sqrt[3]{b}}\y) \]
+    
+    \item
+    \[ C=\z\{x\in\R: \frac{x^2}{x^2+1}>1 \y\}    \]
+\end{enumerate}
+
+在最后一个例子中，我们注意到当我们要在公式中打出花括号的时候，需要用反斜杠花括号。这是因为一般的花括号是表整体，用花括号围住的部分指代了一个整体。为了区别于这个用法，我们只能用反斜杠z以及反斜杠y再加上反斜杠花括号来表示。
+
+有时，我们并没有成对的需要用反斜杠z、y的符号，例如在数论中我们需要写整除，但是这一竖杠只有一个，并且需要适当地变大。我们可以用反斜杠big甚至反斜杠bigg的用法，但是我们也可以使用反斜杠z和反斜杠y，方法就是在不需要符号的地方加上一个点。
+
+我们来看一个例子。
+
+\[  n \z| \frac{a^p-a}{p} \y.        \]
+
+在这里，右斜杠没有出现，但是整除号还是适应性地变大了。我们并没有违背反斜杠z和y应当成对出现的原则，我们用一个点来表示在这一边的符号是空缺的。
+
+最后一个例子是用点乘定义的内积。
+
+\[  \z< v,w\y>=v\cdot w        \]
+
+同样地，这里的尖括号可以适应性地变大。
+
+\[  \z< \frac{v}{c},\frac{w}{c}\y>=\frac{\z<v,w\y>}{c}        \]
+
+%——————————————————————————————————%
+
+\section{上标与下标}
+
+我们总是需要较长的上标与下标。假如理解不清，就总会在需要用到的时候出现问题。因此，我们单独用一节来讲解上标与下标的使用方法。
+
+我们或许最先用到的上标用法是一个较长的幂次。
+
+\[  f(x)=x^{2y+1}    \]
+
+注意，假如幂次的符号后没有加花括号，那么系统默认是只将幂次的符号后的第一个字符提到幂次的位置，而其他符号在默认的高度。我们通过下面的$g(x)$来和$f(x)$做对比。
+
+\[  g(x)=x^2y+1    \]
+
+为了效率，我们用以下的方法。
+\begin{enumerate}
+    \item 假如幂次上只有一个字符，我们不加花括号，例如$x^5+4x^3y^2+z^6+1$。
+    \item 假如幂次上有超过一个字符，我们必须加花括号，例如$x^{a^2}+y^{bc}+e^{ab}$。
+\end{enumerate}
+
+假如我们要用多重上标，也必须用花括号的形式，例如上面的$x^{a^2}$。假如没有这个花括号，系统会报错。因此，我们用上面的原则，也可以避免这样的错误。
+
+下标是类似的。我们也举几个简单的例子。比如令$x_1,\cdots,x_n\in\R$。或者等价地，令$\z\{x_i\y\}_{i=1,\cdots,n}\subset \R$。在这里，反斜杠cdots表示高度居中的三个点，subset表示子集，就是包含于的意思。
+
+下标的时候，同样是一个字符的时候可以省略花括号，超过一个字符就必须使用花括号。嵌套的下标一定要用花括号。比如说数列$\z\{a_n\y\}_{n\in\N}\subset \R$的子列
+
+\[  \z\{a_{k_n}\y\}_{n\in\N}\subset \R    \]
+
+事实上，我们在很多场合下都可以使用上下标。例如表示一个有限的集合，我们可以同时使用上下标。
+
+\[ A=\z\{x_i\y\}_{i=1}^{n}     \]
+
+更常见的上下标是在大sigma记号，大pi记号下的，分别读作sum和product，表示求和与乘积。我们来看几个例子。
+
+\[  \sum_{i=1}^ni=1+2+\cdots+n=\frac{n(n+1)}{2}    \]
+
+\[ \prod_{i=1}^ni=n!     \]
+
+当然，我们要注意，当我们在行内公式使用sum和prod的时候，公式也会变得丑陋起来。例如$\sum_{i=1}^ni=1+2+\cdots+n=\frac{n(n+1)}{2}$和$\prod_{i=1}^ni=n!$。
+
+因此，我们在使用大的符号的时候，就应当大气地使用行间公式。
+
+假如我们要对一个整体取幂次，也是用一样的方法。
+
+\[  f(x)=\z( \frac{e^{e^{x_1}}}{x_{k_1}} \y)^{3y^{y^{y+1}}}    \]
+
+总之就是只要学会了基础的用法，就可以不断迭代，玩出花来。重要的还是要打好基础。
+
+用英文写作的时候，我们有时想要说第$n$个傅里叶系数。中文语境下说第$n$个就可以了，但是英文语境下要说 the $n^{\text{th}}$ Fourier coefficient. 在这里，在数学公式（无论是行内公式或行间公式）中输入反斜杠text，就是表示花括号内的内容是以文本形式输出（而非数学公式的形式）。
+
+假如学到稍微困难一些的课，你可能知道直和的符号，这是用反斜杠oplus打出来的。例如一个有限维向量空间的直和分解。当我们在行间公式中使用直和记号的时候，我们应该使用反斜杠bigoplus。
+
+\[  V=\bigoplus_{i=1}^n V_i        \]
+
+%——————————————————————————————————%
+
+\section{Elegantbook模板中的定理环境}
+
+现在，既然我们已经使用了Elegantbook的模板，我们当然应该使用其中的定理环境。
+
+我们分别来演示定义、引理、证明、命题、例题、练习、批注的用法。
+
+\begin{definition}[有理数]
+我们称$p/q$是一个有理数，当且仅当
+\begin{enumerate}
+    \item $p,q$是两个整数。
+    \item $q$不等于0。
+    \item $p,q$的最大公因数是1，或$p,q$互素。
+\end{enumerate}
+
+我们称由全体有理数构成的集合为有理数集，记作$\Q$。
+\end{definition}
+
+\begin{lemma}[重要引理]
+假设$x\in \R$，则$x^2\ge 0$。
+\end{lemma}
+\begin{proof}
+分类讨论。
+\begin{enumerate}
+    \item 假设$x\ge 0$，则$x^2=x\cdot x\ge 0$。
+    \item 假设$x<0$，则$-x>0$，我们有$x^2=(-x)^2\ge 0$。
+\end{enumerate}
+
+此即得证。
+\end{proof}
+
+\begin{proposition}[重要命题]
+假设$x,y\in\R$，则$x^2+y^2\ge 2xy$。
+\end{proposition}
+\begin{proof}
+令$x,y\in\R$。利用上面的引理，我们知道$(x-y)^2=x^2-2xy+y^2\ge 0$。因此显然有
+\[  x^2+y^2\ge 2xy    \]
+
+此即得证。
+\end{proof}
+
+\begin{remark}
+通过这样的写法，我们可以让讲义变得更加美观、可读，让学生更愿意读下去，让老师更有成就感。
+\end{remark}
+
+%——————————————————————————————————%
+
+\section{公式对齐}
+
+有时我们需要用到递等式，或者一般地，只是想要将一些符号对齐。
+
+我们一般用begin align*的形式。加星号是为了不给公式编号。我们用\&来表示需要紧跟着的对齐的符号。我们用双反斜杠来表示换行。结合这么几点，我们就学会了公式对齐的用法。
+\begin{align*}
+(a+b)(c+d) &=
+a(c+d)+b(c+d)\\
+&=ac+ad+bc+bd\\
+&=ac+bc+ad+bd
+\end{align*}
+
+当然，我们也可以用连续的不等式。
+\begin{align*}
+|a+b+c+d|
+&\le |a+b|+|c+d|  \\
+&\le |a|+|b|+|c|+|d|
+\end{align*}
+
+或者命题的连续等价。
+\begin{align*}
+&(x,y)\in (A\times B)\cap(C\times D)\\
+\iff &(x,y)\in A\times B, (x,y)\in C\times D\\
+\iff &x\in A,y\in B,x\in C,y\in D\\
+\iff &x\in A\cap C,y\in B\cap D\\
+\iff &(x,y)\in (A\cap C)\times (B\cap D)
+\end{align*}
+
+%——————————————————————————————————%
+
+\section{特殊符号}
+
+下面，我们来看一些例子。
+
+\begin{enumerate}
+    \item $\sin^2+\cos^2=1$。
+    \item $\log (\exp x)  =x$。
+    \item $\gcd(a,b)\lcm(a,b)=ab$。
+\end{enumerate}
+
+\subsection{实数}
+下面，我们看实数中的一些例子。
+\begin{enumerate}
+    \item 小于：$<$。
+    \item 大于：$>$。
+    \item 小于等于：$\le$或者$\leqslant$。
+    \item 大于等于：$\ge$或者$\geqslant$。
+    \item 不等于：$\neq$。
+\end{enumerate}
+
+\subsection{数理逻辑}
+下面，我们看数理逻辑中的一些例子。
+\begin{enumerate}
+    \item 与运算：$\land$。
+    \item 或运算：$\lor$。
+    \item 非运算：$\lnot$。
+    \item 蕴含：$\to$。
+    \item 等价：$\leftrightarrow$或者$\iff$。
+    \item 全称量词：$\forall$。
+    \item 存在量词：$\exists$。
+\end{enumerate}
+
+\subsection{集合论}
+下面，我们来看集合论中的一些例子。
+\begin{enumerate}
+    \item 属于：$\in$。
+    \item 包含元素：$\ni$。
+    \item 子集/包含于：$\subset$。
+    \item 包含：$\supset$。
+    \item 真包含于：$\subsetneq$。
+    \item 真包含：$\supsetneq$。
+    \item 并：$\cup$或者$\bigcup$。
+    \item 交：$\cap$或者$\bigcap$。
+    \item 差：$-$或者$\setminus$。
+    \item 补：$\cdot^C$。
+    \item 笛卡尔积：$\times$或者$\prod$。
+    \item 无交并：$\sqcup$或者$\bigsqcup$。
+\end{enumerate}
+
+\subsection{关系与映射}
+下面，我们介绍关系与映射中的一些记号。
+\begin{enumerate}
+    \item 同胚/同构：$\simeq$。
+    \item 等价：$\sim$。
+    \item 映射：$f:A\to B$。
+    \item 复合：$\circ$。
+\end{enumerate}
+
+
+\subsection{微积分/数学分析}
+下面是微积分/数学分析中的一些例子。
+
+\[  f'(x)=\lim_{h\to 0}\frac{f(x+h)-f(x)}{h} \]
+
+\[  \int_a^bf(x)dx=F(b)-F(a) \]
+
+\[ \int_a^bf(x)dx=\lim_{n\to \infty }\sum_{i=1}^n f\z(x_i^*\y)\z(x_i-x_{i-1}\y)     \]
+
+\[  \limsup_{n\to \infty}a_n=\inf_{n\ge 1}\sup_{k\ge n}a_k   \]
+
+\[  \liminf_{n\to \infty}a_n=\sup_{n\ge 1}\inf_{k\ge n}a_k   \]
+
+\subsection{矩阵}
+下面，我们来看矩阵的写法。
+\[  A=\begin{pmatrix}
+1&2&3\\
+4&5&6\\
+7&8&9\\
+\end{pmatrix}\]
+
+$A$的行列式记为
+\[ \det A=\begin{vmatrix}
+1&2&3\\
+4&5&6\\
+7&8&9\\
+\end{vmatrix} \]
+
+\subsection{bar和tilde}
+下面，我们来看bar和tilde的写法。
+
+在复分析中，我们对元素取共轭就是加一个bar。很多时候，bar太短，我们用overline来代替。
+\[  \overline{z+w}=\overline{z}+\overline{w} \]
+
+在对函数$f$做修改后，我们有时用$\tilde{f}$来表示修改后的函数。它们很相似，但又有不同。我们如果用$f'$，就容易与导数相混淆。为了避免歧义，我们有时用tilde来表示。
+
+
+
+
+
+
+

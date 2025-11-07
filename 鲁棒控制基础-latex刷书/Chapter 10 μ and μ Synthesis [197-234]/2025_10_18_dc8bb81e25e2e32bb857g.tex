@@ -1,0 +1,1842 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{multirow}
+\usepackage{bbold}
+\usepackage{arydshln}
+\usepackage{fvextra, csquotes}
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\captionsetup{singlelinecheck=false}
+\section*{Chapter 10}
+\section*{$\mu$ and $\mu$ Synthesis}
+\begin{researchnote}[author=JC, date=2025-10-21]
+  这是一个测试
+\end{researchnote}
+It is noted that the robust stability and robust performance criteria derived in Chapter 8 vary with the assumptions about the uncertainty descriptions and performance requirements. We shall show in this chapter that they can all be treated in a unified framework using the LFT machinery introduced in the last chapter and the structured singular value to be introduced in this chapter. This, of course, does not mean that those special problems and their corresponding results are not important; on the contrary, they are sometimes very enlightening to our understanding of complex problems, such as those in which complex problems are formed from simple problems. On the other hand, a unified approach may relieve the mathematical burden of dealing with specific problems repeatedly. Furthermore, the unified framework introduced here will enable us to treat exactly the robust stability and robust performance problems for systems with multiple sources of uncertainties, which is a formidable problem from the standpoint of Chapter 8, in the same fashion as single unstructured uncertainty. Indeed, if a system is subject to multiple sources of uncertainties, in order to use the results in Chapter 8 for unstructured cases, it is necessary to reflect all sources of uncertainties from their known point of occurrence to a single reference location in the loop. Such reflected uncertainties invariably have a great deal of structure, which must then be "covered up" with a large, arbitrarily more conservative perturbation in order to maintain a simple cone-bounded representation at the reference location. Readers might have some idea about the conservativeness in such reflection based on the skewed specification problem, where an input multiplicative uncertainty of the plant is reflected at the output and the size of the reflected uncertainty is proportional to the condition number of the plant. In general, the reflected uncertainty may be proportional to the condition number of the transfer matrix between its original location and the reflected location. Thus it is highly desirable to treat the uncertainties as they are and where they are. The structured singular value is defined exactly for that purpose.
+
+\subsection*{10.1 General Framework for System Robustness}
+
+As we illustrated in Chapter 9, any interconnected system may be rearranged to fit the general framework in Figure 10.1. Although the interconnection structure can become quite complicated for complex systems, many software packages, such as Simulink and $\mu$ Analysis and Synthesis Toolbox, are available that could be used to generate the interconnection structure from system components. Various modeling assumptions will be considered, and the impact of these assumptions on analysis and synthesis methods will be explored in this general framework.
+
+\begin{researchnote}[author=JC, date=2025-10-21]
+  由第九章的线性分式变换（LFT），任何互联系统都可以重新排列以适应图10.1中的通用框架
+\end{researchnote}
+\hl{由第九章的线性分式变换（LFT），任何互联系统都可以重新排列以适应}\\
+\hl{图10.1中的通用框架.}
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-02}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.1: General framework}
+\end{center}
+\end{figure}
+
+Note that uncertainty may be modeled in two ways, either as external inputs or as perturbations to the nominal model. The performance of a system is measured in terms of the behavior of the outputs or errors. The assumptions that characterize the uncertainty, performance, and nominal models determine the analysis techniques that must be used. The models are assumed to be FDLTI systems. The uncertain inputs are assumed to be either filtered white noise or weighted power or weighted $\mathcal{L}_{p}$ signals. Performance is measured as weighted output variances, or as power, or as weighted output $\mathcal{L}_{p}$ norms. The perturbations are assumed to be themselves FDLTI systems that are norm-bounded as input-output operators. Various combinations of these assumptions form the basis for all the standard linear system analysis tools.
+
+Given that the nominal model is an FDLTI system, the interconnection system has the form
+
+$$
+P(s)=\left[\begin{array}{lll}
+P_{11}(s) & P_{12}(s) & P_{13}(s) \\
+P_{21}(s) & P_{22}(s) & P_{23}(s) \\
+P_{31}(s) & P_{32}(s) & P_{33}(s)
+\end{array}\right]
+$$
+
+and the closed-loop system is an LFT on the perturbation and the controller given by
+
+$$
+\begin{aligned}
+z & =\mathcal{F}_{u}\left(\mathcal{F}_{\ell}(P, K), \Delta\right) w \\
+& =\mathcal{F}_{\ell}\left(\mathcal{F}_{u}(P, \Delta), K\right) w
+\end{aligned}
+$$
+
+We shall focus our discussion in this section on analysis methods; therefore, the controller may be viewed as just another system component and absorbed into the\\
+interconnection structure. Denote
+
+$$
+M(s)=\mathcal{F}_{\ell}(P(s), K(s))=\left[\begin{array}{ll}
+M_{11}(s) & M_{12}(s) \\
+M_{21}(s) & M_{22}(s)
+\end{array}\right] .
+$$
+
+Then the general framework reduces to Figure 10.2, where
+
+$$
+z=\mathcal{F}_{u}(M, \Delta) w=\left[M_{22}+M_{21} \Delta\left(I-M_{11} \Delta\right)^{-1} M_{12}\right] w .
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-03}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.2: Analysis framework}
+\end{center}
+\end{figure}
+
+Suppose $K(s)$ is a stabilizing controller for the nominal plant $P$. Then $M(s) \in \mathcal{R} \mathcal{H}_{\infty}$. In general, the stability of $\mathcal{F}_{u}(M, \Delta)$ does not necessarily imply the internal stability of the closed-loop feedback system. However, they can be made equivalent with suitably chosen $w$ and $z$. For example, consider again the multiplicatively perturbed system shown in Figure 10.3.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-03(1)}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.3: Multiplicatively perturbed systems}
+\end{center}
+\end{figure}
+
+Now let
+
+$$
+w:=\left[\begin{array}{l}
+d_{1} \\
+d_{2}
+\end{array}\right], \quad z:=\left[\begin{array}{l}
+e_{1} \\
+e_{2}
+\end{array}\right] .
+$$
+
+Then the system is robustly stable for all $\Delta(s) \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ if and only if $\mathcal{F}_{u}(M, \Delta) \in \mathcal{R} \mathcal{H}_{\infty}$ for all admissible $\Delta$ with $M_{11}=-W_{2} P K(I+P K)^{-1} W_{1}$, which is guaranteed by $\left\|M_{11}\right\|_{\infty} \leq 1$.
+
+The analysis results presented in the previous chapters together with the associated synthesis tools are summarized in Table 10.1 with various uncertainty modeling assumptions.
+
+However, the analysis is not so simple for systems with multiple sources of model uncertainties, including the robust performance problem for systems with unstructured
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Input Assumptions & Performance Specifications & Perturbation Assumptions & Analysis Tests & Synthesis Methods \\
+\hline
+\( \begin{gathered} E\left(w(t) w(\tau)^{*}\right) \\ =\delta(t-\tau) I \end{gathered} \) & $E\left(z(t)^{*} z(t)\right) \leq 1$ & \multirow{2}{*}{$\Delta=0$} & \multirow{2}{*}{$\left\|M_{22}\right\|_{2} \leq 1$} & \multirow{2}{*}{\begin{tabular}{l}
+LQG \\
+Wiener-Hopf $\mathcal{H}_{2}$ \\
+\end{tabular}} \\
+\hline
+\begin{tabular}{l}
+\( w=U_{0} \delta(t) \) \\
+$E\left(U_{0} U_{0}^{*}\right)=I$ \\
+\end{tabular} & $E\left(\|z\|_{2}^{2}\right) \leq 1$ &  &  &  \\
+\hline
+$\|w\|_{2} \leq 1$ & $\|z\|_{2} \leq 1$ & $\Delta=0$ & $\left\|M_{22}\right\|_{\infty} \leq 1$ & \multirow{2}{*}{\begin{tabular}{l}
+Singular Value Loop Shaping \\
+$\mathcal{H}_{\infty}$ \\
+\end{tabular}} \\
+\hline
+$\|w\|_{2} \leq 1$ & Internal Stability & $\|\Delta\|_{\infty}<1$ & $\left\|M_{11}\right\|_{\infty} \leq 1$ &  \\
+\hline
+\end{tabular}
+\captionsetup{labelformat=empty}
+\caption{Table 10.1: General analysis for single source of uncertainty}
+\end{center}
+\end{table}
+
+uncertainty. As we shown in Chapter 9, if a system is built from components that are themselves uncertain, then, in general, the uncertainty in the system level is structured, involving typically a large number of real parameters. The stability analysis involving real parameters is much more difficult and will be discussed in Chapter 18. Here we shall simply cover the real parametric uncertainty with norm-bounded dynamical uncertainty. Moreover, the interconnection model $M$ can always be chosen so that $\Delta(s)$ is block diagonal, and, by absorbing any weights, $\|\Delta\|_{\infty}<1$. Thus we shall assume that $\Delta(s)$ takes the form of
+
+$$
+\Delta(s)=\left\{\operatorname{diag}\left[\delta_{1} I_{r_{1}}, \ldots, \delta_{s} I_{r_{S}}, \Delta_{1}, \ldots, \Delta_{F}\right]: \delta_{i}(s) \in \mathcal{R} \mathcal{H}_{\infty}, \quad \Delta_{j} \in \mathcal{R} \mathcal{H}_{\infty}\right\}
+$$
+
+with $\left\|\delta_{i}\right\|_{\infty}<1$ and $\left\|\Delta_{j}\right\|_{\infty}<1$. Then the system is robustly stable iff the interconnected system in Figure 10.4 is stable.
+
+The results of Table 10.1 can be applied to analysis of the system's robust stability in two ways:\\
+(1) $\left\|M_{11}\right\|_{\infty} \leq 1$ implies stability, but not conversely, because this test ignores the known block diagonal structure of the uncertainties and is equivalent to regarding $\Delta$ as unstructured. This can be arbitrarily conservative in that stable systems can have arbitrarily large $\left\|M_{11}\right\|_{\infty}$.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-05}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.4: Robust stability analysis framework}
+\end{center}
+\end{figure}
+
+(2) Test for each $\delta_{i}\left(\Delta_{j}\right)$ individually (assuming no uncertainty in other channels). This test can be arbitrarily optimistic because it ignores interaction between the $\delta_{i}\left(\Delta_{j}\right)$. This optimism is also clearly shown in the spinning body example in Section 8.6.
+
+The difference between the stability margins (or bounds on $\Delta$ ) obtained in (1) and (2) can be arbitrarily far apart. Only when the margins are close can conclusions be made about the general case with structured uncertainty.
+
+The exact stability and performance analysis for systems with structured uncertainty requires a new matrix function called the \hl{ structured singular value } \hl{(SSV), which is denoted by $\mu$.}
+
+\subsection*{10.2 Structured Singular Value}
+\subsection*{10.2.1 Definitions of $\mu$}
+We shall motivate the definition of the structured singular value by asking the following question: Given a matrix $M \in \mathbb{C}^{p \times q}$, what is the smallest perturbation matrix $\Delta \in \mathbb{C}^{q \times p}$ in the sense of $\bar{\sigma}(\Delta)$ such that
+
+$$
+\operatorname{det}(I-M \Delta)=0 ?
+$$
+
+That is, we are interested in finding
+
+$$
+\alpha_{\min }:=\inf \left\{\bar{\sigma}(\Delta): \operatorname{det}(I-M \Delta)=0, \Delta \in \mathbb{C}^{q \times p}\right\} .
+$$
+
+It is easy to see that
+
+$$
+\alpha_{\min }=\inf \left\{\alpha: \operatorname{det}(I-\alpha M \Delta)=0, \bar{\sigma}(\Delta) \leq 1, \Delta \in \mathbb{C}^{q \times p}\right\}=\frac{1}{\max _{\bar{\sigma}(\Delta) \leq 1} \rho(M \Delta)}
+$$
+
+and
+
+$$
+\max _{\bar{\sigma}(\Delta) \leq 1} \rho(M \Delta)=\bar{\sigma}(M)
+$$
+
+Hence the smallest norm of a "destabilizing" perturbation matrix is $1 / \bar{\sigma}(M)$ with a smallest "destabilizing" $\Delta$ :
+
+$$
+\Delta_{\mathrm{des}}=\frac{1}{\bar{\sigma}(M)} v_{1} u_{1}^{*}, \quad \operatorname{det}\left(I-M \Delta_{\mathrm{des}}\right)=0
+$$
+
+where $M=\bar{\sigma}(M) u_{1} v_{1}^{*}+\sigma_{2} u_{2} v_{2}^{*}+\cdots$ is a singular value decomposition.\\
+So the reciprocal of the largest singular value of a matrix is a measure of the smallest "destabilizing" perturbation matrix. Hence it is instructive to introduce the following alternative definition for the largest singular value:
+
+$$
+\bar{\sigma}(M):=\frac{1}{\inf \left\{\bar{\sigma}(\Delta): \operatorname{det}(I-M \Delta)=0, \Delta \in \mathbb{C}^{q \times p}\right\}}
+$$
+
+Next we consider a similar problem but with $\Delta$ structurally restricted. In particular, we consider the block diagonal matrix $\Delta$. We shall consider two types of blocks: repeated scalar and full blocks. Let $S$ and $F$ represent the number of repeated scalar blocks and the number of full blocks, respectively. To bookkeep their dimensions, we introduce positive integers $r_{1}, \ldots, r_{S} ; m_{1}, \ldots, m_{F}$. The $i$ th repeated scalar block is $r_{i} \times r_{i}$, while the $j$ th full block is $m_{j} \times m_{j}$. With those integers given, we define $\boldsymbol{\Delta} \subset \mathbb{C}^{n \times n}$ as
+
+
+\begin{equation*}
+\boldsymbol{\Delta}=\left\{\operatorname{diag}\left[\delta_{1} I_{r_{1}}, \ldots, \delta_{s} I_{r_{S}}, \Delta_{1}, \ldots, \Delta_{F}\right]: \delta_{i} \in \mathbb{C}, \Delta_{j} \in \mathbb{C}^{m_{j} \times m_{j}}\right\} \tag{10.1}
+\end{equation*}
+
+
+For consistency among all the dimensions, we must have
+
+$$
+\sum_{i=1}^{S} r_{i}+\sum_{j=1}^{F} m_{j}=n
+$$
+
+Often, we will need norm-bounded subsets of $\boldsymbol{\Delta}$, and we introduce the following notation:
+
+
+\begin{gather*}
+\mathbf{B} \boldsymbol{\Delta}=\{\Delta \in \boldsymbol{\Delta}: \bar{\sigma}(\Delta) \leq 1\}  \tag{10.2}\\
+\mathbf{B}^{\mathrm{o}} \boldsymbol{\Delta}=\{\Delta \in \boldsymbol{\Delta}: \bar{\sigma}(\Delta)<1\} \tag{10.3}
+\end{gather*}
+
+
+where the superscript "o" symbolizes the open ball. To keep the notation as simple as possible in equation (10.1), we place all of the repeated scalar blocks first; in actuality, they can come in any order. Also, the full blocks do not have to be square, but restricting them as such saves a great deal in terms of notation.
+
+Now we ask a similar question: Given a matrix $M \in \mathbb{C}^{p \times q}$, what is the smallest perturbation matrix $\Delta \in \Delta$ in the sense of $\bar{\sigma}(\Delta)$ such that
+
+$$
+\operatorname{det}(I-M \Delta)=0 ?
+$$
+
+That is, we are interested in finding
+
+$$
+\alpha_{\min }:=\inf \{\bar{\sigma}(\Delta): \operatorname{det}(I-M \Delta)=0, \Delta \in \boldsymbol{\Delta}\}
+$$
+
+Again we have
+
+$$
+\alpha_{\min }=\inf \{\alpha: \operatorname{det}(I-\alpha M \Delta)=0, \Delta \in \mathbf{B} \boldsymbol{\Delta}\}=\frac{1}{\max _{\Delta \in \mathbf{B} \boldsymbol{\Delta}} \rho(M \Delta)}
+$$
+
+Similar to the unstructured case, we shall call $1 / \alpha_{\text {min }}$ the structured singular value and denote it by $\mu_{\boldsymbol{\Delta}}(M)$.\\
+Definition 10.1 For $M \in \mathbb{C}^{n \times n}, \mu_{\Delta}(M)$ is defined as
+
+
+\begin{equation*}
+\mu_{\Delta}(M):=\frac{1}{\min \{\bar{\sigma}(\Delta): \Delta \in \Delta, \operatorname{det}(I-M \Delta)=0\}} \tag{10.4}
+\end{equation*}
+
+
+unless no $\Delta \in \Delta$ makes $I-M \Delta$ singular, in which case $\mu_{\Delta}(M):=0$.\\
+Remark 10.1 Without a loss in generality, the full blocks in the minimal norm $\Delta$ can each be chosen to be dyads (rank $=1$ ). To see this, assume $S=0$ (i.e., all blocks are full blocks). Suppose that $I-M \Delta$ is singular for some $\Delta \in \Delta$. Then there is an $x \in \mathbb{C}^{n}$ such that $M \Delta x=x$. Now partition $x$ conformably with $\Delta$ :
+
+$$
+x=\left[\begin{array}{c}
+x_{1} \\
+x_{2} \\
+\vdots \\
+x_{F}
+\end{array}\right], \quad x_{i} \in \mathbb{C}^{m_{i}}, i=1, \ldots, F
+$$
+
+and let
+
+$$
+\tilde{\Delta}_{i}=\left\{\begin{array}{ll}
+\frac{\Delta_{i} x_{i} x_{i}^{*}}{\left\|x_{i}\right\|^{2}}, & x_{i} \neq 0 ; \\
+0, & x_{i}=0
+\end{array} \quad \text { for } i=1,2, \ldots, F\right.
+$$
+
+Define
+
+$$
+\tilde{\Delta}=\operatorname{diag}\left\{\tilde{\Delta}_{1}, \tilde{\Delta}_{2}, \ldots, \tilde{\Delta}_{F}\right\}
+$$
+
+Then $\bar{\sigma}(\tilde{\Delta}) \leq \bar{\sigma}(\Delta), \tilde{\Delta} x=\Delta x$, and thus $(I-M \tilde{\Delta}) x=(I-M \Delta) x=0$ (i.e., $I-M \tilde{\Delta}$ is also singular). Hence we have replaced a general perturbation $\Delta$ that satisfies the singularity condition with a perturbation $\tilde{\Delta}$ that is no larger [in the $\bar{\sigma}(\cdot)$ sense] and has rank 1 for each block but still satisfies the singularity condition.
+
+Lemma $10.1 \mu_{\boldsymbol{\Delta}}(M)=\max _{\Delta \in \mathbf{B} \boldsymbol{\Delta}} \rho(M \Delta)$\\
+In view of this lemma, continuity of the function $\mu: \mathbb{C}^{n \times n} \rightarrow \mathbb{R}$ is apparent. In general, though, the function $\mu: \mathbb{C}^{n \times n} \rightarrow \mathbb{R}$ is not a norm, since it does not satisfy the triangle inequality; however, for any $\alpha \in \mathbb{C}, \mu(\alpha M)=|\alpha| \mu(M)$, so in some sense, it is related to how "big" the matrix is.
+
+We can relate $\mu_{\boldsymbol{\Delta}}(M)$ to familiar linear algebra quantities when $\boldsymbol{\Delta}$ is one of two extreme sets.
+
+\begin{itemize}
+  \item If $\boldsymbol{\Delta}=\{\delta I: \delta \in \mathbb{C}\}\left(S=1, F=0, r_{1}=n\right)$, then $\mu_{\boldsymbol{\Delta}}(M)=\rho(M)$, the spectral radius of $M$.
+\end{itemize}
+
+Proof. The only $\Delta$ 's in $\boldsymbol{\Delta}$ that satisfy the $\operatorname{det}(I-M \Delta)=0$ constraint are reciprocals of nonzero eigenvalues of $M$. The smallest one of these is associated with the largest (magnitude) eigenvalue, so, $\mu_{\Delta}(M)=\rho(M)$.
+
+\begin{itemize}
+  \item If $\boldsymbol{\Delta}=\mathbb{C}^{n \times n}\left(S=0, F=1, m_{1}=n\right)$, then $\mu_{\boldsymbol{\Delta}}(M)=\bar{\sigma}(M)$.
+\end{itemize}
+
+Obviously, for a general $\boldsymbol{\Delta}$, as in equation (10.1), we must have
+
+
+\begin{equation*}
+\left\{\delta I_{n}: \delta \in \mathbb{C}\right\} \subset \Delta \subset \mathbb{C}^{n \times n} \tag{10.5}
+\end{equation*}
+
+
+Hence directly from the definition of $\mu$ and from the two preceding special cases, we conclude that
+
+
+\begin{equation*}
+\rho(M) \leq \mu_{\Delta}(M) \leq \bar{\sigma}(M) \tag{10.6}
+\end{equation*}
+
+
+These bounds alone are not sufficient for our purposes because the gap between $\rho$ and $\bar{\sigma}$ can be arbitrarily large.
+
+Example 10.1 Suppose
+
+$$
+\Delta=\left[\begin{array}{cc}
+\delta_{1} & 0 \\
+0 & \delta_{2}
+\end{array}\right]
+$$
+
+and consider\\
+(1) $M=\left[\begin{array}{ll}0 & \beta \\ 0 & 0\end{array}\right]$ for any $\beta>0$. Then $\rho(M)=0$ and $\bar{\sigma}(M)=\beta$. But $\mu(M)=0$ since $\operatorname{det}(I-M \Delta)=1$ for all admissible $\Delta$.\\
+(2) $M=\left[\begin{array}{cc}-1 / 2 & 1 / 2 \\ -1 / 2 & 1 / 2\end{array}\right]$. Then $\rho(M)=0$ and $\bar{\sigma}(M)=1$. Since
+
+$$
+\operatorname{det}(I-M \Delta)=1+\frac{\delta_{1}-\delta_{2}}{2}
+$$
+
+it is easy to see that $\min \left\{\max _{i}\left|\delta_{i}\right|: 1+\frac{\delta_{1}-\delta_{2}}{2}=0\right\}=1$, so $\mu(M)=1$.
+
+Thus neither $\rho$ nor $\bar{\sigma}$ provide useful bounds even in simple cases. The only time they do provide reliable bounds is when $\rho \approx \bar{\sigma}$.
+
+However, the bounds can be refined by considering transformations on $M$ that do not affect $\mu_{\boldsymbol{\Delta}}(M)$, but do affect $\rho$ and $\bar{\sigma}$. To do this, define the following two subsets of $\mathbb{C}^{n \times n}$ :
+
+
+\begin{gather*}
+\mathcal{U}=\left\{U \in \boldsymbol{\Delta}: U U^{*}=I_{n}\right\}  \tag{10.7}\\
+\mathcal{D}=\left\{\begin{array}{r}
+\operatorname{diag}\left[D_{1}, \ldots, D_{S}, d_{1} I_{m_{1}}, \ldots, d_{F-1} I_{m_{F-1}}, I_{m_{F}}\right]: \\
+D_{i} \in \mathbb{C}^{r_{i} \times r_{i}}, D_{i}=D_{i}^{*}>0, d_{j} \in \mathbb{R}, d_{j}>0
+\end{array}\right\} \tag{10.8}
+\end{gather*}
+
+
+Note that for any $\Delta \in \Delta, U \in \mathcal{U}$, and $D \in \mathcal{D}$,
+
+
+\begin{gather*}
+U^{*} \in \mathcal{U} \quad U \Delta \in \Delta \quad \Delta U \in \Delta \quad \bar{\sigma}(U \Delta)=\bar{\sigma}(\Delta U)=\bar{\sigma}(\Delta)  \tag{10.9}\\
+D \Delta=\Delta D . \tag{10.10}
+\end{gather*}
+
+
+Consequently, we have the following:\\
+Theorem 10.2 For all $U \in \mathcal{U}$ and $D \in \mathcal{D}$
+
+
+\begin{equation*}
+\mu_{\Delta}(M U)=\mu_{\Delta}(U M)=\mu_{\Delta}(M)=\mu_{\Delta}\left(D M D^{-1}\right) \tag{10.11}
+\end{equation*}
+
+
+Proof. For all $D \in \mathcal{D}$ and $\Delta \in \boldsymbol{\Delta}$,
+
+$$
+\operatorname{det}(I-M \Delta)=\operatorname{det}\left(I-M D^{-1} \Delta D\right)=\operatorname{det}\left(I-D M D^{-1} \Delta\right)
+$$
+
+since $D$ commutes with $\Delta$. Therefore $\mu_{\Delta}(M)=\mu_{\Delta}\left(D M D^{-1}\right)$. Also, for each $U \in \mathcal{U}, \operatorname{det}(I-M \Delta)=0$ if and only if $\operatorname{det}\left(I-M U U^{*} \Delta\right)=0$. Since $U^{*} \Delta \in \boldsymbol{\Delta}$ and $\bar{\sigma}\left(U^{*} \Delta\right)=\bar{\sigma}(\Delta)$, we get $\mu_{\Delta}(M U)=\mu_{\Delta}(M)$ as desired. The argument for $U M$ is the same.
+
+Therefore, the bounds in equation (10.6) can be tightened to
+
+
+\begin{equation*}
+\max _{U \in \mathcal{U}} \rho(U M) \leq \max _{\Delta \in \mathbf{B} \Delta} \rho(\Delta M)=\mu_{\Delta}(M) \leq \inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right) \tag{10.12}
+\end{equation*}
+
+
+where the equality comes from Lemma 10.1. Note that the last element in the $D$ matrix is normalized to 1 since for any nonzero scalar $\gamma, D M D^{-1}=(\gamma D) M(\gamma D)^{-1}$.
+
+Remark 10.2 Note that the scaling set $\mathcal{D}$ in Theorem 10.2 and in inequality (10.12) is not necessarily restricted to being Hermitian. In fact, it can be replaced by any set of nonsingular matrices that satisfy equation (10.10). However, enlarging the set of scaling matrices does not improve the upper-bound in inequality (10.12). This can be shown\\
+as follows: Let $D$ be any nonsingular matrix such that $D \Delta=\Delta D$. Then there exist a Hermitian matrix $0<R=R^{*} \in \mathcal{D}$ and a unitary matrix $U$ such that $D=U R$ and
+
+$$
+\inf _{D} \bar{\sigma}\left(D M D^{-1}\right)=\inf _{D} \bar{\sigma}\left(U R M R^{-1} U^{*}\right)=\inf _{R \in \mathcal{D}} \bar{\sigma}\left(R M R^{-1}\right)
+$$
+
+Therefore, there is no loss of generality in assuming $\mathcal{D}$ to be Hermitian.
+
+\subsection*{10.2.2 Bounds}
+In this section we will concentrate on the bounds
+
+$$
+\max _{U \in \mathcal{U}} \rho(U M) \leq \mu_{\Delta}(M) \leq \inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)
+$$
+
+The lower bound is always an equality (Doyle [1982]).\\
+Theorem $10.3 \max _{U \in \mathcal{U}} \rho(M U)=\mu_{\Delta}(M)$\\
+Unfortunately, the quantity $\rho(U M)$ can have multiple local maxima that are not global. Thus local search cannot be guaranteed to obtain $\mu$, but can only yield a lower bound. For computation purposes one can derive a slightly different formulation of the lower bound as a power algorithm that is reminiscent of power algorithms for eigenvalues and singular values (Packard and Doyle [1988a, 1988b]). While there are open questions about convergence, the algorithm usually works quite well and has proven to be an effective method to compute $\mu$.
+
+The upper-bound can be reformulated as a convex optimization problem, so the global minimum can, in principle, be found. Unfortunately, the upper-bound is not always equal to $\mu$. For block structures $\boldsymbol{\Delta}$ satisfying $2 S+F \leq 3$, the upper-bound is always equal to $\mu_{\boldsymbol{\Delta}}(M)$, and for block structures with $2 S+F>3$, there exist matrices for which $\mu$ is less than the infimum. This can be summarized in the following diagram, which shows for which cases the upper-bound is guaranteed to be equal to $\mu$. See Packard and Doyle [1993] for details.
+
+Theorem $10.4 \mu_{\Delta}(M)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)$ if $2 S+F \leq 3$
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\multicolumn{1}{|r|}{$F=$} & 0 & 1 & 2 & 3 & 4 \\
+\hline
+0 &  & yes & yes & yes & no \\
+\hline
+1 & yes & yes & no & no & no \\
+\hline
+2 & no & no & no & no & no \\
+\hline
+\end{tabular}
+\end{center}
+
+Several of the boxes have connections with standard results.
+
+\begin{itemize}
+  \item $S=0, F=1: \mu_{\Delta}(M)=\bar{\sigma}(M)$.
+  \item $S=1, F=0: \mu_{\Delta}(M)=\rho(M)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)$. This is a standard result in linear algebra. In fact, without a loss in generality, the matrix $M$ can be assumed in Jordan canonical form. Now let
+\end{itemize}
+
+$$
+J_{1}=\left[\begin{array}{ccccc}
+\lambda & 1 & & & \\
+& \lambda & 1 & & \\
+& & \ddots & \ddots & \\
+& & & \lambda & 1 \\
+& & & & \lambda
+\end{array}\right], \quad D_{1}=\left[\begin{array}{ccccc}
+1 & & & & \\
+& k & & & \\
+& & \ddots & & \\
+& & & k^{n_{1}-2} & \\
+& & & & k^{n_{1}-1}
+\end{array}\right] \in \mathbb{C}^{n_{1} \times n_{1}}
+$$
+
+Then $\inf _{D_{1} \in \mathbb{C}^{n_{1} \times n_{1}}} \bar{\sigma}\left(D_{1} J_{1} D_{1}^{-1}\right)=\lim _{k \rightarrow \infty} \bar{\sigma}\left(D_{1} J_{1} D_{1}^{-1}\right)=|\lambda|$. (Note that by Remark 10.2, the scaling matrix does not need to be Hermitian.) The conclusion follows by applying this result to each Jordan block.\\
+That $\mu$ equals to the preceding upper-bound in this case is also equivalent to the fact that Lyapunov asymptotic stability and exponential stability are equivalent for discrete time systems. This is because $\rho(M)<1$ (exponential stability of a discrete time system matrix $M$ ) implies for some nonsingular $D \in \mathbb{C}^{n \times n}$
+
+$$
+\bar{\sigma}\left(D M D^{-1}\right)<1 \text { or }\left(D^{-1}\right)^{*} M^{*} D^{*} D M D^{-1}-I<0
+$$
+
+which, in turn, is equivalent to the existence of a $P=D^{*} D>0$ such that
+
+$$
+M^{*} P M-P<0
+$$
+
+(Lyapunov asymptotic stability).
+
+\begin{itemize}
+  \item $S=0, F=2$ : This case was studied by Redheffer [1959].
+  \item $S=1, F=1$ : This is equivalent to a state-space characterization of the $\mathcal{H}_{\infty}$ norm of a discrete time transfer function.
+  \item $S=2, F=0$ : This is equivalent to the fact that for multidimensional systems (two dimensional, in fact), exponential stability is not equivalent to Lyapunov stability.
+  \item $S=0, F \geq 4$ : For this case, the upper-bound is not always equal to $\mu$. This is important, as these are the cases that arise most frequently in applications. Fortunately, the bound seems to be close to $\mu$. The worst known example has a ratio of $\mu$ over the bound of about .85 , and most systems are close to 1 .
+\end{itemize}
+
+The preceding bounds are much more than just computational schemes. They are also theoretically rich and can unify a number of apparently different results in linear systems theory. There are several connections with Lyapunov asymptotic stability, two of which were hinted at previously, but there are further connections between the\\
+upper-bound scalings and solutions to Lyapunov and Riccati equations. Indeed, many major theorems in linear systems theory follow from the upper-bounds and from some results of linear fractional transformations. The lower bound can be viewed as a natural generalization of the maximum modulus theorem.
+
+Of course, one of the most important uses of the upper-bound is as a computational scheme when combined with the lower bound. For reliable use of the $\mu$ theory, it is essential to have upper and lower bounds. Another important feature of the upperbound is that it can be combined with $H_{\infty}$ controller synthesis methods to yield an ad hoc $\mu$-synthesis method. Note that the upper-bound when applied to transfer functions is simply a scaled $H_{\infty}$ norm. This is exploited in the $D-K$ iteration procedure to perform approximate $\mu$ synthesis (Doyle [1982]), which will be briefly introduced in Section 10.4.
+
+The upper and lower bounds of the structured singular value and the scaling matrix $D$ can be computed using the MATLAB command
+
+$$
+\gg[\text { bounds }, \text { rowd }]=\text { mu }(\mathrm{M}, \mathrm{blk})
+$$
+
+where the structure of the $\Delta$ is specified by a two-column matrix blk. for example, a
+
+$$
+\begin{gathered}
+\Delta=\left[\begin{array}{cccccc}
+\delta_{1} I_{2} & 0 & 0 & 0 & 0 & 0 \\
+0 & \delta_{2} & 0 & 0 & 0 & 0 \\
+0 & 0 & \Delta_{3} & 0 & 0 & 0 \\
+0 & 0 & 0 & \Delta_{4} & 0 & 0 \\
+0 & 0 & 0 & 0 & \delta_{5} I_{3} & 0 \\
+0 & 0 & 0 & 0 & 0 & \Delta_{6}
+\end{array}\right] \\
+\delta_{1}, \delta_{2}, \delta_{5}, \in \mathbb{C}, \Delta_{3} \in \mathbb{C}^{2 \times 3}, \Delta_{4} \in \mathbb{C}^{3 \times 3}, \Delta_{6} \in \mathbb{C}^{2 \times 1}
+\end{gathered}
+$$
+
+can be specified by
+
+$$
+\mathbf{b l k}=\left[\begin{array}{cc}
+2 & 0 \\
+1 & 1 \\
+2 & 3 \\
+3 & 3 \\
+3 & 0 \\
+2 & 1
+\end{array}\right]
+$$
+
+Note that $\Delta_{j}$ is not required to be square. The outputs of the program include a $2 \times 1$ vector bounds containing the upper and lower bounds of $\mu_{\Delta}(M)$ and the row vector rowd containing the scaling $D$. The $D$ matrix can be recovered by
+
+$$
+\gg\left[\mathbf{D}_{\ell}, \mathbf{D}_{\mathbf{r}}\right]=\text { unwrapd }(\text { rowd }, \text { blk })
+$$
+
+where $D_{\ell}$ and $D_{r}$ denote the left and right scaling matrices used in computing the upper-bound $\inf \bar{\sigma}\left(D_{\ell} M D_{r}^{-1}\right)$ when some full blocks are not necessarily square and they are equal if all full blocks are square.
+
+Example 10.2 Let
+
+$$
+M=\left[\begin{array}{ccccccc}
+j & 2 & 2 j & 0 & -1 & -1+3 j & 2+3 j \\
+3+j & 2-j & -1+j & 2+j & -1+j & 1 & -1+j \\
+3+j & j & 2+2 j & -1+2 j & 3-j & 3 j & -1+j \\
+-1+j & -1-j & j & 0 & 1-j & 2-j & 2+2 j \\
+3 & j & 1+j & 3 j & 1+j & 3 j & -j \\
+1 & 3+2 j & 2+2 j & 3 j & 1+2 j & 2+j & -1+2 j \\
+2+j & -1-j & -1 & 3+3 j & 2+3 j & 2 j & 1-j
+\end{array}\right]
+$$
+
+and
+
+$$
+\boldsymbol{\Delta}=\left\{\Delta=\left[\begin{array}{cccc}
+\delta_{1} I_{2} & & & \\
+& \delta_{2} & & \\
+& & \Delta_{3} & \\
+& & & \Delta_{4}
+\end{array}\right]: \delta_{1}, \delta_{2} \in \mathbb{C}, \Delta_{3} \in \mathbb{C}^{2 \times 3}, \Delta_{4} \in \mathbb{C}^{2 \times 1}\right\}
+$$
+
+Then blk $=\left[\begin{array}{cc}2 & 0 \\ 1 & 1 \\ 2 & 3 \\ 2 & 1\end{array}\right]$ and the Matlab program gives bounds $=\left[\begin{array}{ll}10.5955 & 10.5518\end{array}\right]$\\
+and
+
+$$
+\begin{aligned}
+D_{\ell} & =\left[\begin{array}{llll}
+D_{1} & & & \\
+& 0.7638 & & \\
+& & 0.8809 I_{3} & \\
+& & & 1.0293
+\end{array}\right] \\
+D_{r} & =\left[\begin{array}{llll}
+D_{1} & & & \\
+& 0.7638 & & \\
+& & 0.8809 I_{2} & \\
+& & & 1.0293 I_{2}
+\end{array}\right]
+\end{aligned}
+$$
+
+where
+
+$$
+D_{1}=\left[\begin{array}{cc}
+1.0260-0.0657 j & 0.2174-0.3471 j \\
+-0.0701+0.3871 j & -0.4487-0.6953 j
+\end{array}\right]
+$$
+
+In fact, $D_{\ell}$ and $D_{r}$ can be replaced by Hermitian matrices without changing the upperbound by replacing $D_{1}$ with
+
+$$
+\hat{D}_{1}=\left[\begin{array}{cc}
+1.0992 & 0.0041-0.0591 j \\
+0.0041+0.0591 j & 0.9215
+\end{array}\right]
+$$
+
+since $D_{1}=U_{1} \hat{D}_{1}$ and
+
+$$
+U_{1}=\left[\begin{array}{cc}
+0.9155-0.0713 j & 0.2365-0.3177 j \\
+-0.1029+0.3824 j & -0.5111-0.7629 j
+\end{array}\right]
+$$
+
+is a unitary matrix.
+
+\subsection*{10.2.3 Well-Posedness and Performance for Constant LFTs}
+Let $M$ be a complex matrix partitioned as
+
+\[
+M=\left[\begin{array}{ll}
+M_{11} & M_{12}  \tag{10.13}\\
+M_{21} & M_{22}
+\end{array}\right]
+\]
+
+and suppose there are two defined block structures, $\boldsymbol{\Delta}_{1}$ and $\boldsymbol{\Delta}_{2}$, which are compatible in size with $M_{11}$ and $M_{22}$, respectively. Define a third structure $\boldsymbol{\Delta}$ as
+
+\[
+\boldsymbol{\Delta}=\left\{\left[\begin{array}{cc}
+\Delta_{1} & 0  \tag{10.14}\\
+0 & \Delta_{2}
+\end{array}\right]: \Delta_{1} \in \boldsymbol{\Delta}_{1}, \Delta_{2} \in \boldsymbol{\Delta}_{2}\right\} .
+\]
+
+Now we may compute $\mu$ with respect to three structures. The notations we use to keep track of these computations are as follows: $\mu_{1}(\cdot)$ is with respect to $\boldsymbol{\Delta}_{1}, \mu_{2}(\cdot)$ is with respect to $\boldsymbol{\Delta}_{2}$, and $\mu_{\boldsymbol{\Delta}}(\cdot)$ is with respect to $\boldsymbol{\Delta}$. In view of these notations, $\mu_{1}\left(M_{11}\right)$, $\mu_{2}\left(M_{22}\right)$, and $\mu_{\Delta}(M)$ all make sense, though, for instance, $\mu_{1}(M)$ does not.
+
+This section is interested in following constant matrix problems:
+
+\begin{itemize}
+  \item Determine whether the $\operatorname{LFT} \mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ is well-defined for all $\Delta_{2} \in \boldsymbol{\Delta}_{2}$ with $\bar{\sigma}\left(\Delta_{2}\right) \leq \beta(<\beta)$.
+  \item If so, determine how "large" $\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ can get for this norm-bounded set of perturbations.
+\end{itemize}
+
+Let $\Delta_{2} \in \boldsymbol{\Delta}_{2}$. Recall that $\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ is well-defined if $I-M_{22} \Delta_{2}$ is invertible. The first theorem is nothing more than a restatement of the definition of $\mu$.
+
+Theorem 10.5 The linear fractional transformation $\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ is well-defined\\
+(a) for all $\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}$ if and only if $\mu_{2}\left(M_{22}\right)<1$.\\
+(b) for all $\Delta_{2} \in \mathbf{B}^{\circ} \boldsymbol{\Delta}_{2}$ if and only if $\mu_{2}\left(M_{22}\right) \leq 1$.
+
+As the "perturbation" $\Delta_{2}$ deviates from zero, the matrix $\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ deviates from $M_{11}$. The range of values that $\mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)$ takes on is intimately related to $\mu_{\Delta}(M)$, as shown in the following theorem:
+
+Theorem 10.6 (main loop theorem) The following are equivalent:
+
+$$
+\begin{array}{ll}
+\mu_{\boldsymbol{\Delta}}(M)<1 & \Longleftrightarrow\left\{\begin{array}{l}
+\mu_{2}\left(M_{22}\right)<1, \text { and } \\
+\max _{\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)<1
+\end{array}\right. \\
+\mu_{\boldsymbol{\Delta}}(M) \leq 1 & \Longleftrightarrow\left\{\begin{array}{l}
+\mu_{2}\left(M_{22}\right) \leq 1, \text { and } \\
+\sup _{\Delta_{2} \in \mathbf{B}^{\mathrm{o}} \boldsymbol{\Delta}_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right) \leq 1
+\end{array}\right.
+\end{array}
+$$
+
+Proof. We shall only prove the first part of the equivalence. The proof for the second part is similar.\\
+$\Leftarrow$ Let $\Delta_{i} \in \boldsymbol{\Delta}_{i}$ be given, with $\bar{\sigma}\left(\Delta_{i}\right) \leq 1$, and define $\Delta=\operatorname{diag}\left[\Delta_{1}, \Delta_{2}\right]$. Obviously $\Delta \in \Delta$. Now
+
+\[
+\operatorname{det}(I-M \Delta)=\operatorname{det}\left[\begin{array}{cc}
+I-M_{11} \Delta_{1} & -M_{12} \Delta_{2}  \tag{10.15}\\
+-M_{21} \Delta_{1} & I-M_{22} \Delta_{2}
+\end{array}\right]
+\]
+
+By hypothesis $I-M_{22} \Delta_{2}$ is invertible, and hence $\operatorname{det}(I-M \Delta)$ becomes
+
+$$
+\operatorname{det}\left(I-M_{22} \Delta_{2}\right) \operatorname{det}\left(I-M_{11} \Delta_{1}-M_{12} \Delta_{2}\left(I-M_{22} \Delta_{2}\right)^{-1} M_{21} \Delta_{1}\right)
+$$
+
+Collecting the $\Delta_{1}$ terms leaves
+
+
+\begin{equation*}
+\operatorname{det}(I-M \Delta)=\operatorname{det}\left(I-M_{22} \Delta_{2}\right) \operatorname{det}\left(I-\mathcal{F}_{\ell}\left(M, \Delta_{2}\right) \Delta_{1}\right) \tag{10.16}
+\end{equation*}
+
+
+But $\mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)<1$ and $\Delta_{1} \in \mathbf{B} \boldsymbol{\Delta}_{1}$, so $I-\mathcal{F}_{\ell}\left(M, \Delta_{2}\right) \Delta_{1}$ must be nonsingular. Therefore, $I-M \Delta$ is nonsingular and, by definition, $\mu_{\Delta}(M)<1$.\\
+$\Rightarrow$ Basically, the argument above is reversed. Again let $\Delta_{1} \in \mathbf{B} \boldsymbol{\Delta}_{1}$ and $\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}$ be given, and define $\Delta=\operatorname{diag}\left[\Delta_{1}, \Delta_{2}\right]$. Then $\Delta \in \mathbf{B} \boldsymbol{\Delta}$ and, by hypothesis, $\operatorname{det}(I-M \Delta) \neq 0$. It is easy to verify from the definition of $\mu$ that (always)
+
+$$
+\mu(M) \geq \max \left\{\mu_{1}\left(M_{11}\right), \mu_{2}\left(M_{22}\right)\right\}
+$$
+
+We can see that $\mu_{2}\left(M_{22}\right)<1$, which gives that $I-M_{22} \Delta_{2}$ is also nonsingular. Therefore, the expression in equation (10.16) is valid, giving
+
+$$
+\operatorname{det}\left(I-M_{22} \Delta_{2}\right) \operatorname{det}\left(I-\mathcal{F}_{\ell}\left(M, \Delta_{2}\right) \Delta_{1}\right)=\operatorname{det}(I-M \Delta) \neq 0
+$$
+
+Obviously, $I-\mathcal{F}_{\ell}\left(M, \Delta_{2}\right) \Delta_{1}$ is nonsingular for all $\Delta_{i} \in \mathbf{B} \boldsymbol{\Delta}_{i}$, which indicates that the claim is true.
+
+Remark 10.3 This theorem forms the basis for all uses of $\mu$ in linear system robustness analysis, whether from a state-space, frequency domain, or Lyapunov approach.
+
+The role of the block structure $\boldsymbol{\Delta}_{2}$ in the main loop theorem is clear - it is the structure that the perturbations come from; however, the role of the perturbation structure $\boldsymbol{\Delta}_{1}$ is often misunderstood. Note that $\mu_{1}(\cdot)$ appears on the right-hand side of the theorem, so that the set $\boldsymbol{\Delta}_{1}$ defines what particular property of $\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)$ is considered. As an example, consider the theorem applied with the two simple block structures considered right after Lemma 10.1. Define $\boldsymbol{\Delta}_{1}:=\left\{\delta_{1} I_{n}: \delta_{1} \in \mathbb{C}\right\}$. Hence, for $A \in \mathbb{C}^{n \times n}, \mu_{1}(A)=\rho(A)$. Likewise, define $\boldsymbol{\Delta}_{2}=\mathbb{C}^{m \times m}$; then for $D \in \mathbb{C}^{m \times m}$, $\mu_{2}(D)=\bar{\sigma}(D)$. Now, let $\boldsymbol{\Delta}$ be the diagonal augmentation of these two sets, namely
+
+$$
+\boldsymbol{\Delta}:=\left\{\left[\begin{array}{cc}
+\delta_{1} I_{n} & 0_{n \times m} \\
+0_{m \times n} & \Delta_{2}
+\end{array}\right]: \delta_{1} \in \mathbb{C}, \Delta_{2} \in \mathbb{C}^{m \times m}\right\} \subset \mathbb{C}^{(n+m) \times(n+m)}
+$$
+
+Let $A \in \mathbb{C}^{n \times n}, B \in \mathbb{C}^{n \times m}, C \in \mathbb{C}^{m \times n}$, and $D \in \mathbb{C}^{m \times m}$ be given, and interpret them as the state-space model of a discrete time system
+
+$$
+\begin{aligned}
+x_{k+1} & =A x_{k}+B u_{k} \\
+y_{k} & =C x_{k}+D u_{k}
+\end{aligned}
+$$
+
+Let $M \in \mathbb{C}^{(n+m) \times(n+m)}$ be the block state-space matrix of the system
+
+$$
+M=\left[\begin{array}{ll}
+A & B \\
+C & D
+\end{array}\right]
+$$
+
+Applying the theorem with these data gives that the following are equivalent:
+
+\begin{itemize}
+  \item The spectral radius of $A$ satisfies $\rho(A)<1$, and
+\end{itemize}
+
+
+\begin{equation*}
+\max _{\substack{\delta_{1} \in \mathbb{C} \\\left|\delta_{1}\right| \leq 1}} \bar{\sigma}\left(D+C \delta_{1}\left(I-A \delta_{1}\right)^{-1} B\right)<1 \tag{10.17}
+\end{equation*}
+
+
+\begin{itemize}
+  \item The maximum singular value of $D$ satisfies $\bar{\sigma}(D)<1$, and
+\end{itemize}
+
+
+\begin{equation*}
+\max _{\substack{\Delta_{2} \in \mathbb{C}^{m \times m} \\ \bar{\sigma}\left(\Delta_{2}\right) \leq 1}} \rho\left(A+B \Delta_{2}\left(I-D \Delta_{2}\right)^{-1} C\right)<1 \tag{10.18}
+\end{equation*}
+
+
+\begin{itemize}
+  \item The structured singular value of $M$ satisfies
+\end{itemize}
+
+
+\begin{equation*}
+\mu_{\Delta}(M)<1 . \tag{10.19}
+\end{equation*}
+
+
+The first condition is recognized by two things: The system is stable, and the $\|\cdot\|_{\infty}$ norm on the transfer function from $u$ to $y$ is less than 1 (by replacing $\delta_{1}$ with $\frac{1}{z}$ ):
+
+$$
+\|G\|_{\infty}:=\max _{\substack{z \in \mathbb{C} \\|z| \geq 1}} \bar{\sigma}\left(D+C(z I-A)^{-1} B\right)=\max _{\substack{\delta_{1} \in \mathbb{C} \\\left|\delta_{1}\right| \leq 1}} \bar{\sigma}\left(D+C \delta_{1}\left(I-A \delta_{1}\right)^{-1} B\right)
+$$
+
+The second condition implies that $\left(I-D \Delta_{2}\right)^{-1}$ is well defined for all $\bar{\sigma}\left(\Delta_{2}\right) \leq 1$ and that a robust stability result holds for the uncertain difference equation
+
+$$
+x_{k+1}=\left(A+B \Delta_{2}\left(I-D \Delta_{2}\right)^{-1} C\right) x_{k}
+$$
+
+where $\Delta_{2}$ is any element in $\mathbb{C}^{m \times m}$ with $\bar{\sigma}\left(\Delta_{2}\right) \leq 1$, but otherwise unknown.\\
+This equivalence between the small gain condition, $\|G\|_{\infty}<1$, and the stability robustness of the uncertain difference equation is well-known. This is the small gain theorem, in its necessary and sufficient form for linear, time invariant systems with one of the components norm bounded, but otherwise unknown. What is important to note is that both of these conditions are equivalent to a condition involving the structured singular value of the state-space matrix. Already we have seen that special cases of $\mu$ are the spectral radius and the maximum singular value. Here we see that other important linear system properties - namely, robust stability and input-output gain - are also related to a particular case of the structured singular value.
+
+Example 10.3 Let $M, \Delta_{1}$, and $\Delta_{2}$ be defined as in the beginning of this section. Now suppose $\mu_{2}\left(M_{22}\right)<1$. Find
+
+$$
+\max _{\Delta_{2} \in \mathbf{B} \Delta_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)
+$$
+
+This can be done iteratively as follows:
+
+$$
+\begin{gathered}
+\max _{\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)=\alpha \\
+\Longleftrightarrow \max _{\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(\left[\begin{array}{cc}
+M_{11} / \alpha & M_{12} / \alpha \\
+M_{21} & M_{22}
+\end{array}\right], \Delta_{2}\right)\right)=1 \\
+\Longleftrightarrow \mu_{\boldsymbol{\Delta}}\left(\left[\begin{array}{cc}
+M_{11} / \alpha & M_{12} / \alpha \\
+M_{21} & M_{22}
+\end{array}\right]\right)=1
+\end{gathered}
+$$
+
+Hence
+
+$$
+\max _{\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}} \mu_{1}\left(\mathcal{F}_{\ell}\left(M, \Delta_{2}\right)\right)=\left\{\alpha: \mu_{\boldsymbol{\Delta}}\left(\left[\begin{array}{cc}
+M_{11} / \alpha & M_{12} / \alpha \\
+M_{21} & M_{22}
+\end{array}\right]\right)=1\right\}
+$$
+
+For example, let $\Delta_{1}=\delta I_{2}, \Delta_{2} \in \mathbb{C}^{2 \times 2}$ :
+
+$$
+A=\left[\begin{array}{cc}
+0.1 & 0.2 \\
+1 & 0
+\end{array}\right], B=\left[\begin{array}{ll}
+1 & 0 \\
+1 & 1
+\end{array}\right], C=\left[\begin{array}{ll}
+1 & 2 \\
+1 & 3
+\end{array}\right], D=\left[\begin{array}{cc}
+0.5 & 0 \\
+0 & 0.8
+\end{array}\right] .
+$$
+
+Find
+
+$$
+\alpha_{\max }=\sup _{\bar{\sigma}\left(\Delta_{2}\right) \leq 1} \rho\left(A+B \Delta_{2}\left(I-D \Delta_{2}\right)^{-1} C\right)
+$$
+
+Define $\Delta=\left[\begin{array}{cc}\delta I_{2} & \\ & \Delta_{2}\end{array}\right]$. Then a bisection search can be done to find
+
+$$
+\alpha_{\max }=\left\{\alpha: \mu_{\Delta}\left(\left[\begin{array}{cc}
+A / \alpha & B / \alpha \\
+C & D
+\end{array}\right]\right)=1\right\}=21.77 .
+$$
+
+Related MATLAB Commands: unwrapp, muunwrap, dypert, sisorat
+
+\subsection*{10.3 Structured Robust Stability and Performance}
+\subsection*{10.3.1 Robust Stability}
+The most well-known use of $\mu$ as a robustness analysis tool is in the frequency domain. Suppose $G(s)$ is a stable, real rational, multi-input, multioutput transfer function of a linear system. For clarity, assume $G$ has $q_{1}$ inputs and $p_{1}$ outputs. Let $\boldsymbol{\Delta}$ be a block structure, as in equation (10.1), and assume that the dimensions are such that $\boldsymbol{\Delta} \subset \mathbb{C}^{q_{1} \times p_{1}}$. We want to consider feedback perturbations to $G$ that are themselves dynamical systems with the block diagonal structure of the set $\boldsymbol{\Delta}$.
+
+Let $\mathcal{M}(\boldsymbol{\Delta})$ denote the set of all block diagonal and stable rational transfer functions that have block structures such as $\Delta$.
+
+$$
+\mathcal{M}(\Delta):=\left\{\Delta(\cdot) \in \mathcal{R} \mathcal{H}_{\infty}: \Delta\left(s_{o}\right) \in \Delta \text { for all } s_{o} \in \overline{\mathbb{C}}_{+}\right\}
+$$
+
+Theorem 10.7 Let $\beta>0$. The loop shown below is well-posed and internally stable for all $\Delta(\cdot) \in \mathcal{M}(\boldsymbol{\Delta})$ with $\|\Delta\|_{\infty}<\frac{1}{\beta}$ if and only if
+
+$$
+\sup _{\omega \in \mathbb{R}} \mu_{\Delta}(G(j \omega)) \leq \beta
+$$
+
+\begin{center}
+\includegraphics[max width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-18}
+\end{center}
+
+Proof. $(\Longleftarrow)$ Suppose $\sup _{s \in \overline{\mathbb{C}}_{+}} \mu_{\Delta}(G(s)) \leq \beta$. Then $\operatorname{det}(I-G(s) \Delta(s)) \neq 0$ for all $s \in \overline{\mathbb{C}}_{+} \cup\{\infty\}$ whenever $\|\Delta\|_{\infty}<1 / \beta$ (i.e., the system is robustly stable). Now it is sufficient to show that
+
+$$
+\sup _{s \in \overline{\mathbb{C}}_{+}} \mu_{\Delta}(G(s))=\sup _{\omega \in \mathbb{R}} \mu_{\Delta}(G(j \omega))
+$$
+
+It is clear that
+
+$$
+\sup _{s \in \overline{\mathbb{C}}_{+}} \mu_{\Delta}(G(s))=\sup _{s \in \mathbb{C}_{+}} \mu_{\Delta}(G(s)) \geq \sup _{\omega} \mu_{\Delta}(G(j \omega))
+$$
+
+Now suppose $\sup _{s \in \mathbb{C}_{+}} \mu_{\Delta}(G(s))>\beta$; then by the definition of $\mu$, there is an $s_{o} \in \overline{\mathbb{C}}_{+} \cup\{\infty\}$ and a complex structured $\Delta$ such that $\bar{\sigma}(\Delta)<1 / \beta$ and $\operatorname{det}\left(I-G\left(s_{o}\right) \Delta\right)=0$. This implies that there is a $0 \leq \hat{\omega} \leq \infty$ and $0<\alpha \leq 1$ such that $\operatorname{det}(I-G(j \hat{\omega}) \alpha \Delta)=$ 0 . This, in turn, implies that $\mu_{\Delta}(G(j \hat{\omega}))>\beta$ since $\bar{\sigma}(\alpha \Delta)<1 / \beta$. In other words, $\sup _{s \in \mathbb{C}_{+}} \mu_{\Delta}(G(s)) \leq \sup _{\omega} \mu_{\Delta}(G(j \omega))$. The proof is complete.\\
+$(\Longrightarrow)$ Suppose $\sup _{\omega \in \mathbb{R}} \mu_{\Delta}(G(j \omega))>\beta$. Then there is a $0<\omega_{o}<\infty$ such that $\mu_{\Delta}\left(G\left(j \omega_{o}\right)\right)>\beta$. By Remark 10.1, there is a complex $\Delta_{c} \in \boldsymbol{\Delta}$ that each full block has rank 1 and $\bar{\sigma}\left(\Delta_{c}\right)<1 / \beta$ such that $I-G\left(j \omega_{o}\right) \Delta_{c}$ is singular. Next, using the same construction used in the proof of the small gain theorem (Theorem 8.1), one can find a rational $\Delta(s)$ such that $\|\Delta(s)\|_{\infty}=\bar{\sigma}\left(\Delta_{c}\right)<1 / \beta, \Delta\left(j \omega_{o}\right)=\Delta_{c}$, and $\Delta(s)$ destabilizes the system.
+
+Hence, the peak value on the $\mu$ plot of the frequency response determines the size of perturbations that the loop is robustly stable against.\\[0pt]
+Remark 10.4 The internal stability with a closed ball of uncertainties is more complicated. The following example is shown in Tits and Fan [1995]. Consider
+
+$$
+G(s)=\frac{1}{s+1}\left[\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}\right]
+$$
+
+and $\Delta=\delta(s) I_{2}$. Then
+
+$$
+\sup _{\omega \in \mathbb{R}} \mu_{\Delta}(G(j \omega))=\sup _{\omega \in \mathbb{R}} \frac{1}{|j \omega+1|}=\mu_{\Delta}(G(j 0))=1
+$$
+
+On the other hand, $\mu_{\Delta}(G(s))<1$ for all $s \neq 0, s \in \overline{\mathbb{C}}_{+}$, and the only matrices in the form of $\Gamma=\gamma I_{2}$ with $|\gamma| \leq 1$ for which
+
+$$
+\operatorname{det}(I-G(0) \Gamma)=0
+$$
+
+are the complex matrices $\pm j I_{2}$. Thus, clearly, $(I-G(s) \Delta(s))^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ for all real rational $\Delta(s)=\delta(s) I_{2}$ with $\|\delta\|_{\infty} \leq 1$ since $\Delta(0)$ must be real. This shows that $\sup _{\omega \in \mathbb{R}} \mu_{\Delta}(G(j \omega))<1$ is not necessary for $(I-G(s) \Delta(s))^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ with the closed ball of structured uncertainty $\|\Delta\|_{\infty} \leq 1$. Similar examples with no repeated blocks are generated by setting $G(s)=\frac{1}{s+1} M$, where $M$ is any real matrix with $\mu_{\Delta}(M)=1$ for which there is no real $\Delta \in \boldsymbol{\Delta}$ with $\bar{\sigma}(\Delta)=1$ such that $\operatorname{det}(I-M \Delta)=0$. For example, let
+
+$$
+M=\left[\begin{array}{cc}
+0 & \beta \\
+\gamma & \alpha \\
+\gamma & -\alpha
+\end{array}\right]\left[\begin{array}{ccc}
+-\beta & \alpha & \alpha \\
+0 & -\gamma & \gamma
+\end{array}\right], \quad \boldsymbol{\Delta}=\left\{\left[\begin{array}{lll}
+\delta_{1} & & \\
+& \delta_{2} & \\
+& & \delta_{3}
+\end{array}\right], \quad \delta_{i} \in \mathbb{C}\right\}
+$$
+
+with $\gamma^{2}=\frac{1}{2}$ and $\beta^{2}+2 \alpha^{2}=1$. Then it is shown in Packard and Doyle [1993] that $\mu_{\Delta}(M)=1$ and all $\Delta \in \boldsymbol{\Delta}$ with $\bar{\sigma}(\Delta)=1$ that satisfy $\operatorname{det}(I-M \Delta)=0$ must be complex.
+
+Remark 10.5 Let $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ be a structured uncertainty and
+
+$$
+G(s)=\left[\begin{array}{ll}
+G_{11}(s) & G_{12}(s) \\
+G_{21}(s) & G_{22}(s)
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty} .
+$$
+
+Then $\mathcal{F}_{u}(G, \Delta) \in \mathcal{R} \mathcal{H}_{\infty}$ does not necessarily imply $\left(I-G_{11} \Delta\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ whether $\Delta$ is in an open ball or is in a closed ball. For example, consider
+
+$$
+G(s)=\left[\begin{array}{cc:c}
+\frac{1}{s+1} & 0 & 1 \\
+0 & \frac{10}{s+1} & 0 \\
+\hdashline 1 & 0 & 0
+\end{array}\right]
+$$
+
+and $\Delta=\left[\begin{array}{cc}\delta_{1} & \\ & \delta_{2}\end{array}\right]$ with $\|\Delta\|_{\infty}<1$. Then $\mathcal{F}_{u}(G, \Delta)=\frac{1}{1-\delta_{1} \frac{1}{s+1}} \in \mathcal{R} \mathcal{H}_{\infty}$ for all admissible $\Delta\left(\|\Delta\|_{\infty}<1\right)$ but $\left(I-G_{11} \Delta\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ is true only for $\|\Delta\|_{\infty}<0.1 . \quad \diamond$
+
+\subsection*{10.3.2 Robust Performance}
+Often, stability is not the only property of a closed-loop system that must be robust to perturbations. Typically, there are exogenous disturbances acting on the system (wind gusts, sensor noise) that result in tracking and regulation errors. Under perturbation, the effect that these disturbances have on error signals can greatly increase. In most cases, long before the onset of instability, the closed-loop performance will degrade to the point of unacceptability (hence the need for a "robust performance" test). Such a test will indicate the worst-case level of performance degradation associated with a given level of perturbations.
+
+Assume $G_{p}$ is a stable, real-rational, proper transfer function with $q_{1}+q_{2}$ inputs and $p_{1}+p_{2}$ outputs. Partition $G_{p}$ in the obvious manner
+
+$$
+G_{p}(s)=\left[\begin{array}{ll}
+G_{11} & G_{12} \\
+G_{21} & G_{22}
+\end{array}\right]
+$$
+
+so that $G_{11}$ has $q_{1}$ inputs and $p_{1}$ outputs, and so on. Let $\boldsymbol{\Delta} \subset \mathbb{C}^{q_{1} \times p_{1}}$ be a block structure, as in equation (10.1). Define an augmented block structure:
+
+$$
+\Delta_{P}:=\left\{\left[\begin{array}{cc}
+\Delta & 0 \\
+0 & \Delta_{f}
+\end{array}\right]: \Delta \in \Delta, \Delta_{f} \in \mathbb{C}^{q_{2} \times p_{2}}\right\}
+$$
+
+The setup is to address theoretically the robust performance questions about the following loop:\\
+\includegraphics[max width=\textwidth, center]{2025_10_18_dc8bb81e25e2e32bb857g-21}
+
+The transfer function from $w$ to $z$ is denoted by $\mathcal{F}_{u}\left(G_{p}, \Delta\right)$.\\
+Theorem 10.8 Let $\beta>0$. For all $\Delta(s) \in \mathcal{M}(\boldsymbol{\Delta})$ with $\|\Delta\|_{\infty}<\frac{1}{\beta}$, the loop shown above is well-posed, internally stable, and $\left\|\mathcal{F}_{u}\left(G_{p}, \Delta\right)\right\|_{\infty} \leq \beta$ if and only if
+
+$$
+\sup _{\omega \in \mathbb{R}} \mu_{\boldsymbol{\Delta}_{P}}\left(G_{p}(j \omega)\right) \leq \beta
+$$
+
+Note that by internal stability, $\sup _{\omega \in \mathbb{R}} \mu_{\Delta}\left(G_{11}(j \omega)\right) \leq \beta$, then the proof of this theorem is exactly along the lines of the earlier proof for Theorem 10.7, but also appeals to Theorem 10.6. This is a remarkably useful theorem. It says that a robust performance problem is equivalent to a robust stability problem with augmented uncertainty $\Delta$, as shown in Figure 10.5.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-21(1)}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.5: Robust performance vs robust stability}
+\end{center}
+\end{figure}
+
+Example 10.4 We shall consider again the HIMAT problem from Example 9.1. Use the Simulink block diagram in Example 9.1 and run the following commands to get an interconnection model $\hat{G}$, an $\mathcal{H}_{\infty}$ stabilizing controller $K$ and a closed-loop transfer matrix $G_{p}(s)=\mathcal{F}_{\ell}(\hat{G}, K)$. (Do not bother to figure out how hinfsyn works; it will be considered in detail in Chapter 14.)\\
+$\gg[\mathbf{A}, \mathbf{B}, \mathbf{C}, \mathbf{D}]=\operatorname{linmod}\left({ }^{\prime}\right.$ aircraft $\left.^{\prime}\right)$\\
+$\gg \hat{\mathbf{G}}=\operatorname{pck}(\mathbf{A}, \mathbf{B}, \mathbf{C}, \mathbf{D}) ;$\\
+$\gg\left[\mathbf{K}, \mathbf{G}_{\mathbf{p}}, \gamma\right]=\operatorname{hinfsyn}(\hat{\mathbf{G}}, \mathbf{2}, \mathbf{2}, \mathbf{0}, \mathbf{1 0}, \mathbf{0 . 0 0 1}, \mathbf{2}) ;$\\
+which gives $\gamma=1.8612=\left\|G_{p}\right\|_{\infty}$, a stabilizing controller $K$, and a closed loop transfer matrix $G_{p}$ :
+
+$$
+\left[\begin{array}{c}
+z_{1} \\
+z_{2} \\
+\hdashline e_{1} \\
+e_{2}
+\end{array}\right]=G_{p}(s)\left[\begin{array}{c}
+p_{1} \\
+p_{2} \\
+\hdashline d_{1} \\
+d_{2} \\
+n_{1} \\
+n_{2}
+\end{array}\right], \quad G_{p}(s)=\left[\begin{array}{cc}
+G_{p 11} & G_{p 12} \\
+G_{p 21} & G_{p 22}
+\end{array}\right]
+$$
+
+1.5
+
+Figure 10.6: Singular values of $G_{p}(j \omega)$
+
+Now generate the singular value frequency responses of $G_{p}$ :\\
+$\gg \mathrm{w}=\operatorname{logspace}(-3,3,300) ;$\\
+$\gg \mathbf{G} \mathbf{p f}=\mathbf{f r} \mathbf{s p}\left(\mathbf{G}_{\mathbf{p}}, \mathbf{w}\right) ; \quad \% G p f$ is the frequency response of $G_{p} ;$\\
+$\gg[\mathbf{u}, \mathbf{s}, \mathbf{v}]=\operatorname{vsvd}(\mathbf{G} \mathbf{p f}) ;$\\
+$\gg \operatorname{vplot}\left({ }^{\prime} \operatorname{liv}, \mathbf{m}^{\prime}, \mathbf{s}\right)$\\
+The singular value frequency responses of $G_{p}$ are shown in Figure 10.6. To test the robust stability, we need to compute $\left\|G_{p 11}\right\|_{\infty}$ :\\
+$\gg \mathbf{G}_{\mathbf{p} \mathbf{1 1}}=\operatorname{sel}\left(\mathbf{G}_{\mathbf{p}}, \mathbf{1}: \mathbf{2}, \mathbf{1}: \mathbf{2}\right) ;$\\
+$\gg$ norm\_of\_ $\mathbf{G}_{\mathbf{p 1 1}}=\operatorname{hinfnorm}\left(\mathbf{G}_{\mathbf{p 1 1}}, \mathbf{0 . 0 0 1}\right)$;\\
+which gives $\left\|G_{P 11}\right\|_{\infty}=0.933<1$. So the system is robustly stable. To check the robust performance, we shall compute the $\mu_{\Delta_{P}}\left(G_{p}(j \omega)\right)$ for each frequency with
+
+$$
+\Delta_{P}=\left[\begin{array}{cc}
+\Delta & \\
+& \Delta_{f}
+\end{array}\right], \Delta \in \mathbb{C}^{2 \times 2}, \quad \Delta_{f} \in \mathbb{C}^{4 \times 2}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-23}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.7: \$\textbackslash mu\_\{\textbackslash Delta\_\{P}\}\textbackslash left(G\_\{p\}(j \textbackslash omega)\textbackslash right)\$ and $\bar{\sigma}\left(G_{p}(j \omega)\right)$\}\end{center}
+\end{figure}
+
+$\gg$ blk $=[2,2 ; 4,2] ;$\\
+$\gg[$ bnds,dvec,sens,pvec $]=\mathrm{mu}(\mathrm{Gpf}, \mathrm{blk}) ;$\\
+$\gg \operatorname{vplot}\left({ }^{\prime} \operatorname{liv}, \mathbf{m}^{\prime}, \operatorname{vnorm}(\mathbf{G p f})\right.$, bnds $)$\\
+$\gg$ title('Maximum Singular Value and $\mathbf{m u}^{\prime}$ )
+
+\begin{displayquote}
+  \begin{displayquote}
+xlabel('frequency(rad/sec)')\\
+$\gg \operatorname{text}(0.01,1.7, '$ maximum singular value')\\
+$\gg \operatorname{text}(0.5,0.8, ' m u$ bounds')\\
+The structured singular value $\mu_{\Delta_{P}}\left(G_{p}(j \omega)\right)$ and $\bar{\sigma}\left(G_{p}(j \omega)\right)$ are shown in Figure 10.7. It is clear that the robust performance is not satisfied. Note that
+  \end{displayquote}
+\end{displayquote}
+
+$$
+\max _{\|\Delta\|_{\infty} \leq 1}\left\|\mathcal{F}_{u}\left(G_{p}, \Delta\right)\right\|_{\infty} \leq \gamma \Longleftrightarrow \sup _{\omega} \mu_{\Delta_{P}}\left(\left[\begin{array}{cc}
+G_{p 11} & G_{p 12} \\
+G_{p 21} / \gamma & G_{p 22} / \gamma
+\end{array}\right]\right) \leq 1 .
+$$
+
+Using a bisection algorithm, we can also find the worst performance:
+
+$$
+\max _{\|\Delta\|_{\infty} \leq 1}\left\|\mathcal{F}_{u}\left(G_{p}, \Delta\right)\right\|_{\infty}=12.7824
+$$
+
+\subsection*{10.3.3 Two-Block $\mu$ : Robust Performance Revisited}
+Suppose that the uncertainty block is given by
+
+$$
+\Delta=\left[\begin{array}{ll}
+\Delta_{1} & \\
+& \Delta_{2}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+with $\|\Delta\|_{\infty}<1$ and that the interconnection model $G$ is given by
+
+$$
+G(s)=\left[\begin{array}{ll}
+G_{11}(s) & G_{12}(s) \\
+G_{21}(s) & G_{22}(s)
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+Then the closed-loop system is well-posed and internally stable iff $\sup _{\omega} \mu_{\Delta}(G(j \omega)) \leq 1$. Let
+
+$$
+D_{\omega}=\left[\begin{array}{cc}
+d_{\omega} I & \\
+& I
+\end{array}\right], \quad d_{\omega} \in \mathbb{R}_{+}
+$$
+
+Then
+
+$$
+D_{\omega} G(j \omega) D_{\omega}^{-1}=\left[\begin{array}{cc}
+G_{11}(j \omega) & d_{\omega} G_{12}(j \omega) \\
+\frac{1}{d_{\omega}} G_{21}(j \omega) & G_{22}(j \omega)
+\end{array}\right]
+$$
+
+Hence, by Theorem 10.4, at each frequency $\omega$
+
+\[
+\mu_{\Delta}(G(j \omega))=\inf _{d_{\omega} \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+G_{11}(j \omega) & d_{\omega} G_{12}(j \omega)  \tag{10.20}\\
+\frac{1}{d_{\omega}} G_{21}(j \omega) & G_{22}(j \omega)
+\end{array}\right]\right)
+\]
+
+Since the minimization is convex in $\log d_{\omega}$ (see, Doyle [1982]), the optimal $d_{\omega}$ can be found by a search; however, two approximations to $d_{\omega}$ can be obtained easily by approximating the right-hand side of equation (10.20):\\
+(1) Note that
+
+$$
+\begin{aligned}
+& \mu_{\Delta}(G(j \omega)) \leq \inf _{d_{\omega} \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+\left\|G_{11}(j \omega)\right\| & d_{\omega}\left\|G_{12}(j \omega)\right\| \\
+\frac{1}{d_{\omega}}\left\|G_{21}(j \omega)\right\| & \left\|G_{22}(j \omega)\right\|
+\end{array}\right]\right) \\
+\leq & \sqrt{\inf _{d_{\omega} \in \mathbb{R}_{+}}\left(\left\|G_{11}(j \omega)\right\|^{2}+d_{\omega}^{2}\left\|G_{12}(j \omega)\right\|^{2}+\frac{1}{d_{\omega}^{2}}\left\|G_{21}(j \omega)\right\|^{2}+\left\|G_{22}(j \omega)\right\|^{2}\right)} \\
+= & \sqrt{\left\|G_{11}(j \omega)\right\|^{2}+\left\|G_{22}(j \omega)\right\|^{2}+2\left\|G_{12}(j \omega)\right\|\left\|G_{21}(j \omega)\right\|}
+\end{aligned}
+$$
+
+with the minimizing $d_{\omega}$ given by
+
+\[
+\hat{d}_{\omega}= \begin{cases}\sqrt{\frac{\left\|G_{21}(j \omega)\right\|}{\left\|G_{12}(j \omega)\right\|}} & \text { if } \quad G_{12} \neq 0 \quad \& \quad G_{21} \neq 0  \tag{10.21}\\ 0 & \text { if } \quad G_{21}=0 \\ \infty & \text { if } \quad G_{12}=0\end{cases}
+\]
+
+(2) Alternative approximation can be obtained by using the Frobenius norm:
+
+$$
+\begin{aligned}
+& \mu_{\Delta}(G(j \omega)) \leq \inf _{d_{\omega} \in \mathbb{R}_{+}}\left\|\left[\begin{array}{cc}
+G_{11}(j \omega) & d_{\omega} G_{12}(j \omega) \\
+\frac{1}{d_{\omega}} G_{21}(j \omega) & G_{22}(j \omega)
+\end{array}\right]\right\|_{F} \\
+= & \sqrt{\inf _{d_{\omega} \in \mathbb{R}_{+}}\left(\left\|G_{11}(j \omega)\right\|_{F}^{2}+d_{\omega}^{2}\left\|G_{12}(j \omega)\right\|_{F}^{2}+\frac{1}{d_{\omega}^{2}}\left\|G_{21}(j \omega)\right\|_{F}^{2}+\left\|G_{22}(j \omega)\right\|_{F}^{2}\right)} \\
+= & \sqrt{\left\|G_{11}(j \omega)\right\|_{F}^{2}+\left\|G_{22}(j \omega)\right\|_{F}^{2}+2\left\|G_{12}(j \omega)\right\|_{F}\left\|G_{21}(j \omega)\right\|_{F}}
+\end{aligned}
+$$
+
+with the minimizing $d_{\omega}$ given by
+
+\[
+\tilde{d}_{\omega}= \begin{cases}\sqrt{\frac{\left\|G_{21}(j \omega)\right\|_{F}}{\left\|G_{12}(j \omega)\right\|_{F}}} & \text { if } G_{12} \neq 0 \quad \& \quad G_{21} \neq 0  \tag{10.22}\\ 0 & \text { if } G_{21}=0 \\ \infty & \text { if } G_{12}=0\end{cases}
+\]
+
+It can be shown that the approximations for the scalar $d_{\omega}$ obtained previously are exact for a $2 \times 2$ matrix $G$. For higher dimensional $G$, the approximations for $d_{\omega}$ are still reasonably good. Hence an approximation of $\mu$ can be obtained as
+
+\[
+\mu_{\Delta}(G(j \omega)) \leq \bar{\sigma}\left(\left[\begin{array}{cc}
+G_{11}(j \omega) & \hat{d}_{\omega} G_{12}(j \omega)  \tag{10.23}\\
+\frac{1}{\hat{d}_{\omega}} G_{21}(j \omega) & G_{22}(j \omega)
+\end{array}\right]\right)
+\]
+
+or, alternatively, as
+
+\[
+\mu_{\Delta}(G(j \omega)) \leq \bar{\sigma}\left(\left[\begin{array}{cc}
+G_{11}(j \omega) & \tilde{d}_{\omega} G_{12}(j \omega)  \tag{10.24}\\
+\frac{1}{\tilde{d}_{\omega}} G_{21}(j \omega) & G_{22}(j \omega)
+\end{array}\right]\right)
+\]
+
+We can now see how these approximated $\mu$ tests are compared with the sufficient conditions obtained in Chapter 8.
+
+Example 10.5 Consider again the robust performance problem of a system with output multiplicative uncertainty in Chapter 8 (see Figure 8.10):
+
+$$
+P_{\Delta}=\left(I+W_{1} \Delta W_{2}\right) P, \quad\|\Delta\|_{\infty}<1
+$$
+
+Then it is easy to show that the problem can be put in the general framework by selecting
+
+$$
+G(s)=\left[\begin{array}{cc}
+-W_{2} T_{o} W_{1} & -W_{2} T_{o} W_{d} \\
+W_{e} S_{o} W_{1} & W_{e} S_{o} W_{d}
+\end{array}\right]
+$$
+
+and that the robust performance condition is satisfied if and only if
+
+
+\begin{equation*}
+\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1 \tag{10.25}
+\end{equation*}
+
+
+and
+
+
+\begin{equation*}
+\left\|\mathcal{F}_{u}(G, \Delta)\right\|_{\infty} \leq 1 \tag{10.26}
+\end{equation*}
+
+
+for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$. But equations (10.25) and (10.26) are satisfied iff for each frequency $\omega$
+
+$$
+\mu_{\Delta}(G(j \omega))=\inf _{d_{\omega} \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+-W_{2} T_{o} W_{1} & -d_{\omega} W_{2} T_{o} W_{d} \\
+\frac{1}{d_{\omega}} W_{e} S_{o} W_{1} & W_{e} S_{o} W_{d}
+\end{array}\right]\right) \leq 1
+$$
+
+Note that, in contrast to the sufficient condition obtained in Chapter 8, this condition is an exact test for robust performance. To compare the $\mu$ test with the criteria obtained in Chapter 8, some upper-bounds for $\mu$ can be derived. Let
+
+$$
+d_{\omega}=\sqrt{\frac{\left\|W_{e} S_{o} W_{1}\right\|}{\left\|W_{2} T_{o} W_{d}\right\|}}
+$$
+
+Then, using the first approximation for $\mu$, we get
+
+$$
+\begin{aligned}
+\mu_{\Delta}(G(j \omega)) & \leq \sqrt{\left\|W_{2} T_{o} W_{1}\right\|^{2}+\left\|W_{e} S_{o} W_{d}\right\|^{2}+2\left\|W_{2} T_{o} W_{d}\right\|\left\|W_{e} S_{o} W_{1}\right\|} \\
+& \leq \sqrt{\left\|W_{2} T_{o} W_{1}\right\|^{2}+\left\|W_{e} S_{o} W_{d}\right\|^{2}+2 \kappa\left(W_{1}^{-1} W_{d}\right)\left\|W_{2} T_{o} W_{1}\right\|\left\|W_{e} S_{o} W_{d}\right\|} \\
+& \leq\left\|W_{2} T_{o} W_{1}\right\|+\kappa\left(W_{1}^{-1} W_{d}\right)\left\|W_{e} S_{o} W_{d}\right\|
+\end{aligned}
+$$
+
+where $W_{1}$ is assumed to be invertible in the last two inequalities. The last term is exactly the sufficient robust performance criteria obtained in Chapter 8. It is clear that any term preceding the last forms a tighter test since $\kappa\left(W_{1}^{-1} W_{d}\right) \geq 1$. Yet another alternative sufficient test can be obtained from the preceding sequence of inequalities:
+
+$$
+\mu_{\Delta}(G(j \omega)) \leq \sqrt{\kappa\left(W_{1}^{-1} W_{d}\right)}\left(\left\|W_{2} T_{o} W_{1}\right\|+\left\|W_{e} S_{o} W_{d}\right\|\right)
+$$
+
+Note that this sufficient condition is not easy to get from the approach taken in Chapter 8 and is potentially less conservative than the bounds derived there.
+
+Next we consider the skewed specification problem, but first the following lemma is needed in the sequel.
+
+Lemma 10.9 Suppose $\bar{\sigma}=\sigma_{1} \geq \sigma_{2} \geq \ldots \geq \sigma_{m}=\underline{\sigma}>0$, then
+
+$$
+\inf _{d \in \mathbb{R}_{+}} \max _{i}\left\{\left(d \sigma_{i}\right)^{2}+\frac{1}{\left(d \sigma_{i}\right)^{2}}\right\}=\frac{\bar{\sigma}}{\underline{\sigma}}+\frac{\underline{\sigma}}{\bar{\sigma}}
+$$
+
+Proof. Consider a function $y=x+1 / x$; then $y$ is a convex function and the maximization over a closed interval is achieved at the boundary of the interval. Hence for any fixed $d$
+
+$$
+\max _{i}\left\{\left(d \sigma_{i}\right)^{2}+\frac{1}{\left(d \sigma_{i}\right)^{2}}\right\}=\max \left\{(d \bar{\sigma})^{2}+\frac{1}{(d \bar{\sigma})^{2}}, \quad(d \underline{\sigma})^{2}+\frac{1}{(d \underline{\sigma})^{2}}\right\}
+$$
+
+Then the minimization over $d$ is obtained iff
+
+$$
+(d \bar{\sigma})^{2}+\frac{1}{(d \bar{\sigma})^{2}}=(d \underline{\sigma})^{2}+\frac{1}{(d \underline{\sigma})^{2}}
+$$
+
+which gives $d^{2}=\frac{1}{\bar{\sigma} \underline{\sigma}}$. The result then follows from substituting $d$.
+
+Example 10.6 As another example, consider again the skewed specification problem from Chapter 8. Then the corresponding $G$ matrix is given by
+
+$$
+G=\left[\begin{array}{cc}
+-W_{2} T_{i} W_{1} & -W_{2} K S_{o} W_{d} \\
+W_{e} S_{o} P W_{1} & W_{e} S_{o} W_{d}
+\end{array}\right]
+$$
+
+So the robust performance specification is satisfied iff
+
+$$
+\mu_{\Delta}(G(j \omega))=\inf _{d_{\omega} \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+-W_{2} T_{i} W_{1} & -d_{\omega} W_{2} K S_{o} W_{d} \\
+\frac{1}{d_{\omega}} W_{e} S_{o} P W_{1} & W_{e} S_{o} W_{d}
+\end{array}\right]\right) \leq 1
+$$
+
+for all $\omega \geq 0$. As in the last example, an upper-bound can be obtained by taking
+
+$$
+d_{\omega}=\sqrt{\frac{\left\|W_{e} S_{o} P W_{1}\right\|}{\left\|W_{2} K S_{o} W_{d}\right\|}}
+$$
+
+Then
+
+$$
+\mu_{\Delta}(G(j \omega)) \leq \sqrt{\kappa\left(W_{d}^{-1} P W_{1}\right)}\left(\left\|W_{2} T_{i} W_{1}\right\|+\left\|W_{e} S_{o} W_{d}\right\|\right)
+$$
+
+In particular, this suggests that the robust performance margin is inversely proportional to the square root of the plant condition number if $W_{d}=I$ and $W_{1}=I$. This can be further illustrated by considering a plant-inverting control system.
+
+To simplify the exposition, we shall make the following assumptions:
+
+$$
+W_{e}=w_{s} I, W_{d}=I, W_{1}=I, W_{2}=w_{t} I
+$$
+
+and $P$ is stable and has a stable inverse (i.e., minimum phase) ( $P$ can be strictly proper). Furthermore, we shall assume that the controller has the form
+
+$$
+K(s)=P^{-1}(s) l(s)
+$$
+
+where $l(s)$ is a scalar loop transfer function that makes $K(s)$ proper and stabilizes the closed loop. This compensator produces diagonal sensitivity and complementary sensitivity functions with identical diagonal elements; namely,
+
+$$
+S_{o}=S_{i}=\frac{1}{1+l(s)} I, \quad T_{o}=T_{i}=\frac{l(s)}{1+l(s)} I
+$$
+
+Denote
+
+$$
+\varepsilon(s)=\frac{1}{1+l(s)}, \quad \tau(s)=\frac{l(s)}{1+l(s)}
+$$
+
+and substitute these expressions into $G$; we get
+
+$$
+G=\left[\begin{array}{cc}
+-w_{t} \tau I & -w_{t} \tau P^{-1} \\
+w_{s} \varepsilon P & w_{s} \varepsilon I
+\end{array}\right]
+$$
+
+The structured singular value for $G$ at frequency $\omega$ can be computed by
+
+$$
+\mu_{\Delta}(G(j \omega))=\inf _{d \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+-w_{t} \tau I & -w_{t} \tau(d P)^{-1} \\
+w_{s} \varepsilon d P & w_{s} \varepsilon I
+\end{array}\right]\right)
+$$
+
+Let the singular value decomposition of $P(j \omega)$ at frequency $\omega$ be
+
+$$
+P(j \omega)=U \Sigma V^{*}, \quad \Sigma=\operatorname{diag}\left(\sigma_{1}, \sigma_{2}, \ldots, \sigma_{m}\right)
+$$
+
+with $\sigma_{1}=\bar{\sigma}$ and $\sigma_{m}=\underline{\sigma}$, where $m$ is the dimension of $P$. Then
+
+$$
+\mu_{\Delta}(G(j \omega))=\inf _{d \in \mathbb{R}_{+}} \bar{\sigma}\left(\left[\begin{array}{cc}
+-w_{t} \tau I & -w_{t} \tau(d \Sigma)^{-1} \\
+w_{s} \varepsilon d \Sigma & w_{s} \varepsilon I
+\end{array}\right]\right)
+$$
+
+since unitary operations do not change the singular values of a matrix. Note that
+
+$$
+\left[\begin{array}{cc}
+-w_{t} \tau I & -w_{t} \tau(d \Sigma)^{-1} \\
+w_{s} \varepsilon d \Sigma & w_{s} \varepsilon I
+\end{array}\right]=P_{1} \operatorname{diag}\left(M_{1}, M_{2}, \ldots, M_{m}\right) P_{2}
+$$
+
+where $P_{1}$ and $P_{2}$ are permutation matrices and where
+
+$$
+M_{i}=\left[\begin{array}{cc}
+-w_{t} \tau & -w_{t} \tau\left(d \sigma_{i}\right)^{-1} \\
+w_{s} \varepsilon d \sigma_{i} & w_{s} \varepsilon
+\end{array}\right]
+$$
+
+Hence
+
+$$
+\begin{aligned}
+\mu_{\Delta}(G(j \omega)) & =\inf _{d \in \mathbb{R}_{+}} \max _{i} \bar{\sigma}\left(\left[\begin{array}{cc}
+-w_{t} \tau & -w_{t} \tau\left(d \sigma_{i}\right)^{-1} \\
+w_{s} \varepsilon d \sigma_{i} & w_{s} \varepsilon
+\end{array}\right]\right) \\
+& =\inf _{d \in \mathbb{R}_{+}} \max _{i} \bar{\sigma}\left(\left[\begin{array}{c}
+-w_{t} \tau \\
+w_{s} \varepsilon d \sigma_{i}
+\end{array}\right]\left[\begin{array}{cc}
+1 & \left(d \sigma_{i}\right)^{-1}
+\end{array}\right]\right) \\
+& =\inf _{d \in \mathbb{R}_{+}} \max _{i} \sqrt{\left(1+\left|d \sigma_{i}\right|^{-2}\right)\left(\left|w_{s} \varepsilon d \sigma_{i}\right|^{2}+\left|w_{t} \tau\right|^{2}\right)} \\
+& =\inf _{d \in \mathbb{R}_{+}} \max _{i} \sqrt{\left|w_{s} \varepsilon\right|^{2}+\left|w_{t} \tau\right|^{2}+\left|w_{s} \varepsilon d \sigma_{i}\right|^{2}+\left|\frac{w_{t} \tau}{d \sigma_{i}}\right|^{2}}
+\end{aligned}
+$$
+
+Using Lemma 10.9, it is easy to show that the maximum is achieved at either $\bar{\sigma}$ or $\underline{\sigma}$ and that optimal $d$ is given by
+
+$$
+d^{2}=\frac{\left|w_{t} \tau\right|}{\left|w_{s} \varepsilon\right| \underline{\sigma} \bar{\sigma}}
+$$
+
+so the structured singular value is
+
+
+\begin{equation*}
+\mu_{\Delta}(G(j \omega))=\sqrt{\left|w_{s} \varepsilon\right|^{2}+\left|w_{t} \tau\right|^{2}+\left|w_{s} \varepsilon\right|\left|w_{t} \tau\right|\left[\kappa(P)+\frac{1}{\kappa(P)}\right]} \tag{10.27}
+\end{equation*}
+
+
+Note that if $\left|w_{s} \varepsilon\right|$ and $\left|w_{t} \tau\right|$ are not too large, which is guaranteed if the nominal performance and robust stability conditions are satisfied, then the structured singular value is proportional to the square root of the plant condition number:
+
+
+\begin{equation*}
+\mu_{\Delta}(G(j \omega)) \approx \sqrt{\left|w_{s} \varepsilon\right|\left|w_{t} \tau\right| \kappa(P)} \tag{10.28}
+\end{equation*}
+
+
+This confirms our intuition that an ill-conditioned plant with skewed specifications is hard to control.
+
+\subsection*{10.3.4 Approximation of Multiple Full Block $\mu$}
+The approximations given in the last subsection can be generalized to the multiple-block $\mu$ problem by assuming that $M$ is partitioned consistently with the structure of
+
+$$
+\Delta=\operatorname{diag}\left(\Delta_{1}, \Delta_{2}, \ldots, \Delta_{F}\right)
+$$
+
+so that
+
+$$
+M=\left[\begin{array}{cccc}
+M_{11} & M_{12} & \cdots & M_{1 F} \\
+M_{21} & M_{22} & \cdots & M_{2 F} \\
+\vdots & \vdots & & \vdots \\
+M_{F 1} & M_{F 2} & \cdots & M_{F F}
+\end{array}\right]
+$$
+
+and
+
+$$
+D=\operatorname{diag}\left(d_{1} I, \ldots, d_{F-1} I, I\right)
+$$
+
+Now
+
+$$
+D M D^{-1}=\left[M_{i j} \frac{d_{i}}{d_{j}}\right], d_{F}:=1
+$$
+
+Hence
+
+$$
+\begin{aligned}
+\mu_{\Delta}(M) & \leq \inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left[M_{i j} \frac{d_{i}}{d_{j}}\right] \\
+& \leq \inf _{D \in \mathcal{D}} \bar{\sigma}\left[\left\|M_{i j}\right\| \frac{d_{i}}{d_{j}}\right] \leq \inf _{D \in \mathcal{D}} \sqrt{\sum_{i=1}^{F} \sum_{j=1}^{F}\left\|M_{i j}\right\|^{2} \frac{d_{i}^{2}}{d_{j}^{2}}} \\
+& \leq \inf _{D \in \mathcal{D}} \sqrt{\sum_{i=1}^{F} \sum_{j=1}^{F}\left\|M_{i j}\right\|_{F}^{2} \frac{d_{i}^{2}}{d_{j}^{2}}}
+\end{aligned}
+$$
+
+An approximate $D$ can be found by solving the following minimization problem:
+
+$$
+\inf _{D \in \mathcal{D}} \sum_{i=1}^{F} \sum_{j=1}^{F}\left\|M_{i j}\right\|^{2} \frac{d_{i}^{2}}{d_{j}^{2}}
+$$
+
+or, more conveniently, by minimizing
+
+$$
+\inf _{D \in \mathcal{D}} \sum_{i=1}^{F} \sum_{j=1}^{F}\left\|M_{i j}\right\|_{F}^{2} \frac{d_{i}^{2}}{d_{j}^{2}}
+$$
+
+with $d_{F}=1$. The optimal $d_{i}$ minimizing the preceding two problems satisfies, respectively,
+
+
+\begin{equation*}
+d_{k}^{4}=\frac{\sum_{i \neq k}\left\|M_{i k}\right\|^{2} d_{i}^{2}}{\sum_{j \neq k}\left\|M_{k j}\right\|^{2} / d_{j}^{2}}, \quad k=1,2, \ldots, F-1 \tag{10.29}
+\end{equation*}
+
+
+and
+
+
+\begin{equation*}
+d_{k}^{4}=\frac{\sum_{i \neq k}\left\|M_{i k}\right\|_{F}^{2} d_{i}^{2}}{\sum_{j \neq k}\left\|M_{k j}\right\|_{F}^{2} / d_{j}^{2}}, \quad k=1,2, \ldots, F-1 \tag{10.30}
+\end{equation*}
+
+
+Using these relations, $d_{k}$ can be obtained by iterations.
+
+Example 10.7 Consider a $3 \times 3$ complex matrix
+
+$$
+M=\left[\begin{array}{ccc}
+1+j & 10-2 j & -20 j \\
+5 j & 3+j & -1+3 j \\
+-2 & j & 4-j
+\end{array}\right]
+$$
+
+with structured $\Delta=\operatorname{diag}\left(\delta_{1}, \delta_{2}, \delta_{3}\right)$. The largest singular value of $M$ is $\bar{\sigma}(M)=22.9094$ and the structured singular value of $M$ computed using the $\mu$ Analysis and Synthesis Toolbox is equal to its upper-bound:
+
+$$
+\mu_{\Delta}(M)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)=11.9636
+$$
+
+with the optimal scaling $D_{\text {opt }}=\operatorname{diag}(0.3955,0.6847,1)$. The optimal $D$ minimizing
+
+$$
+\inf _{D \in \mathcal{D}} \sum_{i=1}^{F} \sum_{j=1}^{F}\left\|M_{i j}\right\|^{2} \frac{d_{i}^{2}}{d_{j}^{2}}
+$$
+
+is $D_{\text {subopt }}=\operatorname{diag}(0.3212,0.4643,1)$, which is solved from equation (10.29). Using this $D_{\text {subopt }}$, we obtain another upper-bound for the structured singular value:
+
+$$
+\mu_{\boldsymbol{\Delta}}(M) \leq \bar{\sigma}\left(D_{\text {subopt }} M D_{\text {subopt }}^{-1}\right)=12.2538
+$$
+
+One may also use this $D_{\text {subopt }}$ as an initial guess for the exact optimization.
+
+\subsection*{10.4 Overview of $\mu$ Synthesis}
+This section briefly outlines various synthesis methods. The details are somewhat complicated and are treated in the other parts of this book. At this point, we simply want to point out how the analysis theory discussed in the previous sections leads naturally to synthesis questions.
+
+From the analysis results, we see that each case eventually leads to the evaluation of
+
+
+\begin{equation*}
+\|M\|_{\alpha} \quad \alpha=2, \infty, \text { or } \mu \tag{10.31}
+\end{equation*}
+
+
+for some transfer matrix $M$. Thus when the controller is put back into the problem, it involves only a simple linear fractional transformation, as shown in Figure 10.8, with
+
+$$
+M=\mathcal{F}_{\ell}(G, K)=G_{11}+G_{12} K\left(I-G_{22} K\right)^{-1} G_{21}
+$$
+
+where $G=\left[\begin{array}{ll}G_{11} & G_{12} \\ G_{21} & G_{22}\end{array}\right]$ is chosen, respectively, as
+
+\begin{itemize}
+  \item nominal performance only $(\Delta=0): G=\left[\begin{array}{ll}P_{22} & P_{23} \\ P_{32} & P_{33}\end{array}\right]$
+  \item robust stability only: $G=\left[\begin{array}{ll}P_{11} & P_{13} \\ P_{31} & P_{33}\end{array}\right]$
+  \item robust performance: $G=P=\left[\begin{array}{cc:c}P_{11} & P_{12} & P_{13} \\ P_{21} & P_{22} & P_{23} \\ \hdashline P_{31} & P_{32} & P_{33}\end{array}\right]$.
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-32}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.8: Synthesis framework}
+\end{center}
+\end{figure}
+
+Each case then leads to the synthesis problem
+
+
+\begin{equation*}
+\min _{K}\left\|\mathcal{F}_{\ell}(G, K)\right\|_{\alpha} \quad \text { for } \alpha=2, \infty, \text { or } \quad \mu \tag{10.32}
+\end{equation*}
+
+
+which is subject to the internal stability of the nominal.\\
+The solutions of these problems for $\alpha=2$ and $\infty$ are the focus of the rest of this book. The $\alpha=2$ case was already known in the 1960s, and the result presented in this book is simply a new interpretation. The two Riccati solutions for the $\alpha=\infty$ case were new products of the late 1980s.
+
+The synthesis for the $\alpha=\mu$ case is not yet fully solved. Recall that $\mu$ may be obtained by scaling and applying $\|\cdot\|_{\infty}$ (for $F \leq 3$ and $S=0$ ); a reasonable approach is to "solve"
+
+
+\begin{equation*}
+\min _{K} \inf _{D, D^{-1} \in \mathcal{H}_{\infty}}\left\|D \mathcal{F}_{\ell}(G, K) D^{-1}\right\|_{\infty} \tag{10.33}
+\end{equation*}
+
+
+by iteratively solving for $K$ and $D$. This is the so-called $D-K$ iteration. The stable and minimum phase scaling matrix $D(s)$ is chosen such that $D(s) \Delta(s)=\Delta(s) D(s)$. [Note\\
+that $D(s)$ is not necessarily belonging to $\mathcal{D}$ since $D(s)$ is not necessarily Hermitian, see Remark 10.2.] For a fixed scaling transfer matrix $D, \min _{K}\left\|D \mathcal{F}_{\ell}(G, K) D^{-1}\right\|_{\infty}$ is a standard $\mathcal{H}_{\infty}$ optimization problem that will be solved later in this book. For a given stabilizing controller $K, \inf _{D, D^{-1} \in \mathcal{H}_{\infty}}\left\|D \mathcal{F}_{\ell}(G, K) D^{-1}\right\|_{\infty}$ is a standard convex optimization problem and it can be solved pointwise in the frequency domain:
+
+$$
+\sup _{\omega} \inf _{D_{\omega} \in \mathcal{D}} \bar{\sigma}\left[D_{\omega} \mathcal{F}_{\ell}(G, K)(j \omega) D_{\omega}^{-1}\right] .
+$$
+
+Indeed,
+
+$$
+\inf _{D, D^{-1} \in \mathcal{H}_{\infty}}\left\|D \mathcal{F}_{\ell}(G, K) D^{-1}\right\|_{\infty}=\sup _{\omega} \inf _{D_{\omega} \in \mathcal{D}} \bar{\sigma}\left[D_{\omega} \mathcal{F}_{\ell}(G, K)(j \omega) D_{\omega}^{-1}\right] .
+$$
+
+This follows intuitively from the following arguments: The left-hand side is always no smaller than the right-hand side, and, on the other hand, given $D_{\omega} \in \mathcal{D}$, there is always a real-rational function $D(s)$, stable with stable inverse, such that the Hermitian positive definite factor in the polar decomposition of $D(j \omega)$ uniformly approximates $D_{\omega}$ over $\omega$ in $\mathbb{R}$. In particular, in the case of scalar blocks, the magnitude $|D(j \omega)|$ uniformly approximates $D_{\omega}$ over $\mathbb{R}$.
+
+Note that when $S=0$ (no scalar blocks),
+
+$$
+D_{\omega}=\operatorname{diag}\left(d_{1}^{\omega} I, \ldots, d_{F-1}^{\omega} I, I\right) \in \mathcal{D},
+$$
+
+which is a block diagonal scaling matrix applied pointwise across frequency to the frequency response $\mathcal{F}_{\ell}(G, K)(j \omega)$.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_dc8bb81e25e2e32bb857g-33}
+\captionsetup{labelformat=empty}
+\caption{Figure 10.9: $\mu$ synthesis via scaling}
+\end{center}
+\end{figure}
+
+D-K iterations proceed by performing this two-parameter minimization in sequential fashion: first minimizing over $K$ with $D$ fixed, then minimizing pointwise over $D$ with $K$ fixed, then again over $K$, and again over $D$, etc. Details of this process are summarized in the following steps:\\
+(i) Fix an initial estimate of the scaling matrix $D_{\omega} \in \mathcal{D}$ pointwise across frequency.\\
+(ii) Find scalar transfer functions $d_{i}(s), d_{i}^{-1}(s) \in \mathcal{R} \mathcal{H}_{\infty}$ for $i=1,2, \ldots,(F-1)$ such that $\left|d_{i}(j \omega)\right| \approx d_{i}^{\omega}$. This step can be done using the interpolation theory (Youla and Saito [1967]); however, this will usually result in very high-order transfer functions, which explains why this process is currently done mostly by graphical matching using lower-order transfer functions.\\
+(iii) Let
+
+$$
+D(s)=\operatorname{diag}\left(d_{1}(s) I, \ldots, d_{F-1}(s) I, I\right)
+$$
+
+Construct a state-space model for system
+
+$$
+\hat{G}(s)=\left[\begin{array}{ll}
+D(s) & \\
+& I
+\end{array}\right] G(s)\left[\begin{array}{cc}
+D^{-1}(s) & \\
+& I
+\end{array}\right]
+$$
+
+as shown in Figure 10.9.\\
+(iv) Solve an $\mathcal{H}_{\infty}$-optimization problem to minimize
+
+$$
+\left\|\mathcal{F}_{\ell}(\hat{G}, K)\right\|_{\infty}
+$$
+
+over all stabilizing $K$ 's. Note that this optimization problem uses the scaled version of $G$. Let its minimizing controller be denoted by $\hat{K}$.\\
+(v) Minimize $\bar{\sigma}\left[D_{\omega} \mathcal{F}_{\ell}(G, \hat{K}) D_{\omega}^{-1}\right]$ over $D_{\omega}$, pointwise across frequency. ${ }^{1}$ Note that this evaluation uses the minimizing $\hat{K}$ from the last step, but that $G$ is not scaled. The minimization itself produces a new scaling function. Let this new function be denoted by $\hat{D}_{\omega}$.\\
+(vi) Compare $\hat{D}_{\omega}$ with the previous estimate $D_{\omega}$. Stop if they are close, but otherwise replace $D_{\omega}$ with $\hat{D}_{\omega}$ and return to step (ii).
+
+With either $K$ or $D$ fixed, the global optimum in the other variable may be found using the $\mu$ and $\mathcal{H}_{\infty}$ solutions. Although the joint optimization of $D$ and $K$ is not convex and the global convergence is not guaranteed, many designs have shown that this approach works very well (see, e.g., Balas [1990]). In fact, this is probably the most effective design methodology available today for dealing with such complicated problems. Detailed treatment of $\mu$ analysis is given in Packard and Doyle [1993]. The rest of this book will focus on the $\mathcal{H}_{\infty}$ optimization, which is a fundamental tool for $\mu$ synthesis.
+
+\section*{Related MATLAB Commands: musynfit, musynflp, muftbtch, dkit}
+\subsection*{10.5 Notes and References}
+This chapter is partially based on the lecture notes given by Doyle [1984] and partially based on the lecture notes by Packard [1991] and the paper by Doyle, Packard, and Zhou [1991]. Parts of Section 10.3.3 are based on the paper by Stein and Doyle [1991]. The small $\mu$ theorem for systems with nonrational plants and uncertainties is proven in Tits [1995]. Connections were established in Poolla and Tikku [1995] between the
+
+\footnotetext{${ }^{1}$ The approximate solutions given in the preceding section may be used.
+}
+frequency-dependent D-scaled upper bounds of the structured singular value and the robust performance of a system with arbitrarily slowly varying structured linear perturbations. Robust performance of systems with structured time-varying perturbations was also considered in Shamma [1994] using the constant D-scaled upper bounds of the structured singular value. Other results on $\mu$ can be found in Fan and Tits [1986], Fan, Tits, and Doyle [1991], Packard and Doyle [1993], Packard and Pandey [1993], Young [1993], and references therein.
+
+\subsection*{10.6 Problems}
+Problem 10.1 Let $M$ and $N$ be suitably dimensioned matrices and let $\Delta$ be a structured uncertainty. Prove or disprove\\
+(a) $\mu_{\Delta}(M)=0 \Longrightarrow M=0 ;$\\
+(b) $\mu_{\Delta}\left(M_{1}+M_{2}\right) \leq \mu_{\Delta}\left(M_{1}\right)+\mu_{\Delta}\left(M_{2}\right)$.\\
+(c) $\mu_{\Delta}(\alpha M)=|\alpha| \mu_{\Delta}(M)$.\\
+(d) $\mu_{\Delta}(I)=1$.\\
+(e) $\mu_{\Delta}(M N) \leq \bar{\sigma}(M) \mu_{\Delta}(N)$.\\
+(f) $\mu_{\Delta}(M N) \leq \bar{\sigma}(N) \mu_{\Delta}(M)$.
+
+Problem 10.2 Let $\Delta=\left[\begin{array}{cc}\Delta_{1} & 0 \\ 0 & \Delta_{2}\end{array}\right]$, where $\Delta_{i}$ are structured uncertainties. Show that $\mu_{\Delta}\left(\left[\begin{array}{cc}M_{11} & M_{12} \\ 0 & M_{22}\end{array}\right]\right)=\max \left\{\mu_{\Delta_{1}}\left(M_{11}\right), \mu_{\Delta_{2}}\left(M_{22}\right)\right\}$.
+
+Problem 10.3 Matlab exercise. Let $M$ be a $7 \times 7$ random real matrix. Take the perturbation structure to be
+
+$$
+\boldsymbol{\Delta}=\left\{\left[\begin{array}{ccc}
+\delta_{1} I_{3} & 0 & 0 \\
+0 & \Delta_{2} & 0 \\
+0 & 0 & \delta_{3} I_{2}
+\end{array}\right]: \delta_{1}, \delta_{3} \in \mathbb{C}, \Delta_{2} \in \mathbb{C}^{2 \times 2}\right\}
+$$
+
+Compute $\mu(M)$ and a singularizing perturbation.\\
+Problem 10.4 Let $M=\left[\begin{array}{cc}0 & M_{12} \\ M_{21} & 0\end{array}\right]$ be a complex matrix and let $\Delta=\left[\begin{array}{ll}\Delta_{1} & \\ & \Delta_{2}\end{array}\right]$.\\
+Show that
+
+$$
+\mu_{\Delta}(M)=\sqrt{\bar{\sigma}\left(M_{12}\right) \bar{\sigma}\left(M_{21}\right)}
+$$
+
+Problem 10.5 Let $M=\left[\begin{array}{ll}M_{11} & M_{12} \\ M_{21} & M_{22}\end{array}\right]$ be a complex matrix and let $\Delta=\left[\begin{array}{cc}\Delta_{1} & \\ & \Delta_{2}\end{array}\right]$.\\
+Show that
+
+$$
+\begin{aligned}
+& \sqrt{\bar{\sigma}\left(M_{12}\right) \bar{\sigma}\left(M_{21}\right)}-\max \left\{\bar{\sigma}\left(M_{11}\right), \bar{\sigma}\left(M_{22}\right)\right\} \leq \mu_{\Delta}(M) \\
+& \quad \leq \sqrt{\bar{\sigma}\left(M_{12}\right) \bar{\sigma}\left(M_{21}\right)}+\max \left\{\bar{\sigma}\left(M_{11}\right), \bar{\sigma}\left(M_{22}\right)\right\}
+\end{aligned}
+$$
+
+Problem 10.6 Let $\Delta$ be all diagonal full blocks and $M$ be partitioned as $M=\left[M_{i j}\right]$, where $M_{i j}$ are matrices with suitable dimensions. Show that
+
+$$
+\mu_{\Delta}(M) \leq \pi\left(\left[\left\|M_{i j}\right\|\right]\right)\left(=\rho\left(\left[\left\|M_{i j}\right\|\right]\right)\right)
+$$
+
+where $\pi(\cdot)$ denotes the Perron eigenvalue.\\
+Problem 10.7 Show
+
+$$
+\inf _{D \in \mathbb{C}^{n} \times n}\left\|D M D^{-1}\right\|_{p}=\rho(M)
+$$
+
+where $\|\cdot\|_{p}$ is the induced $p$-norm, $1 \leq p \leq \infty$.\\
+Problem 10.8 Let $D$ be a nonsingular diagonal matrix $D=\operatorname{diag}\left(d_{1}, d_{2}, \ldots, d_{n}\right)$. Show
+
+$$
+\inf _{D}\left\|D M D^{-1}\right\|_{p}=\pi(M)
+$$
+
+if either $M=\left[\left|m_{i} j\right|\right]$ and $1 \leq p \leq \infty$ or $p=1$ or $\infty$. Moreover, the optimal $D$ is given by
+
+$$
+D=\operatorname{diag}\left(y_{1}^{1 / p} / x_{1}^{1 / q}, y_{2}^{1 / p} / x_{2}^{1 / q}, \ldots, y_{n}^{1 / p} / x_{n}^{1 / q}\right)
+$$
+
+where $1 / p+1 / q=1$ and
+
+$$
+\left[\left|m_{i j}\right|\right] x=\pi(M) x, \quad y^{T}\left[\left|m_{i j}\right|\right]=\pi(M) y^{T}
+$$
+
+Problem 10.9 Let $\Delta$ be a structured uncertainty defined in the book. Suppose $M= x y^{*}$ with $x, y \in \mathbb{C}^{n}$. Derive an exact expression for $\mu_{\Delta}(M)$ in terms of the components of $x$ and $y$. [Note that $\Delta=\operatorname{diag}\left(\delta_{1} I, \delta_{2} I, \ldots, \delta_{m} I, \Delta_{1}, \ldots, \Delta_{F}\right)$ and $\mu_{\Delta}(M)= \max _{U \in \mathcal{U}} \rho(M U)=\max _{\Delta \in \mathbf{B} \Delta} \rho(M \Delta)$.]
+
+Problem 10.10 Let $\left\{x_{k}\right\}_{k=0}^{\infty},\left\{z_{k}\right\}_{k=0}^{\infty}$, and $\left\{d_{k}\right\}_{k=0}^{\infty}$ be sequences satisfying
+
+$$
+\left\|x_{k+1}\right\|^{2}+\left\|z_{k}\right\|^{2} \leq \beta^{2}\left(\left\|x_{k}\right\|^{2}+\left\|d_{k}\right\|^{2}\right)
+$$
+
+for some $\beta<1$ and all $k \geq 0$. If $d \in \ell_{2}$, show that both $x \in \ell_{2}$ and $z \in \ell_{2}$ and the norms are bounded by
+
+$$
+\|z\|_{2}^{2}+\left(1-\beta^{2}\right)\|x\|_{2}^{2} \leq \beta^{2}\|d\|_{2}^{2}+\left\|x_{0}\right\|^{2}
+$$
+
+Give a system interpretation of this result.
+
+Problem 10.11 Consider a SISO feedback system shown here with
+
+$$
+P=P_{0}\left(1+W_{1} \Delta_{1}\right)+W_{2} \Delta_{2}, \quad \Delta_{i} \in \mathcal{R} \mathcal{H}_{\infty}, \quad\left\|\Delta_{i}\right\|_{\infty}<1, i=1,2 .
+$$
+
+Suppose $W_{1}$ and $W_{2}$ are stable, and $P$ and $P_{0}$ have the same number of poles in $\operatorname{Re}\{s\}>0$.\\
+\includegraphics[max width=\textwidth, center]{2025_10_18_dc8bb81e25e2e32bb857g-37}\\
+(a) Show that the feedback system is robustly stable if and only if $K$ stabilizes $P_{0}$ and
+
+$$
+\left\|\left|W_{1} T\right|+\left|W_{2} K S\right|\right\|_{\infty} \leq 1
+$$
+
+where
+
+$$
+S=\frac{1}{1+P_{0} K}, \quad T=\frac{P_{0} K}{1+P_{0} K}
+$$
+
+(b) Show that the feedback system has robust performance; that is, $\left\|T_{z d}\right\|_{\infty} \leq 1$, if and only if $K$ stabilizes $P_{0}$ and
+
+$$
+\left\|\left|W_{3} S\right|+\left|W_{1} T\right|+\left|W_{2} K S\right|\right\|_{\infty} \leq 1
+$$
+
+Problem 10.12 In Problem 10.11, find a matrix
+
+$$
+M=\left[\begin{array}{ll}
+M_{11} & M_{12} \\
+M_{21} & M_{22}
+\end{array}\right]
+$$
+
+such that
+
+$$
+z=\mathcal{F}_{u}(M, \Delta) d, \quad \Delta_{s}=\left[\begin{array}{cc}
+\Delta_{1} & \\
+& \Delta_{2}
+\end{array}\right]
+$$
+
+Assume that $K$ stabilizes $P_{0}$. Show that at each frequency
+
+$$
+\mu_{\Delta_{s}}\left(M_{11}\right)=\inf _{D_{s} \in \mathcal{D}_{s}} \bar{\sigma}\left(D_{s} M_{11} D_{s}^{-1}\right)=\left|W_{1} T\right|+\left|W_{2} K S\right|
+$$
+
+with $D_{s}=\left[\begin{array}{cc}d & \\ & 1\end{array}\right]$.
+
+$$
+\begin{aligned}
+& \text { Next let } \Delta=\left[\begin{array}{ll}
+\Delta_{s} & \\
+& \Delta_{p}
+\end{array}\right] \text { and } D=\left[\begin{array}{lll}
+d_{1} & & \\
+& d_{2} & \\
+& & 1
+\end{array}\right] . \text { Show that } \\
+& \mu_{\Delta}(M)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)=\left|W_{3} S\right|+\left|W_{1} T\right|+\left|W_{2} K S\right|
+\end{aligned}
+$$
+
+Problem 10.13 Let $\Delta=\operatorname{diag}\left(\Delta_{1}, \ldots, \Delta_{F}\right)$ be a structured uncertainty and suppose $M=x y^{*}$ with $x, y \in \mathbb{C}^{n}$. Let $x$ and $y$ be partitioned compatibly with the $\Delta$ :
+
+$$
+x=\left(\begin{array}{c}
+x_{1} \\
+x_{2} \\
+\vdots \\
+x_{m+F}
+\end{array}\right), \quad y=\left(\begin{array}{c}
+y_{1} \\
+y_{2} \\
+\vdots \\
+y_{m+F}
+\end{array}\right)
+$$
+
+Show that
+
+$$
+\mu_{\Delta}(M)=\inf _{D \in \mathcal{D}} \bar{\sigma}\left(D M D^{-1}\right)
+$$
+
+and the minimizing $d_{i}$ are given by
+
+$$
+d_{i}^{2}=\frac{\left\|y_{i}\right\|\left\|x_{F}\right\|}{\left\|x_{i}\right\|\left\|y_{F}\right\|}
+$$
+
+Problem 10.14 Consider $M \in \mathbb{C}^{2 n \times 2 n}$ to be given. Let $\boldsymbol{\Delta}_{2}$ be a $n \times n$ block structure, and suppose that $\mu_{2}\left(M_{22}\right)<1$. Suppose also that $\mathcal{F}_{l}\left(M, \Delta_{2}\right)$ is invertible for all $\Delta_{2} \in \mathbf{B} \boldsymbol{\Delta}_{2}$. For each $\alpha>1$, find a matrix $W_{\alpha}$ and a block structure $\hat{\boldsymbol{\Delta}}$ such that
+
+$$
+\max _{\Delta_{2} \in \mathbf{B} \Delta_{2}} \kappa\left(\mathcal{F}_{l}\left(M, \Delta_{2}\right)\right)<\alpha
+$$
+
+if and only if
+
+$$
+\mu_{\hat{\Delta}}\left(W_{\alpha}\right)<1
+$$
+
+where $\kappa$ is the condition number.\\
+Problem 10.15 Let $G(s) \in \mathcal{R} \mathcal{H}_{\infty}$ be an $m \times m$ symmetric transfer matrix, i.e., $G^{T}(s)=G(s)$, and let $\Delta(s) \in \mathcal{R} \mathcal{H}_{\infty}$ be a diagonal perturbation, i.e.,
+
+$$
+\Delta(s)=\left(\begin{array}{cccc}
+\delta_{1}(s) & & & \\
+& \delta_{2}(s) & & \\
+& & \ddots & \\
+& & & \delta_{m}(s)
+\end{array}\right)
+$$
+
+Show $(I-G \Delta)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ for all $\|\Delta\|_{\infty} \leq \gamma$ if and only if $\|G\|_{\infty}<1 / \gamma$. [Hint: Note that for a complex symmetric matrix $M=M^{T} \in \mathbb{C}^{m \times m}$, there is a unitary matrix $U$ and a diagonal matrix $\Sigma=\operatorname{diag}\left(\sigma_{1}, \sigma_{2}, \ldots, \sigma_{m}\right) \geq 0$ such that $M=U \Sigma U^{T}$, see Horn and Johnson [1990, page 204]. For detailed discussion of this problem, see Qiu [1995].]
+
+
+\end{document}

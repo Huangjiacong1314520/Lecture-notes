@@ -1,0 +1,125 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{ctex}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{mathrsfs}
+\usepackage{bbold}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{shapes,arrows,positioning}
+
+\title{公式重新推导，换符号}
+
+\author{黄嘉聪}
+\date{}
+
+
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+
+
+\begin{abstract}
+主要介绍了稳定性的相关知识，重点在于理解：稳定性条件（传统SISO和传统MIMO和鲁棒稳定背后有什么共性？有界输入有界输出稳定和内稳定）为什么鲁棒稳定的条件是det(I-M\delta)
+
+\end{abstract}
+
+KEY WORDS: robust control; $\mu$; skew $\mu$; lower bound
+
+
+\section{问题阐述}
+
+首先是给出一个定理，说明了1.微小参数变化的LPV系统可以等价为含不确定性的LTI系统，不过（没有强调2.其故障诊断问题也是可以同样等价，没有给出严格证明，只是证明了1，没有证明2，所以其实不是很严谨）
+
+然后当然就开始对不确定性LTI系统描述进行描述：由于我们可以将微小参数变化的LPV系统可以等价为含不确定性的LTI系统，因此我们可以通过将参数变化转化为不确定性，从而实现对问题的简化，即通过研究含不确定性的LTI系统的故障检测滤波器设计来研究对微小参数变化LPV系统的故障检测滤波器设计。因此这里我们对不确定性LTI系统进行描述。
+
+进一步对LTI残差生成问题进行描述：基于模型的故障检测的本质是对正常运行的实际系统进行精确的模型重构，给予重构系统和实际系统相同的输入，通过检测二者输出之间的差异，也称之为残差，判断实际系统是否出现故障。换句话说，如果实际系统中出现故障，那么将会使得重构系统的输出估计值和实际系统的输出值的差值超过设定的阈值，这就是基于模型的故障检测的直观思路。
+对于
+
+再进一步提出鲁棒故障检测目标：然而，在实际系统中，往往存在模型不确定性和外界扰动，这同样会引起输出的变化，显然会影响故障检测的准确性。因此我们提出对实际系统的鲁棒故障检测指标，要求在系统存在一定不确定性和外界扰动的情况下，尽可能对于故障进行灵敏的检测。
+
+\section{鲁棒故障检测滤波器设计}
+
+\subsection{不确定系统的开环故障检测   FD Design for open-loop uncertain systems }
+
+首先对形式上较为简单的开环不确定系统进行研究，闭环形式只需将u替换为r-y即可，将在后续进行介绍。（这里可以把对标称系统的残差生成转移到问题阐述的残差生成问题中，相当于重新改了推导结构）
+
+\subsection{不确定系统的闭环故障检测   FD Design for closed-loop uncertain systems }
+由于实际系统往往是闭环的，因此需要对闭环进行进一步的分析。
+
+\subsection{最优故障检测滤波器设计方法}重灾区，可以进一步添加物理意义/为什么这么做的解释和修改。这里可以重新推导和补充逻辑。
+
+\section{不确定系统的开环FDI}
+
+考虑如图1所示的通用FDI配置。对于标称系统，由于没有模型不确定性，可以通过设置不确定性$\Delta = 0$来简化系统。输出$y$表示为：
+\begin{equation}
+y = G_{u}u + G_{d}d + G_{f}f
+\end{equation}
+
+其中$f$表示故障，$d$表示扰动，$u$表示控制输入。$G_u = \tilde{M}_u^{-1} N_u$是左互质分解，其中$\tilde{M}_u$和$N_u$在$RH_\infty$空间中左互质。从观测器的角度来看，对于受控对象$G_u = C(sI - A)^{-1}B + D$，记作：
+
+\begin{equation}
+G_u = (A, B, C, D) \quad \text{或} \quad G_u = 
+\begin{bmatrix}
+A & B \\
+C & D
+\end{bmatrix}
+\end{equation}
+
+通过设计观测器增益$L$可以确保观测器的稳定性。考虑输出估计误差$\tilde{s} = y - \hat{y}$：
+
+\begin{equation}
+\begin{aligned}
+y(s) - \hat{y}(s) &= (C(sI - A)^{-1}B + D)u(s) \\
+&\quad -C(sI - A)^{-1}(L(y(s) - \hat{y}(s)) + Bu(s)) - Du(s) \\
+&\Leftrightarrow (I + C(sI - A)^{-1}L)(y(s) - \hat{y}(s)) = 0 \\
+&\Leftrightarrow y(s) - \hat{y}(s) = 0
+\end{aligned}
+\end{equation}
+
+此外，
+
+\begin{align}
+y(s) - \hat{y}(s) &= (I - C(sI - A + LC)^{-1}L)y(s) \nonumber \\
+&\quad - (C(sI - A + LC)^{-1}(B - LD) + D)u(s)
+\end{align}
+
+左互质分解的结果可以表示为\cite{ref7}：
+
+\begin{equation}
+[\tilde{M}_u \quad \tilde{N}_u] = \left[\begin{array}{c|c c} A + LC & L & B + LD \\ \hline C & I & D \end{array}\right]
+\end{equation}
+
+残差可以表示为：
+
+\begin{equation}
+\hat{M}(s)y(s) - \hat{N}(s)u(s) = 0 \Leftrightarrow y(s) = \hat{M}^{-1}(s)\hat{N}(s)u(s)
+\end{equation}
+
+实际上，输出估计误差$y - \hat{y}$就是所谓的预残差，这将在后面进一步解释。现在我们得到预残差$\hat{\varepsilon}$：
+\begin{equation}
+\hat{\varepsilon}(s) = \left[ -\hat{N}(s) \quad \hat{M}(s) \right] \begin{bmatrix} u(s) \\ y(s) \end{bmatrix}
+\end{equation}
+
+因此，开环情况下的预残差可以表示为：
+\begin{equation}
+\hat{s} = \tilde{M}_u(G_d d + G_f f)
+\end{equation}
+
+
+\end{document}

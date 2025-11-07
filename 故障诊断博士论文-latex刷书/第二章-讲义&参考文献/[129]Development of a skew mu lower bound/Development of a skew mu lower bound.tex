@@ -1,0 +1,648 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{mathrsfs}
+\usepackage{bbold}
+
+\title{Development of a skew $\mu$ lower bound }
+
+\author{Rod Holland ${ }^{1, *, \dagger}$, Peter Young ${ }^{2}$ and Chuanjiang Zhu ${ }^{3}$\\
+${ }^{1}$ Holland Engineering Consultants, Fort Collins, CO 80526, U.S.A.\\
+${ }^{2}$ Department of Electrical and Computer Engineering, Colorado State University, Fort Collins, CO 80523-1373, U.S.A.\\
+${ }^{3}$ Department of Electrical and Computer Engineering, Iowa State University, Ames, IA 50011-3060, U.S.A.}
+\date{}
+
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+
+
+\begin{abstract}
+SUMMARY Exploitation of the NP hard, mixed $\mu$ problem structure provides a polynomial time algorithm that approximates $\mu$ with usually reasonable answers. When the problem is extended to the skew $\mu$ problem an extension of the existing method to the skew $\mu$ formulation is required. The focus of this paper is to extend the $\mu$ lower bound derivation to the skew $\mu$ lower bound and show its direct computation by way of a power algorithm. Copyright © 2005 John Wiley \& Sons, Ltd.
+\end{abstract}
+
+KEY WORDS: robust control; $\mu$; skew $\mu$; lower bound
+
+\section*{1. INTRODUCTION}
+$\mu$ analysis provides a general framework for robust analysis in the face of system/model uncertainties. However, in practice skewed $\mu$ problems commonly occur, perhaps even more so than $\mu$ problems.
+
+The difference between $\mu$ and skew $\mu$ problems is in $\mu$ problems, all uncertainties ( $\Delta$ ) are allowed to expand or contract to the point where potential instability is encountered. In skew $\mu$ problems, some $\Delta$ are restricted in range ( $\Delta_{f}$ ), while trying to find the smallest $\Delta$ of varying size $\left(\Delta_{v}\right)$ that could potentially cause instability.
+
+\begin{researchnote}[author=JC, date=2025-10-22]
+  \subsubsection*{$\mu$问题和skew $\mu$的区别}
+  \begin{itemize}
+    \item 在传统$\mu$问题中，所有的不确定性$\Delta$都允许扩展或收缩到遇到潜在不稳定性的程度
+    \item 而在许多工程场景中，有些不确定块的变化范围是固定的，不能随意缩放（也就意味着不可能是由这个不确定块的变化来达到触碰不稳定边界），只有另一些块的大小可以去变化到触碰不稳定边界的程度，skew $\mu$问题就是这样
+    \item 在skew $\mu$问题中，某些不确定性块$\Delta_{f}$的范围受到限制，同时尝试找到可能导致不稳定性的最小变化尺寸$\left(\Delta_{v}\right)$
+  \end{itemize}
+\end{researchnote}
+
+\begin{researchnote}[author=JC, date=2025-10-22]
+  \subsubsection*{skew $\mu$幂迭代算法的区别}
+ 
+\end{researchnote}
+
+Perhaps the most common example of a skew $\mu$ problem is the formulation for robust performance [1], as depicted in Figure 1. Ranges of physical uncertainties are chosen for a reason. Typically one does not want these uncertainties re-scaled in the analysis of system performance. The question to answer is 'For uncertainties with these ranges, what level of performance can be expected from the system?'. This is a skew $\mu$ problem. The physical uncertainties have a fixed range, and the performance block is allowed to vary to determine the point where the system could potentially become unstable. Another common example of skew $\mu$ is stability analysis over a given frequency range. Reformulation of the problem using frequency as a fixed range perturbation variable, makes the problem a skew $\mu$ problem. The
+
+\footnotetext{*Correspondence to: Rod Holland, Holland Engineering Consultants, 2837 Seccomb, Fort Collins, CO 80526, U.S.A.\\
+${ }^{\dagger}$ E-mail: \href{mailto:holland@peakpeak.com}{holland@peakpeak.com}\\
+Contract/grant sponsor: National Science Foundation (NSF); contract/grant number: 9810081
+}\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_22_3326bae23109468e22b3g-02}
+\captionsetup{labelformat=empty}
+\caption{Figure 1. Robust analysis system with performance block.}
+\end{center}
+\end{figure}
+
+
+
+other variables are allowed to vary to determine the point where the system could potentially become unstable [2].
+
+Skew $\mu$ problems can be approached as iterative $\mu$ problems in order to achieve a value of skew $\mu$, however, the process is much slower than the results presented here. The speed of the computational algorithm provided here is on the order of the $\mu$ lower bound algorithm, an iterative $\mu$ procedure could easily be an order of magnitude slower.
+
+Work concerning skew $\mu$ has been somewhat limited. Publications on skew $\mu$ may be found in works by Fan et al. [3], Ferreres et al. [4-7] and an upper bound by Glavaški et al. [8].
+
+Only Ferreres [5] has proposed a lower bound for skew $\mu$. His proof bears similarity to the one given here, however, the proof and algorithms contained in this paper are far more detailed. The significance of this paper is in enhancing and extending the theoretical concepts of $\mu$ to a lower bound for skew $\mu$ and additionally providing detailed algorithmic procedures for the calculation of a lower bound for skew $\mu$.
+
+\section*{2. NOTATION AND PRELIMINARIES}
+\begin{researchnote}[author=JC, date=2025-10-23]
+  f是fixed range，代表固定；  v是varing，代表变化；  r是real，代表实数；  c是complex，代表复数\\
+  $m$代表有多少相同类型的重复块的数量，比如$m_{Cf}$代表固定范围的复的不确定性矩阵块的数量，$m_{rf}$代表固定范围的实的不确定性参数的数量
+\end{researchnote}
+The notation used here is a variation of fairly standard notation, and is essentially taken from Fan et al. [9]. In addition, the support basis for skew $\mu$ development comes from Young et al. [10].
+
+For any square complex matrix $M$, denote the complex conjugate transpose by $M^{*}$. The largest singular value and the structured singular value are denoted by $\bar{\sigma}(M)$ and $\mu_{\mathscr{K}}(M)$, respectively. The spectral radius is denoted $\rho(M)$ and the real spectral radius $\rho_{\mathrm{R}}(M)= \max \{|\lambda|: \lambda$ is a real eigenvalue of $M\}$, with $\rho_{\mathrm{R}}(M)=0$ if $M$ has no real eigenvalues. For any complex vector $x$, then $x^{*}$ denotes the complex conjugate transpose, $|x|$ the Euclidean norm, and $\|x\|_{\infty}$ the infinity norm.
+
+The definition of $\mu$ and skew $\mu$ are dependent upon the underlying block structure of the uncertainties, which is typically defined as follows. Given a matrix $M \in \mathbb{C}^{n \times n}$ and three nonnegative integers $m_{r}, m_{c}$, and $m_{C}$ with $m \triangleq m_{r}+m_{c}+m_{C} \leqslant n$, the block structure $\mathscr{K}\left(m_{r}, m_{c}, m_{C}\right)$\\
+is an $m$-tuple of positive integers
+
+
+\begin{equation*}
+\mathscr{K}=\left(k_{1}, \ldots, k_{m_{r}}, k_{m_{r}+1}, \ldots, k_{m_{r}+m_{c}}, k_{m_{r}+m_{c}+1}, \ldots, k_{m}\right) \tag{1}
+\end{equation*}
+
+
+where the requirement is $\sum_{i=1}^{m} k_{i}=n$ in order that these dimensions are compatible with $M$. The integers $m_{r}, m_{c}$, and $m_{C}$ represent the number of repeated real scalars, repeated complex scalars, and full complex blocks, respectively. The purely complex case corresponds to $m_{r}=0$, and the purely real case to $m_{c}=m_{C}=0$.
+
+For skew $\mu$, this is expanded to include the concept of fixed range and varying perturbations. In order to define the fixed perturbation set, define three non-negative integers relating to the number of fixed perturbations blocks $m_{r f}, m_{c f}$, and $m_{C_{f}}$ with $m_{f} \triangleq m_{r f}+m_{c f}+m_{C_{f}} \leqslant n_{f}$, where $n_{f}$ is the total number of fixed perturbations.
+
+The fixed range perturbation block structure $\mathscr{K}_{f}\left(m_{r f}, m_{c f}, m_{C_{f}}\right)$ is an $n$-tuple of positive integers
+
+
+\begin{equation*}
+\mathscr{K}_{f}=\left(k_{1}, \ldots, k_{m_{r_{f}}}, k_{m_{r_{f}}+1}, \ldots, k_{m_{r_{f}}+m_{c_{f}}}, k_{m_{r_{f}}+m_{c_{f}}+1}, \ldots, k_{m_{r_{f}}+m_{c_{f}}+m_{c_{f}}}\right) \tag{2}
+\end{equation*}
+
+
+Similarly, define for varying perturbations three non-negative integers relating to the number of varying perturbation blocks $m_{r_{v}}, m_{c_{v}}$, and $m_{C_{v}}$ with $m_{v} \triangleq m_{r_{v}}+m_{c_{v}}+m_{C_{v}} \leqslant n_{v}$, where $n_{v}$ is the total number of varying perturbations.
+
+The varying perturbation block structure $\mathscr{K}_{v}\left(m_{r_{v}}, m_{c_{v}}, m_{C_{v}}\right)$ is an $n$-tuple of positive integers
+
+
+\begin{equation*}
+\mathscr{K}_{v}=\left(k_{1}, \ldots, k_{m_{r_{v}}}, k_{m_{r_{v}}+1}, \ldots, k_{m_{r_{v}}+m_{c_{v}}}, k_{m_{r_{v}}+m_{c_{v}}+1}, \ldots, k_{m_{r_{v}}+m_{c_{v}}+m_{C_{f}}}\right) \tag{3}
+\end{equation*}
+
+
+It is also necessary to require that $\sum_{i=1}^{m_{f}} k_{f_{i}}+\sum_{i=1}^{m_{v}} k_{v_{i}}=n$ in order that these dimensions are compatible with $M$.
+
+Note also that all the results which follow are easily generalized to the case where the full complex blocks need not be square, and the blocks may come in any order. These restrictions in Equations (4) and (6) are made purely for notational convenience.
+
+\hl{固定范围扰动、变化扰动的结构}
+
+Now, specifically define the structure of the fixed range perturbations (subscript $f$ is dropped to avoid more clutter) as
+
+
+\begin{align*}
+Z_{\mathscr{K}_{f}}= & \left\{\Delta_{f}=\operatorname{block} \operatorname{diag}\left(\delta_{1}^{r} I_{k_{1}}, \ldots, \delta_{m_{r}}^{r} I_{k_{m_{r}}}, \delta_{1}^{c} I_{k_{m_{r}+1}}, \ldots, \delta_{m_{c}}^{c} I_{k_{m_{r}+m_{c}}}, \Delta_{1}^{C}, \ldots, \Delta_{m_{C}}^{C}\right)\right. \\
+& \left.: \delta_{i}^{r} \in \mathbb{R}, \delta_{i}^{c} \in \mathbb{C}, \Delta_{i}^{C} \in \mathbb{C}^{k_{m_{r}+m_{c}+i} \times k_{m_{r}+m_{c}+i}}\right\} \tag{4}
+\end{align*}
+
+
+where
+
+
+\begin{equation*}
+\mathbf{B} Z_{\mathscr{K}_{f}}=\left\{\Delta_{f} \in Z_{\mathscr{K}}: \bar{\sigma}\left(\Delta_{f}\right) \leqslant 1\right\} \tag{5}
+\end{equation*}
+
+
+Define the varying perturbations (with subscript $v$ dropped) as
+
+
+\begin{align*}
+Y_{\mathscr{K}_{v}}= & \left\{\Delta_{v}=\operatorname{block} \operatorname{diag}\left(\delta_{1}^{r} I_{k_{1}}, \ldots, \delta_{m_{r}}^{r} I_{k_{m_{r}}}, \delta_{1}^{c} I_{k_{m_{r}+1}}, \ldots, \delta_{m_{c}}^{c} I_{k_{m_{r}+m_{c}}}, \Delta_{1}^{C}, \ldots, \Delta_{m_{C}}^{C}\right)\right. \\
+& \left.: \delta_{i}^{r} \in \mathbb{R}, \delta_{i}^{c} \in \mathbb{C}, \Delta_{i}^{C} \in \mathbb{C}^{k_{m_{r}+m_{c}+i} \times k_{m_{r}+m_{c}+i}}\right\} \tag{6}
+\end{align*}
+
+
+Finally, the composite perturbation, $\Delta$, can be defined as
+
+
+\begin{equation*}
+W_{\mathscr{K}_{f}, \mathscr{K}_{v}}=\left\{\Delta=\text { block } \operatorname{diag}\left(\Delta_{f}, \Delta_{v}\right)\right\} \tag{7}
+\end{equation*}
+
+
+with $\Delta_{f} \in \mathbf{B} Z_{\mathscr{K}_{f}}$ and $\Delta_{v} \in Y_{\mathscr{K}_{v}}$.\\
+Additionally, in order to refine the lower bound, some sets need to be defined which will be of use later. The following sets of block diagonal matrices are dependent on the underlying block\\
+structure of the perturbations, and are noted as:
+
+
+\begin{gather*}
+\mathscr{Q}_{\mathscr{K}_{f}, \mathscr{K}_{v}}=\left\{\Delta \in W_{\mathscr{K}_{f}, \mathscr{K}_{v}}: \delta_{i_{f}}^{r} \in\left[\begin{array}{ll}
+-1 & 1
+\end{array}\right], \delta_{i_{f}}^{c *} \delta_{i_{f}}^{c}=1, \Delta_{i_{f}}^{C *} \Delta_{i_{f}}^{C}=I_{k_{m_{r}+m_{c_{f}}+i_{f}}}\right. \\
+\left.\delta_{i_{v}}^{r} \in\left[\begin{array}{ll}
+-1 & 1
+\end{array}\right], \delta_{i_{v}}^{c *} \delta_{i_{v}}^{c}=1, \Delta_{i_{v}}^{C *} \Delta_{i_{v}}^{C}=I_{k_{m_{r}}+m_{c_{f}}+i_{v}}\right\} \tag{8}
+\end{gather*}
+
+
+and
+
+
+\begin{align*}
+\mathscr{D}_{\mathscr{K}_{f}, \mathscr{K}_{v}}= & \left\{\operatorname { b l o c k } \operatorname { d i a g } \left(\mathrm{e}^{\mathrm{j} \theta_{1}} D_{1_{f}}, \ldots \mathrm{e}^{\mathrm{j} \theta_{m_{r}}} D_{m_{r_{f}}}, D_{m_{r_{f}}+1}, \ldots, D_{m_{r_{f}}+m_{c_{f}}}, d_{1} I_{k_{m_{f}+m_{c_{f}}+1}}, \ldots, d_{m_{C_{f}}} I_{k_{m_{f}}}\right.\right. \\
+& \left.\mathrm{e}^{\mathrm{j} \theta_{1}} D_{1_{v}}, \ldots, \mathrm{e}^{\mathrm{j} \theta_{m_{r v}}} D_{m_{r_{v}}}, D_{m_{r_{v}}+1}, \ldots, D_{m_{r_{v}}+m_{c_{v}}}, d_{1} I_{k_{m_{r v}+m_{c v}+1}}, \ldots, d_{m_{C_{v}}} I_{k_{m_{v}}}\right) \\
+& \left.: \theta_{i_{f, v}} \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right], 0<D_{i_{f, v}}=D_{i_{f, v}}^{*} \in \mathbb{C}^{k_{i_{f, v}} \times k_{i_{f, v}}}, 0<d_{i_{f, v}} \in \mathbb{R}\right\} \tag{9}
+\end{align*}
+
+
+These are not quite the 'usual' scaling sets associated with the complex $\mu$ problems as explained in Packard et al. [11], since for $m_{r} \neq 0$ matrices in $\mathscr{Q}_{\mathscr{K}_{f}, \mathscr{K}_{v}}$ are not necessarily unitary, and matrices in $\mathscr{D}_{\mathscr{K}_{f}, \mathscr{K}_{v}}$ are not necessarily Hermitian. These sets are chosen for reasons which will become clear later. Note that for any $\Delta \in W_{\mathscr{K}_{f}, \mathscr{K}_{v}}$ and any $D \in D_{\mathscr{K}_{f}, \mathscr{K}_{v}}, D$ and $\Delta$ commute, i.e. $D \Delta=\Delta D$.
+
+\section*{3. FORMAL DEFINITION OF SKEW $\mu$}
+\begin{researchnote}[author=JC, date=2025-10-23]
+  \hl{skew $\mu$定义的要点}
+  \begin{itemize}
+    \item $M \in \mathbb{C}^{n \times n}$中含有固定范围扰动和变化扰动
+    \item skew $\mu$是能够使得矩阵$M$失稳的\ 变化扰动子集的\ 最小的\ 最大奇异值
+    \item 其余扰动具有固定范围
+  \end{itemize}
+\end{researchnote}
+Given a matrix $M \in \mathbb{C}^{n \times n}$ which interacts with perturbations of a fixed range and varying nature, the definition of skew $\mu$ is the smallest maximum SSV of the varying subset of perturbations that can destabilize the matrix $M$ with the remainder of the perturbations being of fixed range.
+
+Using the notation of the previous section, the formal statement of the skewed SSV is defined as follows.
+
+\section*{Definition 1}
+The skewed structured singular value $\mu_{s}(M)$ of a matrix $M \in \mathbb{C}^{n \times n}$ with respect to a block structure $\mathscr{K}_{f}\left(m_{r_{f}}, m_{c_{f}}, m_{C_{f}}\right)$ and $\mathscr{K}_{v}\left(m_{r_{v}}, m_{c_{v}}, m_{C_{v}}\right)$ is defined as
+
+$$
+\mu_{s}(M)=\frac{1}{\min _{\Delta \in W_{x_{f}, x_{v}}}\left\{\bar{\sigma}\left(\Delta_{v}\right) \mid \operatorname{det}(I-\Delta M)=0 \text { for structured } \Delta\right\}}
+$$
+
+with $\mu_{s}(M)=0$ if no $\Delta \in W_{\mathscr{K}_{f}, \mathscr{K}_{v}}$ solves $\operatorname{det}(I-\Delta M)=0$.\\
+Note that the $\Delta \in W_{\mathscr{K}_{f}, \mathscr{K}_{v}}$ are sufficiently general to allow for repeated real scalars, repeated complex scalars, and full complex blocks in both the fixed and varying $\Delta$.
+
+\section*{4. A POWER ALGORITHM FOR THE SKEW $\mu$ LOWER BOUND}
+\hl{为了简化问题/符号方便，将重复块数量都变为1，就是不同性质的都只含一个，但是肯定是不影响推导的}
+Similar to the general $\mu$ case discussed in Reference [10], a case denoted sub, of $m_{r_{f}}=m_{c_{f}}= m_{C_{f}}=m_{r_{v}}=m_{c_{v}}=m_{C_{v}}=1$ will be considered for simplicity sake in the skew $\mu$ case. It must be stressed that this is purely for notational convenience, and that the general formulae for an\\
+arbitrary block structure, as previously defined are simply obtained by duplicating the appropriate formulae for each block.
+
+The implication of this structure is the partitioning of $b, a, z, w$ from Reference [10] compatibly with this block structure as
+
+\[
+b=\left[\begin{array}{c}
+b_{1_{f}}  \tag{10}\\
+b_{2_{f}} \\
+b_{3_{f}} \\
+b_{1_{v}} \\
+b_{2_{v}} \\
+b_{3_{v}}
+\end{array}\right], \quad a=\left[\begin{array}{c}
+a_{1_{f}} \\
+a_{2_{f}} \\
+a_{3_{f}} \\
+a_{1_{v}} \\
+a_{2_{v}} \\
+a_{3_{v}}
+\end{array}\right], \quad z=\left[\begin{array}{c}
+z_{1_{f}} \\
+z_{2_{f}} \\
+z_{3_{f}} \\
+z_{1_{v}} \\
+z_{2_{v}} \\
+z_{3_{v}}
+\end{array}\right], \quad w=\left[\begin{array}{c}
+w_{1_{f}} \\
+w_{2_{f}} \\
+w_{3_{f}} \\
+w_{1_{v}} \\
+w_{2_{v}} \\
+w_{3_{v}}
+\end{array}\right]
+\]
+
+where $b_{i_{f}}, a_{i_{f}}, z_{i_{f}}, w_{i_{f}} \in \mathbb{C}_{f}^{k_{i}}$ and $b_{i_{v}}, a_{i_{v}}, z_{i_{v}}, w_{i_{v}} \in \mathbb{C}_{v}^{k_{i}}$.
+
+\subsection*{4.1. Theoretical development for a skew $\mu$ lower bound power algorithm}
+Using the formal definition of skew $\mu$ and material from development of the $\mu$ lower bound in Reference [10], the power algorithm can be extended from $\mu$ to cover the more general case of skew $\mu$. This begins with the development of a theorem to cover a skew $\mu$ power algorithm.
+
+\section*{Theorem 1}
+Suppose there are vectors $b, a, z, w \in \mathbb{C}^{n}$ partitioned as in Equation (10), but extended to account for the varying and fixed cases ( ${ }_{v, f}$ ) with $b_{i}, a_{i}, z_{i}, w_{i} \neq 0$ and $a_{1 v}^{*} w_{1 v}, a_{2 v}^{*} w_{2 v}$, $a_{1 f}^{*} w_{1 f}, a_{2 f}^{*} w_{2 f} \neq 0$. Then there exist matrices $Q \in \mathscr{Q}_{\text {sub }}$ and $D \in \mathscr{D}_{\text {sub }}$, and a matrix of the block form
+
+\[
+S=\left[\begin{array}{c|c}
+I_{f} & 0  \tag{11}\\
+\hline 0 & v I_{v}
+\end{array}\right]
+\]
+
+where the $S$ matrix is partitioned such that the blocks $I_{f}$ and $v I_{v}$ are sized to correspond to the fixed range and varying uncertainties $\Delta_{f}$ and $\Delta_{v}$, respectively, as defined in Equations (4), (6), and (7). Additionally, $v$ is a positive real scalar such that the following holds:
+
+
+\begin{align*}
+M b & =S a, & & M^{*} z=S w \\
+b & =Q a, & & b=D^{-1} w  \tag{12}\\
+z & =Q^{*} Q D a, & & z=Q^{*} w
+\end{align*}
+
+
+with $\theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$ and $\theta= \pm \frac{\pi}{2}$ for $\left|q^{r}\right|<1$ iff
+
+\[
+\begin{array}{ll}
+M b=S a \\
+z_{1 v}=q w_{1 v}, \quad z_{2 v}=\frac{w_{2 v}^{*} a_{2 v}}{\left|w_{2 v}^{*} a_{2 v}\right|} w_{2 v}, \quad z_{3}=\frac{\left|w_{3 v}\right|}{\left|a_{3 v}\right|} a_{3 v} \\
+z_{1 f}=q w_{1 f}, \quad z_{2 f}=\frac{w_{2 f}^{*} a_{2 f}}{\left|w_{2 f}^{*} a_{2 f}\right|} w_{2 f}, \quad z_{3 f}=\frac{\left|w_{3 f}\right|}{\left|a_{3 f}\right|} a_{3 f} \\
+M^{*} z=S w  \tag{13}\\
+b_{1 v}=q a_{1 v}, \quad b_{2 v}=\frac{a_{2 v}^{*} w_{2 v}}{\left|a_{2 v}^{*} w_{2 v}\right|} a_{2 v}, \quad b_{3 v}=\frac{\left|a_{3 v}\right|}{\left|w_{3 v}\right|} w_{3 v} \\
+b_{1 f}=q a_{1 f}, \quad b_{2 f}=\frac{a_{2 f}^{*} w_{2 f}}{\left|a_{2 f}^{*} w_{2 f}\right|} a_{2 f}, \quad b_{3 f}=\frac{\left|a_{3 f}\right|}{\left|w_{3 f}\right|} w_{3 f}
+\end{array}
+\]
+
+for some real scalar $q \in\left[\begin{array}{ll}-1 & 1\end{array}\right]$ with
+
+\[
+\begin{array}{llll}
+\operatorname{Re}\left(a_{1 v}^{*} w_{1 v}\right) \geqslant 0 & \text { for } q=1 & \operatorname{Re}\left(a_{1 f}^{*} w_{1 f}\right) \geqslant 0 & \text { for } q=1 \\
+\operatorname{Re}\left(a_{1 v}^{*} w_{1 v}\right) \leqslant 0 & \text { for } q=-1 & \operatorname{Re}\left(a_{1 f}^{*} w_{1 f}\right) \leqslant 0 & \text { for } q=-1  \tag{14}\\
+\operatorname{Re}\left(a_{1 v}^{*} w_{1 v}\right)=0 & \text { for }|q|<1 & \operatorname{Re}\left(a_{1 f}^{*} w_{1 f}\right)=0 & \text { for }|q|<1
+\end{array}
+\]
+
+Proof\\
+Note that $M b=S a$ can be rewritten as $a=S^{-1} M b$ and the $S^{-1}$ matrix wrapped into $M$ to form $a=M_{s} b$.
+
+This transforms the problem into a $\mu$ problem with $\mu$ scaled to unity (i.e. $\beta=1$ ) where the remainder of the proof is via the application Theorem 4 and Lemmas (10), (11) and (12) from Reference [10] to the appropriate block components. Note that Lemmas (10) and (11) originally appear in Reference [12].
+
+Theorem 2\\
+The value of $v$ is a lower bound on $\mu_{s}(M)$.\\
+Proof\\
+From the definition of skew $\mu$, a value of 1 corresponds to the maximum allowable value for the fixed block perturbation $\Delta_{f}$. Next, starting with Equation (12)
+
+$$
+\begin{aligned}
+M b & =S a \\
+M Q a & =S a \\
+S^{-1} M Q a & =M_{s} Q a=a
+\end{aligned}
+$$
+
+hence
+
+$$
+\operatorname{det}\left(I-M_{s} Q\right)=0
+$$
+
+and
+
+$$
+\operatorname{det}\left(I-\Delta M_{s}\right)=0
+$$
+
+or
+
+$$
+\operatorname{det}\left(\left[\begin{array}{c|c}
+I & 0 \\
+\hline 0 & I
+\end{array}\right]-\left[\begin{array}{c|c}
+\Delta_{f} & 0 \\
+\hline 0 & \Delta_{v}
+\end{array}\right]\left[\begin{array}{c|c}
+I_{f} & 0 \\
+\hline 0 & \frac{1}{v} I_{v}
+\end{array}\right] M\right)=0
+$$
+
+By regrouping the matrices, it can be said that
+
+$$
+\Delta=Q S^{-1}
+$$
+
+To make the determinant equal to zero corresponds to a $\bar{\sigma}\left(\Delta_{f}\right)=1$ and $\bar{\sigma}\left(\Delta_{v}\right)=v$. By application of Theorem 3 from Reference [10] and Theorem 1, $v$ is a lower bound for $\Delta_{v}$, which corresponds to the definition of $\mu_{s}(M)$. \(\square\)
+
+\section*{Theorem 3}
+The value of $v$ is a lower bound on $\mu_{s}(M)$ that can be calculated from
+
+
+\begin{equation*}
+v=\frac{\left\|\gamma_{2}\right\|_{2}^{2}}{\sqrt{1-\left\|\gamma_{1}\right\|_{2}^{2}}} \tag{15}
+\end{equation*}
+
+
+or
+
+
+\begin{equation*}
+v=\frac{\left\|\psi_{2}\right\|_{2}^{2}}{\sqrt{1-\left\|\psi_{1}\right\|_{2}^{2}}} \tag{16}
+\end{equation*}
+
+
+In Equation (15), $\gamma=M b=\left[\begin{array}{ll}\gamma_{1} & \gamma_{2}\end{array}\right]^{t}$, where $\gamma_{1}$ is of the length of the fixed range columns of $S$ and $\gamma_{2}$ is of the length of the varying columns of $S$. Likewise, for Equation (16), $\psi=M^{*} z= \left[\psi_{1} \psi_{2}\right]^{t}$, where $\psi_{1}$ is of the length of the fixed range columns of $S$ and $\psi_{2}$ is of the length of the varying columns of $S$.
+
+When $\left\|\gamma_{1}\right\|_{2}^{2} \geqslant 1$ or $\left\|\psi_{1}\right\|_{2}^{2} \geqslant 1$ then the system can be destabilized by a fixed perturbation. In this case $\mu_{s}(M)=\infty$. If $\left\|\gamma_{2}\right\|_{2}^{2}=0$ or $\left\|\psi_{2}\right\|_{2}^{2}=0$, then no varying perturbation of any size can destabilize the system and $\mu_{s}(M)=0$.
+
+\section*{Proof}
+Start with the equation from the power algorithm
+
+$$
+M b=S a
+$$
+
+Then let $\gamma=M b$, and partition $\gamma$ as in the theorem statement.\\
+By inspecting the power algorithm, one notes that it is possible to impose $|a|=1$ without loss of generality, then
+
+$$
+S^{-1} \gamma=\left[\begin{array}{lll}
+1 & \ldots & 1
+\end{array}\right]^{t}
+$$
+
+where
+
+$$
+S^{-1}=\left[\begin{array}{c|c}
+I_{f} & 0 \\
+\hline 0 & \frac{1}{v} I_{v}
+\end{array}\right]
+$$
+
+Specifically, this can be written
+
+\[
+a=S^{-1} M b=S^{-1} \gamma=\left[\frac{\gamma_{1}}{\frac{1}{v} \gamma_{2}}\right]=\left[\begin{array}{c}
+1  \tag{17}\\
+\vdots \\
+1
+\end{array}\right]
+\]
+
+Taking the 2 norm of Equation (17) and manipulating gives
+
+$$
+1=\left\|\gamma_{1}\right\|_{2}^{2}+\frac{1}{v^{2}}\left\|\gamma_{2}\right\|_{2}^{2}
+$$
+
+which implies
+
+$$
+v=\frac{\left\|\gamma_{2}\right\|_{2}^{2}}{\sqrt{1-\left\|\gamma_{1}\right\|_{2}^{2}}}
+$$
+
+For a value of $v$ from the left eigenvector equation, let $\psi=M^{*} z$, and partition $\psi$ as in the theorem statement. It can be assumed $|w|=1$ without loss of generality, then proceed as in the earlier part of the proof to calculate $v$.
+
+If $\left\|\gamma_{1}\right\|_{2}^{2}=1$ or $\left\|\psi_{1}\right\|_{2}^{2}=1$, then $v=\infty$ and $\mu_{s}(M)=\infty$. For the case $\left\|\gamma_{1}\right\|_{2}^{2}>1$ or $\left\|\psi_{1}\right\|_{2}^{2}>1$, then the perturbation structure has passed through the point of $\operatorname{setting} \operatorname{det}(I-M \Delta)=0$ regardless of the value of $v$, and once again $v$ is indicated as $\infty$.
+
+If $\left\|\gamma_{2}\right\|_{2}^{2}=0$ or $\left\|\psi_{2}\right\|_{2}^{2}=0$, then it is obvious $v=0$ and $\mu_{s}(M)=0$.
+
+\section*{Remarks}
+Since the relationships in Equations (13) and (14) are unaffected if one multiplies $b$ and $a$ by an arbitrary positive real scalar $\eta$, and $z$ and $w$ by an arbitrary positive real scalar $\theta$, then in searching for solutions to these equations one may impose the additional restriction $|a|=|w|=1$.
+
+Also note that, under certain technical assumptions, there always exists a solution to these equations with $v=\mu_{s}(M)$. Since the desire is to find the largest $v$ that solves Equations (13) and (14), a detailed power algorithm is proposed for finding a solution to this system of equations. This power algorithm is similar to Reference [10] with an extension to cover the varying and fixed ( $v, f$ ) case.
+
+\subsection*{4.2. Detailed steps for a skew $\mu$ lower bound power algorithm}
+The algorithm below parallels Theorem 1, but in a manner that can be more readily followed from step to step. In this algorithm, $k$ is iteration number.
+
+First, the iteration for the right eigenvector, which generates the vector $z$ for the left eigenvector iteration
+
+$$
+\tilde{S}_{k+1} a_{k+1}=M b_{k}
+$$
+
+Calculate $\tilde{v}_{k+1}$
+
+$$
+\begin{aligned}
+& z_{1 v_{k+1}}=\tilde{q}_{k+1} w_{1 v_{k}}, \quad z_{2 v_{k+1}}=\frac{w_{2 v_{k}}^{*} a_{2 v_{k+1}}}{\left|w_{2 v_{k}}^{*} a_{2 v_{k+1}}\right|} w_{2 v_{k}}, \quad z_{3 v_{k+1}}=\frac{\left|w_{3 v_{k}}\right|}{\left|a_{3 v_{k+1}}\right|} a_{3 v_{k+1}} \\
+& z_{1 f_{k+1}}=\tilde{q}_{k+1} w_{1 f_{k}}, \quad z_{2 f_{k+1}}=\frac{w_{2 f_{k}}^{*} a_{2 f_{k+1}}}{\left|w_{2 f_{k}}^{*} a_{2 f_{k+1}}\right|} w_{2 f_{k}}, \quad z_{3 f_{k+1}}=\frac{\left|w_{3 f_{k}}\right|}{\left|a_{3 f_{k+1}}\right|} a_{3 f_{k+1}}
+\end{aligned}
+$$
+
+Then the iteration for the left eigenvector, which generates the vector $b$ for the right eigenvector iteration
+
+$$
+\hat{S}_{k+1} w_{k+1}=M^{*} z_{k+1}
+$$
+
+Calculate $\hat{v}_{k+1}$
+
+$$
+\begin{aligned}
+& b_{1 v_{k+1}}=\hat{q}_{k+1} a_{1 v_{k+1}}, \quad b_{2 v_{k+1}}=\frac{a_{2 v_{k+1}}^{*} w_{2 v_{k+1}}}{\left|a_{2 v_{k+1}}^{*} w_{2 v_{k+1}}\right|} a_{2 v_{k+1}}, \quad b_{3 v_{k+1}}=\frac{\left|a_{3 v_{k+1}}\right|}{\left|w_{3 v_{k+1}}\right|} w_{3 v_{k+1}} \\
+& b_{1 f_{k+1}}=\hat{q}_{k+1} a_{1 f_{k+1}}, \quad b_{2 f_{k+1}}=\frac{a_{2 f_{k+1}}^{*} w_{2 f_{k+1}}}{\left|a_{2 f_{k+1}}^{*} w_{2 f_{k+1}}\right|} a_{2 f_{k+1}}, \quad b_{3 f_{k+1}}=\frac{\left|a_{3_{k+1}}\right|}{\left|w_{3_{k+1}}\right|} w_{3_{k+1}}
+\end{aligned}
+$$
+
+The vectors $\tilde{q}_{k+1}$ and $\hat{q}_{k+1}$ evolve as
+
+$$
+\begin{aligned}
+& \tilde{\alpha}_{k+1}=\operatorname{sgn}\left(\hat{q}_{k}\right) \frac{\left|b_{1_{k}}\right|}{\left|a_{1_{k+1}}\right|}+\operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k}}\right) \\
+& \text { If }\left|\tilde{\alpha}_{k+1}\right| \geqslant 1 \quad \text { Then } \tilde{q}_{k+1}=\frac{\tilde{\alpha}_{k+1}}{\left|\tilde{\alpha}_{k+1}\right|} \quad \text { Else } \tilde{q}_{k+1}=\tilde{\alpha}_{k+1} \\
+& \hat{\alpha}_{k+1}=\operatorname{sgn}\left(\tilde{q}_{k+1}\right) \frac{\left|b_{1_{k}}\right|}{\left|a_{1_{k+1}}\right|}+\operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k+1}}\right)
+\end{aligned}
+$$
+
+If $\left|\hat{\alpha}_{k+1}\right| \geqslant 1 \quad$ Then $\hat{q}_{k+1}=\frac{\hat{\alpha}_{k+1}}{\left|\hat{\alpha}_{k+1}\right|} \quad$ Else $\hat{q}_{k+1}=\hat{\alpha}_{k+1}$\\
+and $\tilde{v}_{k+1}, \hat{v}_{k+1}$ are chosen positive real so that $\left|a_{k+1}\right|=\left|w_{k+1}\right|=1$ according to
+
+$$
+\tilde{\gamma}=M b_{k} \quad \text { and } \quad \hat{\gamma}=M z_{k+1}
+$$
+
+where
+
+
+\begin{equation*}
+\tilde{\gamma}=\left[\frac{\tilde{\gamma}_{1}}{\tilde{\gamma}_{2}}\right] \tag{18}
+\end{equation*}
+
+
+with $\tilde{\gamma}_{1}$ of length $p$ for $\Delta_{f}^{p \times p}$ and $\tilde{\gamma}_{2}$ of length $q$ for $\Delta_{v}^{q \times q}$. Then solve
+
+
+\begin{equation*}
+\tilde{v}=\frac{\left\|\tilde{\gamma}_{2}\right\|_{2}}{\sqrt{1-\left\|\tilde{\gamma}_{1}\right\|_{2}^{2}}} \tag{19}
+\end{equation*}
+
+
+and update
+
+\[
+\tilde{S}_{k+1}=\left[\begin{array}{c|c}
+I_{f} & 0  \tag{20}\\
+\hline 0 & \tilde{v} I_{v}
+\end{array}\right]
+\]
+
+Similarly, this is done for $\hat{S}_{k+1}$.
+
+\section*{Remarks}
+This is essentially a modification of the original work of Young and Doyle [10]. The method applies, but the perturbations must be pre-sorted into fixed and varying sections to allow for the convenient segregation as in Equation (18). The need for this is two-fold, first it simplifies the math, and secondly it simplifies the implemented code.
+
+It is straightforward to verify that if the algorithm converges to some equilibrium point then it satisfies the appropriate constraints on each block component and hence by Lemmas (10), (11), and (12) from Reference [10] there are non-zero vectors $b, a, z, w \in \mathbb{C}^{n}$, matrices $Q \in \mathscr{2}_{\text {sub }}$, $D \in \mathscr{D}_{\text {sub }}$, and positive real scalars $\tilde{v}, \hat{v}$ such that
+
+
+\begin{align*}
+M b & =\tilde{S} a, & & M^{*} z=\hat{S} w \\
+b & =Q a, & & b=D^{-1} w  \tag{21}\\
+z & =Q^{*} Q D a, & & z=Q^{*} w
+\end{align*}
+
+
+Thus if $\tilde{v}=\hat{v}$ then Equation (12) is satisfied and there is a decomposition as in Equation (27) from Reference [10], and hence $\tilde{v}$ is a lower bound for $\mu_{s}(M)$ (associated with a local maximum of $\rho_{\mathrm{R}}\left(Q M_{s}\right)$ ).
+
+Note that if $\tilde{v} \neq \hat{v}$ then a decomposition as in Equation (27) from Reference [10] has not been found. However, from Equation (21) one finds that $Q M b=\tilde{v} b$ and $w^{*} Q M=\hat{v} w^{*}$. Then both $\tilde{v}$ and $\hat{v}$ are real positive eigenvalues of $Q M$, and so by Lemma 3 of Reference [10], $\max (\tilde{v}, \hat{v})$ still gives a lower bound for $\mu_{s}(M)$.
+
+The equilibrium points of the algorithm are unaffected if one multiplies the terms $\operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k}}\right), \operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k+1}}\right)$ by arbitrary real positive scalars. This degree of freedom may be employed to select scaling parameters so as to aid convergence.
+
+\subsection*{4.3. Avoiding computation problems in the lower bound}
+If $\gamma_{1}$ is too large then a complex value for $v$ will result. This is an intuitive result for
+
+
+\begin{equation*}
+v=\frac{\left\|\gamma_{2}\right\|_{2}}{\sqrt{1-\left\|\gamma_{1}\right\|_{2}^{2}}} \tag{22}
+\end{equation*}
+
+
+This is a primary indicator that the problem can be destabilized by a perturbation among the fixed perturbations ( $\Delta_{f}$ ) without consideration of the varying perturbations ( $\Delta_{v}$ ). If the problem can be destabilized by one of the fixed perturbations, then one may want to reconsider the problem and/or the details surrounding it. However, since the lower bound is found via an iterative process, the condition of $v \in \mathbb{C}$ can result during one of the iterations as a momentary aberration. To avoid computational difficulties with complex $v$, the algorithm below can be implemented to alleviate the problem. The following is for $\gamma_{1}$, however, the algorithm can also be implemented in relation to $\psi_{1}$ as well.
+
+For a matrix $M$ :
+
+\begin{enumerate}
+  \item Set $\hat{M}=M$.
+  \item Set $v_{\text {total }}=1$.
+  \item Find $\gamma_{1}$.
+  \item If $\gamma_{1}>1$
+\end{enumerate}
+
+\begin{itemize}
+  \item $v_{\text {total }}=2 v_{\text {total }}$
+  \item Form
+\end{itemize}
+
+\[
+\hat{M}=\left[\begin{array}{c|c}
+I_{f} & 0  \tag{23}\\
+\hline 0 & \frac{1}{\sqrt{2}} I_{v}
+\end{array}\right] \cdot\left[\begin{array}{l|l}
+M_{11} & M_{12} \\
+\hline M_{21} & M_{22}
+\end{array}\right] \cdot\left[\begin{array}{c|c}
+I_{f} & 0 \\
+\hline 0 & \frac{1}{\sqrt{2}} I_{v}
+\end{array}\right]
+\]
+
+\begin{itemize}
+  \item Go to (6).
+\end{itemize}
+
+\begin{enumerate}
+  \setcounter{enumi}{4}
+  \item If $\gamma_{1}<1$
+\end{enumerate}
+
+\begin{itemize}
+  \item Find $v$.
+  \item if $v \approx 1$ then return $v_{\text {total }}$, END.
+  \item if $v \neq 1$ then:\\
+$-v_{\text {total }}=v v_{\text {total }}$
+  \item Form
+\end{itemize}
+
+\[
+\hat{M}=\left[\begin{array}{c|c}
+I_{f} & 0  \tag{24}\\
+\hline 0 & \frac{1}{\sqrt{v}} I_{v}
+\end{array}\right] \cdot\left[\begin{array}{l|l}
+M_{11} & M_{12} \\
+\hline M_{21} & M_{22}
+\end{array}\right] \cdot\left[\begin{array}{c|c}
+I_{f} & 0 \\
+\hline 0 & \frac{1}{\sqrt{v}} I_{v}
+\end{array}\right]
+\]
+
+\begin{enumerate}
+  \setcounter{enumi}{5}
+  \item If $v_{\text {total }} \approx \infty$ then $\mu_{s}(M) \approx \infty$ and the system can be destabilized by a perturbation among the fixed perturbations ( $\Delta_{f}$ ) without consideration of the varying perturbations ( $\Delta_{v}$ ) so END, else go to (3).
+\end{enumerate}
+
+The simplicity of this algorithm is that systems which can be destabilized by a fixed perturbation continuously wrap 2 into $v_{\text {total }}$, causing the value of $v_{\text {total }}$ to grow towards infinity. Hence, the skew $\mu$ lower bound is $v_{\text {total }} \approx \infty$ as expected with systems that can be destabilized without considering the varying perturbation. As $\mu_{s} \approx \infty$ and the eigenvectors for the algorithm converge, and the value of $v$ for a given iteration provides a lower bound on $\mu\left(M_{11}\right)$, a valuable piece of information when trying to interpret the results of a skew $\mu$ robust control problem that did not provide the results expected.
+
+From a practical standpoint, this algorithm is easier to implement than a procedure that must error trap complex values of $\gamma_{1}$. For the algorithm above there are only three possible outcomes, regardless of eigenvector alignment conditions in the power algorithm: (1) $v$ for an iteration converges to 1 , and a value of $v_{\text {total }}$ is found, (2) $\gamma_{1}>1$ consistently and $v_{\text {total }}$ is error trapped as it approaches infinity, or (3) $v$ for an iteration remains continuously below 1 , and $v_{\text {total }}$ is error trapped as it approaches 0 .
+
+\section*{5. CONCLUSION}
+An extension of mixed $\mu$ lower bound methodology is devised to provide for the solution of the potentially more common skew $\mu$ problem. This method is superior to previous skew $\mu$ calculation methods because it does not include repetitive calculations of $\mu$ to find skew $\mu$ [4]. These previous methods are computationally expensive in comparison to both $\mu$ and the proposed skew $\mu$ technique.
+
+In addition to theoretical development of a skew $\mu$ lower bound, a methodology for calculating a skew $\mu$ lower bound via a power algorithm is given including techniques for avoiding difficulties that naturally arise in the implementation of skew $\mu$ software.
+
+\section*{ACKNOWLEDGEMENTS}
+This project is funded by a grant from NSF/PSERC (NSF Award Number 9810081), and was performed at Colorado State University (CSU) in cooperation with Iowa State University (ISU).
+
+\section*{REFERENCES}
+\begin{enumerate}
+  \item Skogestad S, Postlethwaite I. Multivariable Feedback Control. Wiley: New York, 1996.
+  \item Sideris A. Elimination of frequency search from robustness tests. IEEE Transactions on Automatic Control 1992; 37:1635-1640.
+  \item Fan M, Tits A. A measure of worst-case $h_{\infty}$ performance and of largest acceptable uncertainty. Systems and Control Letters 1992; 18(6):409-421.
+  \item Ferreres G. A Practical Approach to Robustness Analysis with Aeronautical Applications. Kluwer Academic/Plenum Publishers: New York, 1999.
+  \item Ferreres G, Fromion V. Robustness analysis using the $v$ tool. Proceedings of the 35 th Conference on Decision and Control, Kobe, Japan, 1996; 4566-4570.
+  \item Ferreres G, M'Saad M. Direct computation of the maximal ssv over the frequency range using the $v$ tool. Proceedings of the 33rd Conference on Decision and Control, Lake Buena Vista, FL, U.S.A., 1994; 2147-2148.
+  \item Ferreres G, Fromion V, Scorletti G. Advanced computation of the robustness margin. Proceedings of the 35 th Conference on Decision and Control, Kobe, Japan, 1996; 4580-4584.
+  \item Glavaški S, Tierno JE. Advances in worst case $h_{\infty}$ performance computation. Proceedings of the 1998 IEEE Conference on Control Applications, vol. 1, Trieste, Italy, 1998; 668-673.
+  \item Fan MKH, Tits AL, Doyle JC. Robustness in the presence of mixed parametric uncertainty and unmodeled dynamics. IEEE Transactions on Automatic Control 1991; AC-36:25-38.
+  \item Young PM, Doyle JC. A lower bound for the mixed $\mu$ problem. IEEE Transactions on Automatic Control 1997; 42:123-128.
+  \item Packard A, Doyle JC. Structured singular value with repeated scalar blocks. Proceedings of the American Control Conference, Atlanta, Georgia, U.S.A., 1988; 1213-1218.
+  \item Packard A, Fan MKH, Doyle JC. A power method for the structured singular value. Proceedings of the 27 th Conference on Decision and Control, Austin, Texas, U.S.A., 1988; 2132-2137.
+\end{enumerate}
+
+
+\end{document}

@@ -1,0 +1,434 @@
+\usepackage[utf8]{inputenc}
+\usepackage{ctable} % for nicer tables if needed
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{xparse}
+\usepackage{hyperref} % 可选：便于内部引用
+\usepackage{datetime} % 更灵活的日期格式（可选）
+% % 备注 
+% 目前暂时是不能换行的，以及笔记内公式是不能不加$$的
+
+% ========== 全局开关 ==========
+\newif\ifshownotes
+\shownotestrue   % 编写时为 true；投稿/打印前改为 \shownotesfalse 一键隐藏所有笔记与汇总
+
+% ========== 优雅配色方案（基于 elegantbook 风格） ==========
+% 主色调：柔和的蓝绿色系，搭配温暖的辅助色
+\definecolor{primary-teal}{RGB}{0, 150, 136}      % 主蓝绿色
+\definecolor{primary-blue}{RGB}{3, 169, 244}      % 辅助蓝色
+\definecolor{accent-orange}{RGB}{255, 152, 0}     % 强调橙色
+\definecolor{accent-purple}{RGB}{156, 39, 176}    % 强调紫色
+
+% 笔记背景色（非常淡的色调）
+\definecolor{researchbg}{RGB}{232, 245, 243}      % 研究笔记 - 极淡蓝绿
+\definecolor{methodbg}{RGB}{227, 242, 253}        % 方法笔记 - 极淡蓝色  
+\definecolor{remarkbg}{RGB}{255, 243, 224}        % 备注笔记 - 极淡橙色
+\definecolor{futurebg}{RGB}{243, 229, 245}        % 后续工作 - 极淡紫色
+
+% 笔记边框色（柔和的主色调）
+\definecolor{researchframe}{RGB}{0, 150, 136}     % 研究笔记 - 主蓝绿
+\definecolor{methodframe}{RGB}{3, 169, 244}       % 方法笔记 - 辅助蓝色
+\definecolor{remarkframe}{RGB}{255, 152, 0}       % 备注笔记 - 强调橙色
+\definecolor{futureframe}{RGB}{156, 39, 176}      % 后续工作 - 强调紫色
+
+% 优先级颜色（协调的强调色）
+\definecolor{priohigh}{RGB}{229, 57, 53}          % 高优先级 - 柔和的红色
+\definecolor{priomed}{RGB}{0, 150, 136}           % 中优先级 - 主蓝绿色
+\definecolor{priolow}{RGB}{158, 158, 158}         % 低优先级 - 中灰色
+
+% ========== 计数器（每类独立编号） ==========
+\newcounter{researchnote}
+\newcounter{methodnote}
+\newcounter{remarknote}
+\newcounter{futurenote}
+
+% ========== 储存所有笔记内容（用于附录汇总） ==========
+\newcommand{\AllNotes}{}
+% 内部追加宏的辅助（需要 @ 名称）
+\makeatletter
+\newcommand{\AppendAllNotes}[1]{%
+  \gappto\AllNotes{#1}%
+}
+\makeatother
+
+% ========== 通用样式（tcolorbox） ==========
+\tcbset{
+  notebox/.style={
+    sharp corners,
+    boxrule=0.8pt,
+    arc=2pt,
+    left=4mm,
+    right=4mm,
+    top=2mm,
+    bottom=2mm,
+    fonttitle=\small\bfseries,
+    coltitle=white,
+    title filled=true,
+    before skip=8pt,
+    after skip=8pt,
+    enhanced,
+    fontupper=\small,
+    colupper=black,
+    overlay first={
+      \node[anchor=north east, inner sep=1.5mm] at (frame.north east) 
+        {\color{white}\scriptsize\bfseries\sffamily #1};
+    }
+  }
+}
+
+% ========== 定义笔记命令（格式：\researchnote[作者][日期][优先级]{内容}） ==========
+\NewDocumentCommand{\researchnote}{ O{} O{} O{med} m }{%
+  \ifshownotes
+    \stepcounter{researchnote}%
+    % 参数处理
+    \def\RNauthor{#1}%
+    \def\RNdate{#2}%
+    \def\RNprio{#3}%
+    \def\RNcontent{#4}%
+    \ifx\RNdate\@empty \edef\RNdate{\today}\fi
+    % 优先级映射
+    \lowercase{\def\RNprioLower{\RNprio}}%
+    \def\RNprcolor{}%
+    \def\RNpriolabel{}%
+    \IfStrEq{\RNprioLower}{high}{%
+      \def\RNprcolor{priohigh}\def\RNpriolabel{重要}%
+    }{%
+    \IfStrEq{\RNprioLower}{med}{%
+      \def\RNprcolor{priomed}\def\RNpriolabel{中等}%
+    }{%
+    \IfStrEq{\RNprioLower}{low}{%
+      \def\RNprcolor{priolow}\def\RNpriolabel{一般}%
+    }{%
+      \def\RNprcolor{priomed}\def\RNpriolabel{中等}%
+    }}}%
+    % 拼标题
+    \edef\RNtitle{研究笔记~\theresearchnote}%
+    \begin{tcolorbox}[notebox=研究,
+        colback=researchbg,
+        colframe=researchframe,
+        colbacktitle=researchframe,
+        title=\RNtitle]
+      {\color{gray!70}\scriptsize\textbf{作者:} \RNauthor\quad 
+       \textbf{日期:} \RNdate\quad 
+       \textbf{级别:} \RNpriolabel}\par\smallskip
+      \RNcontent
+    \end{tcolorbox}%
+    % 追加到汇总
+    \AppendAllNotes{%
+      \par\noindent\textbf{研究笔记~\theresearchnote}\quad (\RNpriolabel)\quad 作者：\RNauthor\quad 日期：\RNdate\\\smallskip
+      \noindent\begin{minipage}{\linewidth}\small \RNcontent \end{minipage}\par\medskip
+    }%
+  \fi
+}
+
+\NewDocumentCommand{\methodnote}{ O{} O{} O{med} m }{%
+  \ifshownotes
+    \stepcounter{methodnote}%
+    \def\MNauthor{#1}\def\MNdate{#2}\def\MNprio{#3}\def\MNcontent{#4}%
+    \ifx\MNdate\@empty \edef\MNdate{\today}\fi
+    \lowercase{\def\MNprioLower{\MNprio}}%
+    \def\MNprlabel{}%
+    \IfStrEq{\MNprioLower}{high}{\def\MNprlabel{重要}}{%
+      \IfStrEq{\MNprioLower}{low}{\def\MNprlabel{一般}}{\def\MNprlabel{中等}}%
+    }%
+    \edef\MNtitle{方法笔记~\themethodnote}%
+    \begin{tcolorbox}[notebox=方法,
+        colback=methodbg,
+        colframe=methodframe,
+        colbacktitle=methodframe,
+        title=\MNtitle]
+      {\color{gray!70}\scriptsize\textbf{作者:} \MNauthor\quad 
+       \textbf{日期:} \MNdate\quad 
+       \textbf{级别:} \MNprlabel}\par\smallskip
+      \MNcontent
+    \end{tcolorbox}%
+    \AppendAllNotes{%
+      \par\noindent\textbf{方法笔记~\themethodnote}\quad (\MNprlabel)\quad 作者：\MNauthor\quad 日期：\MNdate\\\smallskip
+      \noindent\begin{minipage}{\linewidth}\small \MNcontent \end{minipage}\par\medskip
+    }%
+  \fi
+}
+
+\NewDocumentCommand{\remarknote}{ O{} O{} O{med} m }{%
+  \ifshownotes
+    \stepcounter{remarknote}%
+    \def\RmNauthor{#1}\def\RmNdate{#2}\def\RmNprio{#3}\def\RmNcontent{#4}%
+    \ifx\RmNdate\@empty \edef\RmNdate{\today}\fi
+    \lowercase{\def\RmNprioLower{\RmNprio}}%
+    \def\RmNprlabel{}%
+    \IfStrEq{\RmNprioLower}{high}{\def\RmNprlabel{重要}}{%
+      \IfStrEq{\RmNprioLower}{low}{\def\RmNprlabel{一般}}{\def\RmNprlabel{中等}}%
+    }%
+    \edef\RmNtitle{备注笔记~\theremarknote}%
+    \begin{tcolorbox}[notebox=备注,
+        colback=remarkbg,
+        colframe=remarkframe,
+        colbacktitle=remarkframe,
+        title=\RmNtitle]
+      {\color{gray!70}\scriptsize\textbf{作者:} \RmNauthor\quad 
+       \textbf{日期:} \RmNdate\quad 
+       \textbf{级别:} \RmNprlabel}\par\smallskip
+      \RmNcontent
+    \end{tcolorbox}%
+    \AppendAllNotes{%
+      \par\noindent\textbf{备注笔记~\theremarknote}\quad (\RmNprlabel)\quad 作者：\RmNauthor\quad 日期：\RmNdate\\\smallskip
+      \noindent\begin{minipage}{\linewidth}\small \RmNcontent \end{minipage}\par\medskip
+    }%
+  \fi
+}
+
+\NewDocumentCommand{\futurework}{ O{} O{} O{med} m }{%
+  \ifshownotes
+    \stepcounter{futurenote}%
+    \def\FNauthor{#1}\def\FNdate{#2}\def\FNprio{#3}\def\FNcontent{#4}%
+    \ifx\FNdate\@empty \edef\FNdate{\today}\fi
+    \lowercase{\def\FNprioLower{\FNprio}}%
+    \def\FNprlabel{}%
+    \IfStrEq{\FNprioLower}{high}{\def\FNprlabel{重要}}{%
+      \IfStrEq{\FNprioLower}{low}{\def\FNprlabel{一般}}{\def\FNprlabel{中等}}%
+    }%
+    \edef\FNtitle{后续工作~\thefuturenote}%
+    \begin{tcolorbox}[notebox=后续,
+        colback=futurebg,
+        colframe=futureframe,
+        colbacktitle=futureframe,
+        title=\FNtitle]
+      {\color{gray!70}\scriptsize\textbf{作者:} \FNauthor\quad 
+       \textbf{日期:} \FNdate\quad 
+       \textbf{级别:} \FNprlabel}\par\smallskip
+      \FNcontent
+    \end{tcolorbox}%
+    \AppendAllNotes{%
+      \par\noindent\textbf{后续工作~\thefuturenote}\quad (\FNprlabel)\quad 作者：\FNauthor\quad 日期：\FNdate\\\smallskip
+      \noindent\begin{minipage}{\linewidth}\small \FNcontent \end{minipage}\par\medskip
+    }%
+  \fi
+}
+
+% ========== 在文档末尾输出汇总（受 \shownotes 控制） ==========
+\AtEndDocument{%
+  \ifshownotes
+    \clearpage
+    \section*{研究笔记汇总}
+    \AllNotes
+  \fi
+}
+
+
+
+
+% % claude给出的修复代码
+% \usepackage[utf8]{inputenc}
+% \usepackage{ctable}
+% \usepackage{xcolor}
+% \usepackage{tcolorbox}
+% \usepackage{xparse}
+% \usepackage{xstring}
+% \usepackage{etoolbox}
+% \usepackage{hyperref}
+
+% % ========== 全局开关 ==========
+% \newif\ifshownotes
+% \shownotestrue
+
+% % ========== 优雅配色方案 ==========
+% \definecolor{primary-teal}{RGB}{0, 150, 136}
+% \definecolor{primary-blue}{RGB}{3, 169, 244}
+% \definecolor{accent-orange}{RGB}{255, 152, 0}
+% \definecolor{accent-purple}{RGB}{156, 39, 176}
+
+% \definecolor{researchbg}{RGB}{232, 245, 243}
+% \definecolor{methodbg}{RGB}{227, 242, 253}
+% \definecolor{remarkbg}{RGB}{255, 243, 224}
+% \definecolor{futurebg}{RGB}{243, 229, 245}
+
+% \definecolor{researchframe}{RGB}{0, 150, 136}
+% \definecolor{methodframe}{RGB}{3, 169, 244}
+% \definecolor{remarkframe}{RGB}{255, 152, 0}
+% \definecolor{futureframe}{RGB}{156, 39, 176}
+
+% % ========== 计数器 ==========
+% \newcounter{researchnote}
+% \newcounter{methodnote}
+% \newcounter{remarknote}
+% \newcounter{futurenote}
+
+% % ========== 储存所有笔记内容 ==========
+% \makeatletter
+% \newcommand{\AllNotes}{}
+% \newcommand{\AppendAllNotes}[1]{%
+%   \global\protected@xappto\AllNotes{#1}%
+% }
+% \makeatother
+
+% % ========== 通用样式（移除 enhanced，使用 breakable） ==========
+% \tcbset{
+%   notebox/.style 2 args={
+%     sharp corners,
+%     boxrule=0.8pt,
+%     arc=2pt,
+%     left=4mm,
+%     right=4mm,
+%     top=2mm,
+%     bottom=2mm,
+%     fonttitle=\normalfont\small\bfseries,
+%     coltitle=white,
+%     before skip=8pt,
+%     after skip=8pt,
+%     breakable,
+%     fontupper=\small,
+%     colupper=black,
+%   }
+% }
+
+% % ========== 研究笔记 ==========
+% \makeatletter
+% \NewDocumentCommand{\researchnote}{ O{} O{} +m }{%
+%   \ifshownotes
+%     \stepcounter{researchnote}%
+%     \def\RNauthor{#1}%
+%     \def\RNdate{#2}%
+%     \def\RNcontent{#3}%
+%     % 处理默认日期
+%     \ifx\RNdate\@empty 
+%       \def\RNdate{\today}
+%     \fi
+%     % 生成笔记盒子
+%     \begin{tcolorbox}[notebox={研究笔记~\theresearchnote}{研究},
+%         colback=researchbg,
+%         colframe=researchframe,
+%         colbacktitle=researchframe,
+%         title={【研究笔记~\theresearchnote】}]
+%       {\color{gray!70}\small 作者: \RNauthor\quad 日期: \RNdate}
+      
+%       \medskip
+%       \RNcontent
+%     \end{tcolorbox}%
+%     % 追加到汇总
+%     \protected@edef\temp{%
+%       \noexpand\par\noexpand\noindent
+%       \noexpand\textbf{研究笔记~\theresearchnote}\noexpand\quad 
+%       作者：\RNauthor\noexpand\quad 
+%       日期：\RNdate
+%       \noexpand\par\noexpand\smallskip
+%       \noexpand\noindent\RNcontent
+%       \noexpand\par\noexpand\medskip
+%     }%
+%     \expandafter\AppendAllNotes\expandafter{\temp}%
+%   \fi
+% }
+% \makeatother
+
+% % ========== 方法笔记 ==========
+% \makeatletter
+% \NewDocumentCommand{\methodnote}{ O{} O{} +m }{%
+%   \ifshownotes
+%     \stepcounter{methodnote}%
+%     \def\MNauthor{#1}%
+%     \def\MNdate{#2}%
+%     \def\MNcontent{#3}%
+%     \ifx\MNdate\@empty 
+%       \def\MNdate{\today}
+%     \fi
+%     \begin{tcolorbox}[notebox={方法笔记~\themethodnote}{方法},
+%         colback=methodbg,
+%         colframe=methodframe,
+%         colbacktitle=methodframe,
+%         title={【方法笔记~\themethodnote】}]
+%       {\color{gray!70}\small 作者: \MNauthor\quad 日期: \MNdate}
+      
+%       \medskip
+%       \MNcontent
+%     \end{tcolorbox}%
+%     \protected@edef\temp{%
+%       \noexpand\par\noexpand\noindent
+%       \noexpand\textbf{方法笔记~\themethodnote}\noexpand\quad 
+%       作者：\MNauthor\noexpand\quad 
+%       日期：\MNdate
+%       \noexpand\par\noexpand\smallskip
+%       \noexpand\noindent\MNcontent
+%       \noexpand\par\noexpand\medskip
+%     }%
+%     \expandafter\AppendAllNotes\expandafter{\temp}%
+%   \fi
+% }
+% \makeatother
+
+% % ========== 备注笔记 ==========
+% \makeatletter
+% \NewDocumentCommand{\remarknote}{ O{} O{} +m }{%
+%   \ifshownotes
+%     \stepcounter{remarknote}%
+%     \def\RmNauthor{#1}%
+%     \def\RmNdate{#2}%
+%     \def\RmNcontent{#3}%
+%     \ifx\RmNdate\@empty 
+%       \def\RmNdate{\today}
+%     \fi
+%     \begin{tcolorbox}[notebox={备注笔记~\theremarknote}{备注},
+%         colback=remarkbg,
+%         colframe=remarkframe,
+%         colbacktitle=remarkframe,
+%         title={【备注笔记~\theremarknote】}]
+%       {\color{gray!70}\small 作者: \RmNauthor\quad 日期: \RmNdate}
+      
+%       \medskip
+%       \RmNcontent
+%     \end{tcolorbox}%
+%     \protected@edef\temp{%
+%       \noexpand\par\noexpand\noindent
+%       \noexpand\textbf{备注笔记~\theremarknote}\noexpand\quad 
+%       作者：\RmNauthor\noexpand\quad 
+%       日期：\RmNdate
+%       \noexpand\par\noexpand\smallskip
+%       \noexpand\noindent\RmNcontent
+%       \noexpand\par\noexpand\medskip
+%     }%
+%     \expandafter\AppendAllNotes\expandafter{\temp}%
+%   \fi
+% }
+% \makeatother
+
+% % ========== 后续工作 ==========
+% \makeatletter
+% \NewDocumentCommand{\futurework}{ O{} O{} +m }{%
+%   \ifshownotes
+%     \stepcounter{futurenote}%
+%     \def\FNauthor{#1}%
+%     \def\FNdate{#2}%
+%     \def\FNcontent{#3}%
+%     \ifx\FNdate\@empty 
+%       \def\FNdate{\today}
+%     \fi
+%     \begin{tcolorbox}[notebox={后续工作~\thefuturenote}{后续},
+%         colback=futurebg,
+%         colframe=futureframe,
+%         colbacktitle=futureframe,
+%         title={【后续工作~\thefuturenote】}]
+%       {\color{gray!70}\small 作者: \FNauthor\quad 日期: \FNdate}
+      
+%       \medskip
+%       \FNcontent
+%     \end{tcolorbox}%
+%     \protected@edef\temp{%
+%       \noexpand\par\noexpand\noindent
+%       \noexpand\textbf{后续工作~\thefuturenote}\noexpand\quad 
+%       作者：\FNauthor\noexpand\quad 
+%       日期：\FNdate
+%       \noexpand\par\noexpand\smallskip
+%       \noexpand\noindent\FNcontent
+%       \noexpand\par\noexpand\medskip
+%     }%
+%     \expandafter\AppendAllNotes\expandafter{\temp}%
+%   \fi
+% }
+% \makeatother
+
+% % ========== 文档末尾输出汇总 ==========
+% \AtEndDocument{%
+%   \ifshownotes
+%     \clearpage
+%     \section*{研究笔记汇总}
+%     \AllNotes
+%   \fi
+% }

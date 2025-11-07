@@ -1,0 +1,3 @@
+为什么不用overleaf了？
+回答：真的傻逼，尝试了很多，把图片删除，把章节删除，最后发现就是maki给的elegantbook.cls导致的compile timed out（因为一加上这个就jiji），要么就花钱，but我是坚决不想花钱的
+      所以就换到vscode里去进行了，这里就很棒，编译速度也不慢

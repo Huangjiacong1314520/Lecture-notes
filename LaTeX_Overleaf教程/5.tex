@@ -1,0 +1,61 @@
+\chapter{课堂录制}
+第\ref{ch:crossref}章的内容主要是讲交叉引用。
+
+式\ref{eq:TDSE}是含时薛定谔方程
+
+式\eqref{eq:TDSE}是含时薛定谔方程
+
+表格\ref{tab:crossref}总结了elegantbook里面可标记的事物
+
+\tabref{tab:crossref}总结了elegantbook里面可标记的事物
+
+\begin{align*}
+    \bm{0} = \underbrace{\alpha_1 \bm{x}_1 + \cdots + \alpha_n \bm{x}_n}_{\text{互不相同}}
+\end{align*}
+
+\begin{align*}
+    \bm{0} = \underbrace{\alpha_1 \bm{x}_1 + \cdots + \alpha_n \bm{x}_n}_{\text{根据\tabref{tab:crossref}}}
+\end{align*}
+
+\begin{align*}
+    (K,\mathcal{T}_K) \text{是紧的} \iff \forall K \text{中万有网} \{x_\alpha \} \text{都满足} x_\alpha \to x \in K
+\end{align*}
+
+\begin{align*}
+    (K,\mathcal{T}_K) \text{是紧的} \overset{\ref{theo:universal_compact}}{\iff} \forall K \text{中万有网} \{x_\alpha \} \text{都满足} x_\alpha \to x \in K
+\end{align*}
+
+\begin{align*}
+    (K,\mathcal{T}_K) \text{是紧的} \overset{\ref{theo:universal_compact}}{\iff} \forall K \text{中万有网} \{x_\alpha \} \text{都满足} x_\alpha \to x \in K
+\end{align*}
+
+\begin{align*}
+    (K,\mathcal{T}_K) \text{是紧的} \xLeftrightarrow{\text{定理\ref{theo:universal_compact}}} \forall K \text{中万有网} \{x_\alpha \} \text{都满足} x_\alpha \to x \in K
+\end{align*}
+
+Ayumu \href{https://www.bilibili.com/video/BV1ve4y1m7hP/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=4530026c0834d011205a1c8aae339ab9}{第二积分中值定理} 是我最喜欢的一集。
+
+我最近正在学泛函分析\cite{1978Introductory}
+
+\begin{center}
+    \begin{tikzpicture}
+    \node(R) at (-2,2) {$R$};
+    \node(S) at (2,2) {$S$};
+    \node(DR) at (-2,-2) {$D^{-1} R$};
+    \draw[->,dotted] (R)--(DR) node at (-2.3,0) {$\iota$};
+    \draw[->,dotted] (R)--(S) node at (0,2.3) {$\varphi$};
+    \draw[->,dotted] (DR)--(S) node at (0.3,0) {$\phi$};
+    \end{tikzpicture}
+    \captionof{figure}{title}
+    \label{fig:label}
+\end{center}
+
+\begin{center}
+    \begin{tikzcd}[column sep=8 em, row sep = 8 em]
+R \arrow[hook,r,"\varphi"]\arrow[d, hook,"\iota"] 
+& S \\
+D^{-1}R \arrow[hook, ur,dashed,"\Phi"]
+\end{tikzcd}
+\end{center}
+
+

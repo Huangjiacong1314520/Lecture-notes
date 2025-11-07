@@ -1,0 +1,73 @@
+% 测试跨页功能
+\documentclass[12pt]{article}
+\usepackage{researchnotes}
+\usepackage{lipsum}  % 用于生成测试文本
+
+\begin{document}
+
+\section{跨页测试}
+
+这是正文内容。
+
+% 测试1：短笔记（不跨页）
+\begin{rn}[author=JC, date=2025-10-20]
+\textbf{短笔记测试}
+
+这是一个简短的笔记，应该不会跨页。
+\end{rn}
+
+% 测试2：长笔记（会跨页）
+\begin{rn}[author=JC, date=2025-10-20]
+\textbf{长笔记测试 - 会跨页}
+
+\lipsum[1-5]  % 生成5段测试文本
+
+这是一些数学公式：
+
+当\hli{n \to \infty}时，我们有：
+\[
+\hlm{\lim_{n \to \infty} \frac{1}{n} = 0}
+\]
+
+\lipsum[6-10]  % 再生成5段测试文本
+
+\textbf{重要结论：}
+\begin{itemize}
+    \item 第一点：\hl{这很重要}
+    \item 第二点：\hlr{这非常重要}
+    \item 第三点：\hlg{这是补充说明}
+\end{itemize}
+
+\lipsum[11-12]  % 继续生成文本
+\end{rn}
+
+% 测试3：疑问笔记（也会跨页）
+\begin{qn}[author=张三, date=2025-10-20]
+\textbf{这是一个很长的疑问}
+
+\lipsum[1-3]
+
+\textbf{数学推导：}
+
+假设\hli{x > 0}，则：
+\[
+\hlmr{\int_0^x f(t)dt = F(x) - F(0)}
+\]
+
+\lipsum[4-6]
+
+\textbf{待解决的问题：}
+\begin{enumerate}
+    \item \hlp{问题1}：如何证明？
+    \item \hlp{问题2}：是否有反例？
+    \item \hlp{问题3}：能否推广？
+\end{enumerate}
+
+\lipsum[7-8]
+\end{qn}
+
+\section{后续内容}
+
+笔记已经结束，这是正文的后续内容。
+
+\end{document}

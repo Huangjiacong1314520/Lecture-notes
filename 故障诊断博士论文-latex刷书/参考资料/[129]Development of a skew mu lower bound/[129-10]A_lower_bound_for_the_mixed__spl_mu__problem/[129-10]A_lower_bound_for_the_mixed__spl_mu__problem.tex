@@ -1,0 +1,836 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+
+\author{Peter M. Young and John C. Doyle}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section*{A Lower Bound for the Mixed $\boldsymbol{\mu}$ Problem}
+
+
+\begin{abstract}
+The mixed $\mu$ problem has been shown to be NP hard so that exact analysis appears intractable. Our goal then is to exploit the problem structure so as to develop a polynomial time algorithm that approximates $\mu$ and usually gives good answers. To this end it is shown that $\mu$ is equivalent to a real eigenvalue maximization problem, and a power algorithm is developed to tackle this problem. The algorithm not only provides a lower bound for $\mu$ but has the property that $\mu$ is (almost) always an equilibrium point of the algorithm.
+\end{abstract}
+
+\begin{researchnote}[author=JC, date=2025-10-23]
+    本文主要介绍了：同时包含实块和复块的mixed-\(\mu\)的下界算法
+    
+    把$\mu$的下界与一个“实谱半径最大化”紧密关联
+
+\end{researchnote}
+
+Index Terms-Computational methods, control system analysis, robust control, stability analysis, structured singular value.
+
+\section*{I. Introduction}
+Computation schemes for the complex $\mu$ problem, based on upper and lower bounds [1], [2], are now well developed, and software is commercially available as part of the $\mu$-Tools toolbox [3]. The mixed case, however, is a fundamentally more difficult problem and is much less understood. An upper bound for the general mixed $\mu$ problem was presented by Fan et al. [4] involving a minimization problem on the eigenvalues of a Hermitian matrix, and a practical scheme to compute this upper bound has recently been developed [5]. This paper addresses the problem of computing a lower bound for $\mu$ in the mixed case.
+
+We begin with some preliminaries in Section II. It is known that the mixed $\mu$ problem is nonconvex and NP hard [6] so that, except for small problems or special cases, one cannot expect to compute exact solutions without an entirely unacceptable amount of computation. Nevertheless, we would like to quickly find approximate solutions to the problem. This motivates the power iteration approach taken in the paper. Previous work on complex $\mu$ problems has shown that power iterations are fast, seem to have some nice global properties, and give good answers most of the time. Of course we will not be able to provide guarantees about the global properties of our solution since the problem we are trying to solve is NP hard.
+
+It is shown in Section III that mixed $\mu$ can be obtained as the result of a (nonconcave) real eigenvalue maximization. Sections IV-VI present several important theoretical characterizations of the mixed $\mu$ problem, including the generalization of the $\mu$ decomposition to the mixed case in Section V. This leads to the development of a power algorithm to compute a lower bound for the mixed $\mu$ problem which is presented in Section VI. The algorithm performance is very encouraging, both in terms of accuracy of the resulting bound and computational efficiency, and this is briefly discussed in Section VII.
+
+\section*{II. Notation and Preliminaries}
+For any square complex matrix $M$, we denote the complex conjugate transpose by $M^{*}$. The largest singular value and the spectral radius are denoted by $\bar{\sigma}(M)$ and $\rho(M)$, respectively. The real spectral radius is defined as $\rho_{R}(M)= \max \{|\lambda|: \lambda$ is a real eigenvalue of $M\}$, with $\rho_{R}(M)=0$ if $M$ has no real eigenvalues. For any complex vector $x$, then $x^{T}$ denotes the transpose, $x^{*}$ the complex conjugate transpose, $|x|$ the Euclidean norm, and $|x|_{\infty}$ the infinity norm.
+
+The definition of the structured singular value, $\mu$, is dependent upon the underlying block structure of the uncertainties, which is defined as follows. Given a matrix $M \in \mathcal{C}^{n \times n}$ and three nonnegative integers $m_{r}, m_{c}$, and $m_{C}$ with $m \doteq m_{r}+m_{c}+m_{C} \leq n$, \hl{the block structure $\mathcal{K}\left(m_{r}, m_{c}, m_{C}\right)$ }is an $m$-tuple of positive integers块结构，正整数组成的m元组，用来对不确定块计数
+
+
+\begin{equation*}
+\mathcal{K}=\left(k_{1}, \cdots, k_{m_{r}}, k_{m_{r}+1}, \cdots, k_{m_{r}+m_{c}}, k_{m_{r}+m_{c}+1}, \cdots, k_{m}\right) \tag{1}
+\end{equation*}
+
+\hl{维度兼容：$\sum_{i=1}^{m} k_{i}=n$，和$M$}\\
+where we require $\sum_{i=1}^{m} k_{i}=n$ so these dimensions are compatible with $M$. This now determines the set of allowable perturbations, namely define
+\\\hl{扰动矩阵的集合$X_{\mathcal{K}}$：是块对角的，实重复标量块、复重复标量块、全复块}
+\[
+\begin{array}{r}
+X_{\mathcal{K}}=\left\{\Delta = \text { block diag } \left(\delta_{1}^{r} I_{k_{1}}, \cdots, \delta_{m_{r}}^{r} I_{k_{m_{r}}}, \delta_{1}^{c} I_{k_{m_{r}+1}}, \cdots\right.\right. \\
+\left.\delta_{m_{c}}^{c} I_{k_{m_{r}+m_{c}}}, \Delta_{1}^{C}, \cdots, \Delta_{m_{C}}^{C}\right): \\
+\left.\delta_{i}^{r} \in \mathcal{R}, \delta_{i}^{c} \in \mathcal{C}, \Delta_{i}^{C} \in \mathcal{C}^{k_{m_{r}+m_{c}+i} \times k_{m_{r}+m_{c}+i}}\right\} . \tag{2}
+\end{array}
+\]
+
+Note that $X_{\kappa} \subset \mathcal{C}^{n \times n}$ and that this block structure is sufficiently general to allow for repeated real scalars, repeated complex scalars, and full complex blocks. Note also that the full complex blocks need not be square, but we restrict them as such for notational convenience. The purely complex case corresponds to $m_{r}=0$ and the purely real case to $m_{c}=m_{C}=0$.
+
+\textbf{Definition 1 [1]}: The structured singular value, $\mu_{\mathcal{K}}(M)$, of a matrix $M \in \mathcal{C}^{n \times n}$ with respect to a block structure $\mathcal{K}\left(m_{r}, m_{c}, m_{C}\right)$ is defined as
+\begin{equation*}
+\mu_{\mathcal{K}}(M)=\left(\min _{\Delta \in X_{\mathcal{K}}}\{\bar{\sigma}(\Delta): \operatorname{det}(I-\Delta M)=0\}\right)^{-1} \tag{3}
+\end{equation*}
+\begin{researchnote}[author=JC, date=2025-10-23]
+    在允许的不确定性结构里，找一个尽量小范数的$\Delta$能把$I-\Delta M$推到奇异（不可逆）；其“最小大小”的倒数，就是$\mu$。\\
+    关键代数事实: $\det(I - \Delta M) = 0$ 当且仅当存在非零向量 $v$ 使得 $(I - \delta M)v = 0$，即$\Delta Mv = v$。换句话说，若达到奇异，则1是$\Delta M$的特征值（而且就是实特征值1）
+\end{researchnote}
+with $\mu_{\mathcal{K}}(M)=0$ if no $\Delta \in X_{\mathcal{K}}$ solves $\operatorname{det}(I-\Delta M)=0$.\\
+In this paper we will be concerned directly with the computation of $\mu$ rather than how to use $\mu$ as a robustness analysis tool. For the reader unfamiliar with $\mu$-based techniques, a fairly comprehensive review is given in [7].
+
+Whilst it is not at all obvious how to compute $\mu$ from (3), it is easy to obtain the following crude upper and lower bounds:\\
+\hl{粗界：下界来自“实特征值”能引发不稳定，上界来自“把结构忽略掉”的最大奇异值}
+\begin{equation*}
+\rho_{R}(M) \leq \mu_{\mathcal{K}}(M) \leq \bar{\sigma}(M) \tag{4}
+\end{equation*}
+\hl{为了把上面的粗界收紧，定义$\mathcal{Q}_{\mathcal{K}}$和$\mathcal{D}_{\mathcal{K}}$这两组块对角矩阵集合}\\
+其中$\mathcal{Q}_{\mathcal{K}}$是不确定性集合，用于缩小不确定性的搜索范围\\
+$\mathcal{D}_{\mathcal{K}}$是缩放集合，用于对$M$做相似变换，因为相似缩放不改变$\mu$，但是会改变$\bar{\sigma}()$的大小。即$\mu_{\mathcal{K}}(M)=\mu_{\mathcal{K}}\left(D M D^{-1}\right)$，但是$\mu_{\mathcal{K}}(M) \leq \bar{\sigma}(M)$，而$\mu_{\mathcal{K}}(D M D^{-1}) \leq \inf _{D \in \mathcal{D}_{\mathcal{K}}} \bar{\sigma}\left(D M D^{-1}\right)$，只需要找到这么一个$D$能使得$\inf _{D \in \mathcal{D}_{\mathcal{K}}} \bar{\sigma}\left(D M D^{-1}\right) \leq \bar{\sigma}(M)$，这样就相当于通过$D$对上界进行了缩小，使得上界更紧。
+
+To refine these bounds further we define the following sets of block diagonal matrices (also dependent on the underlying block structure):
+\begin{researchnote}[author=JC, date=2025-10-23]
+        \section*{$\mathcal{Q}_{\mathcal{K}}$}
+        仍是块对角，但约束为“单位模/单位阵”：
+        \begin{itemize}
+            \item 重复实标量块取 $\delta^r_i\in[-1,1]$；
+            \item 重复复标量块取 $\delta^c_i$ 满足 $\delta^{c*}_i \delta^c_i=1$（即 $|\delta^c_i|=1$）；
+            \item 每个全复块 $\Delta^{C}_i$ 取\textbf{酉}（$\Delta^{C*}_i\Delta^C_i=I$）。
+        \end{itemize}
+            这类 $\Delta$ 可以理解为"相位/符号"的缩放，不改变各块的大小，只转动方向。
+\end{researchnote}
+\begin{equation*}
+\mathcal{Q}_{\mathcal{K}}=\left\{\Delta \in X_{\mathcal{K}}: \delta_{i}^{r} \in[-1,1], \delta_{i}^{c *} \delta_{i}^{c}=1, \Delta_{i}^{C *} \Delta_{i}^{C}=I_{k_{m_{r}+m_{c}+i}}\right\} \tag{5}
+\end{equation*}
+\begin{researchnote}[author=JC, date=2025-10-23]
+        \section*{$\mathcal{D}_{\mathcal{K}}$}
+        也是按块对角的"正定缩放"，但允许在复标量块前乘以相位 $e^{j\theta_i}$（$\theta_i\in[-\pi/2,\pi/2]$），在实/全块上用正的实数/正定Hermitian矩阵做幅度缩放。\\
+        直观地，$\mathcal D$ 是一组对 $M$ 做"相似变换"的\textbf{比例尺}（scalings），将难的方向缩小、易的方向放大。
+\end{researchnote}
+\begin{align*}
+\mathcal{D}_{\mathcal{K}}= & \left\{\text { block } \operatorname { d i a g } \left(e^{j \theta_{1}} D_{1}, \cdots, e^{j \theta_{m_{r}}} D_{m_{r}}, D_{m_{r}+1}, \cdots\right.\right. \\
+& \left.D_{m_{r}+m_{c}}, d_{1} I_{k_{m_{r}+m_{c}+1}}, \cdots, d_{m_{C}} I_{k_{m}}\right): \theta_{i} \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right] \\
+& \left.0<D_{i}=D_{i}^{*} \in \mathcal{C}^{k_{i} \times k_{i}}, 0<d_{i} \in \mathcal{R}\right\} \tag{6}
+\end{align*}
+
+
+Note that for any $\Delta \in X_{\mathcal{K}}$ and any $D \in \mathcal{D}_{\mathcal{K}}, D \Delta=\Delta D$, and consequently we obtain the following lemma.\\
+\textbf{Lemma 1:} For any matrix $M \in \mathcal{C}^{n \times n}$ and any compatible block structure $\mathcal{K}$, for all $D \in \mathcal{D}_{\mathcal{K}}$\\
+\hl{$\mathcal{D}_{\mathcal{K}}$的作用：可以对$M$用$D$先做相似变换，再算$\mu$}
+
+\begin{equation*}
+\mu_{\mathcal{K}}(M)=\mu_{\mathcal{K}}\left(D M D^{-1}\right) \tag{7}
+\end{equation*}
+
+
+Now to refine the lower bound we define the unit ball in the perturbation set as \\
+\hl{定义结构化单位球不确定集$\mathbf{B} X_{\mathcal{K}}$}，根据定义就是既属于扰动矩阵集合$X_{\mathcal{K}}$，又是最大奇异值小于等于1的所有扰动矩阵。
+
+\begin{equation*}
+\mathbf{B} X_{\mathcal{K}}=\left\{\Delta \in X_{\mathcal{K}}: \bar{\sigma}(\Delta) \leq 1\right\} \tag{8}
+\end{equation*}
+
+The following lemma results almost immediately from the definition of $\mu$.\\
+\textbf{Lemma 2:} For any matrix $M \in \mathcal{C}^{n \times n}$ and any compatible block structure $\mathcal{K}$
+混合$\mu$定义里，我们在“结构化单位球”内搜索会使$I - \Delta M$奇异的$\Delta$。等价地，$\mu$可以写成“在单位球上的实谱半径最大化”：
+\begin{equation*}
+\mu_{\mathcal{K}}(M)=\max _{\Delta \in \mathbf{B} X_{\mathcal{K}}} \rho_{R}(\Delta M) \tag{9}
+\end{equation*}
+\hl{$\mu$分析里，谱半径（尤其“实谱半径”）把“奇异化问题”转成“特征值最大化问题”}
+这把"最小使失稳的 $\Delta$"（定义(3)）改写成"单位球内让实谱半径最大的 $\Delta$"——更像"广义的幂法"目标。
+\begin{researchnote}[author=JC, date=2025-10-23]
+    \subsubsection*{谱半径}
+        对任意方阵 \( A \in \mathbb{C}^{n \times n} \)，谱半径定义为
+        \[
+        \rho(A) = \max\{|\lambda| : \lambda \in \sigma(A)\},
+        \]
+        也就是 \( A \) 的全部特征值模长（绝对值）里最大的那个。
+        实谱半径\(\rho_R(A)\)是仅在实特征值里取最大值；若无实特征值则记为0。\\
+        如果存在$\Delta$能使$\det(I - \Delta M) = 0$，那说明取该$\Delta$时，1是$\Delta M$的特征值，但是1不一定是最大的实特征值，因此\(\rho_R(\Delta M) \geq 1\)
+    \subsubsection*{标准化：把实特征值$\gamma$通过对不确定性缩放变成特征值1}
+        反过来，如果某个 \(\Delta\) 满足 \(\rho_R(\Delta M) = \gamma > 0\)，存在 \(v \neq 0\) 使 \(\Delta M v = \gamma v\)。把 \(\Delta\) 缩放成 \(\Delta' = \frac{1}{\gamma} \Delta\)，就得到
+        \[ \Delta' M v = \frac{1}{\gamma} \Delta M v = \frac{1}{\gamma} \gamma v = v \implies (I - \Delta' M) v = 0 \implies \det(I - \Delta' M) = 0. \]
+\end{researchnote}
+In light of (7) and (9), noting that $\mathcal{Q}_{\mathcal{K}} \subset \mathbf{B} X_{\mathcal{K}}$, we can refine the bounds in (4) to obtain the following lemma.
+
+\begin{questionnote}[author=JC, date=2025-10-25]
+    为什么能缩小$\Delta$的取值范围到$Q_{\mathcal{K}}$而不影响下界的求取，即还是$\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M)=\mu_{\mathcal{K}}(M)$\\
+    在线性-分式的目标（或由特征值/瑞利商诱导的目标）下，带范数约束的最优化常常在单位球的极点（extreme points）或边界达到最优（论文复现与代码实现ChatGPT），于是我们自然会把“单位球”进一步缩到它的边界极点集合上搜索。这就是 $Q_{\mathcal{K}}$的雏形
+\end{questionnote}
+
+\textbf{Lemma 3:} For any matrix $M \in \mathcal{C}^{n \times n}$ and any compatible block structure $\mathcal{K}$\\
+\hl{由于$\mathcal{Q}_{\mathcal{K}} \subset \mathbf{B} X_{\mathcal{K}}$，故得到夹逼界}
+\begin{equation*}
+\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M) \leq \mu_{\mathcal{K}}(M) \leq \inf _{D \in \mathcal{D}_{\mathcal{K}}} \bar{\sigma}\left(D M D^{-1}\right) \tag{10}
+\end{equation*}
+\hl{含义：}
+    \begin{itemize}
+        \item \textbf{下界}：只用"单位模/酉块"的 $Q$ 去扫，最大化 $\rho_R(QM)$。这很cheap（\hl{计算量小、实现简单、数值成本低}），常作为\textbf{$\mu$ 的可计算下界}。
+        \item \textbf{上界}：允许用"相位+正定缩放"把 $M$ 变形，求最小可能的最大奇异值。右端是经典的 \textbf{D–(K) 缩放上界}雏形（这里只是 $D$-缩放）。
+    \end{itemize}
+
+\begin{researchnote}[author=JC, date=2025-10-24]
+    \subsection*{为什么$\mathbf Q_{\mathcal K}\subset \mathbf B X_{\mathcal K}$}
+    因为按定义，$\mathbf Q_{\mathcal K}$ 中的每个 $\Delta$ 同时满足两件事：
+
+        \subsubsection*{属于 $X_{\mathcal K}$}
+
+        $\mathbf Q_{\mathcal K}$ 与 $X_{\mathcal K}$ 具有相同的"块对角"结构（同样的块尺寸与排列），只是对每个块再加了更强的"单位模/单位阵"约束（式(5)）。因此 $\mathbf Q_{\mathcal K}\subseteq X_{\mathcal K}$。
+
+        \subsubsection*{最大奇异值 $\bar{\sigma}(\Delta)\le 1$}
+
+        对块对角矩阵 $\Delta=\mathrm{blkdiag}(\Delta_1,\dots,\Delta_m)$，奇异值集合就是各块奇异值的并，所以
+        \[
+        \bar{\sigma}(\Delta)=\max_i \bar{\sigma}(\Delta_i).
+        \]
+        而在 $\mathbf Q_{\mathcal K}$ 中：
+
+        \begin{itemize}
+            \item 实标量块 $\delta_i^r\in[-1,1]\Rightarrow \bar{\sigma}(\delta_i^r I)=|\delta_i^r|\le 1$；
+            \item 复标量块 $|\delta_i^c|=1\Rightarrow \bar{\sigma}(\delta_i^c I)=|\delta_i^c|=1$；
+            \item 全复块取\textbf{酉}矩阵 $\Delta_i^C$（$\Delta_i^{C*}\Delta_i^C=I$）$\Rightarrow$ 所有奇异值都等于 1，因而 $\bar{\sigma}(\Delta_i^C)=1$。
+        \end{itemize}
+
+        于是 $\bar{\sigma}(\Delta)=\max_i \bar{\sigma}(\Delta_i)\le 1$。
+
+        \subsubsection*{结论}
+
+        把上述两点合在一起：每个 $\Delta\in\mathbf Q_{\mathcal K}$ 都满足"$\Delta\in X_{\mathcal K}$ 且 $\bar{\sigma}(\Delta)\le 1$"，这正是
+        \[
+        \mathbf B X_{\mathcal K}=\{\Delta\in X_{\mathcal K}:\bar{\sigma}(\Delta)\le 1\}
+        \]
+        的定义。因此
+        \[
+        \boxed{\mathbf Q_{\mathcal K}\subset \mathbf B X_{\mathcal K}}
+        \]
+        成立。
+
+        （若考虑矩形"全复块"，把约束写成右酉/左酉如 $\Delta_i^{C*}\Delta_i^C=I$ 或 $\Delta_i^C\Delta_i^{C*}=I$ 也是 $\bar{\sigma}(\Delta_i^C)=1$；本文中已说明为简洁起见把全复块取为方阵，因此上面的论证直接成立。）
+\end{researchnote}
+We introduce one further piece of notation. For any two vectors $x, y \in \mathcal{C}^{n}$, partition $x$ and $y$ according to the block structure as
+\\\hl{对任意向量进行按之前的不确定性块结构分解成下列形式}
+
+\begin{align*}
+& x=\left[\begin{array}{lllllllll}
+x_{r_{1}}^{T} & \cdots & x_{r_{m_{r}}}^{T} & x_{c_{1}}^{T} & \cdots & x_{c_{m_{c}}}^{T} & x_{C_{1}}^{T} & \cdots & x_{C_{m_{C}}}^{T}
+\end{array}\right]^{T} \\
+& y=\left[\begin{array}{llllllll}
+y_{r_{1}}^{T} & \cdots & y_{r_{m_{r}}}^{T} & y_{c_{1}}^{T} & \cdots & y_{c_{m_{c}}}^{T} & y_{C_{1}}^{T} & \cdots
+\end{array} y_{C_{m_{C}}}^{T}\right]^{T} \tag{11}
+\end{align*}
+
+
+where $x_{r_{i}}, y_{r_{i}} \in \mathcal{C}^{k_{i}}, x_{c_{i}}, y_{c_{i}} \in \mathcal{C}^{k_{m}+i}, x_{C_{i}}, y_{C_{i}} \in \mathcal{C}^{k m_{r}+m_{c}+i}$. These will be referred to as the "block components" of $x$ and $y$, and we define the "nondegeneracy" assumption to be that for every $i$ (in the appropriate set), $\left|y_{r_{i}}^{*} x_{r_{i}}\right| \neq 0,\left|y_{c_{i}}^{*} x_{c_{i}}\right| \neq 0,\left|y_{C_{i}}\right|\left|x_{C_{i}}\right| \neq 0$.\\
+\hl{非退化假设：为了后面算法计算过程中的分母都不为0}
+
+\section*{III. Lower Bound as a Maximization}
+In this section we show that the lower bound for the mixed case (10) holds with equality, and hence it is sufficient to consider the complex uncertainties on their boundary. Note, however, that the definition of $\mathcal{Q}_{K}$ requires us to search over the full range of the real perturbations. The following lemma is taken from [1].
+
+Lemma 4 [1]: Let $p: \mathcal{C}^{k} \rightarrow \mathcal{C}$ be a (multivariable) polynomial and define $\beta=\min \left\{|z|_{\infty}: p(z)=0\right\}$, then there exists a $z \in \mathcal{C}^{k}$ such that $p(z)=0$ and for every $i,\left|z_{i}\right|=\beta$.
+
+\begin{researchnote}[author=JC, date=2025-10-23]
+    \subsubsection*{定理1提纲挈领}
+        (12)式说明了二者的相等性，即我可以通过计算$\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M)$来得到$\mu_{\mathcal{K}}(M)$。也即我只需要在“单位模/酉”的块对角集合$\mathcal{Q}_{\mathcal{K}}$上做最大化，就能得到精确的$\mu$（不仅仅是下界）。可以只在\( Q_{\mathcal K}\)里做搜索，不必在整个\(\mathbf B X_{\mathcal K}\)里搜索。
+    \subsubsection*{对定理的理解}
+        要让 $I-\Delta M$ 奇异且 $\|\Delta\|$ 最小，最佳 $\Delta$ 会把每个可控的块都“推到单位球边界”；把尺度 $\beta$ 拿出来，就得到一个“纯相位/酉”的块对角矩阵 $Q$，将 $M$ 的实谱半径推到\(\mu\)。
+\end{researchnote}
+This is now used to prove the main result of the section.\\
+\hl{暂时没看具体证明，先复现了再说，确定这个证明方法重不重要，或者说能不能用到自己的论文里}
+\textbf{Theorem 1:} For any matrix $M \in \mathcal{C}^{n \times n}$ and any compatible block structure $\mathcal{K}$
+\begin{equation*}
+\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M)=\mu_{\mathcal{K}}(M) \tag{12}
+\end{equation*}
+\textbf{Proof:} It is trivial from (10) if $\mu_{\kappa}(M)=0$. So assume \hl{$\mu_{\mathcal{K}}(M)=\beta>0$}, and this value is achieved for some perturbation $\hat{\Delta}$, i.e., $\operatorname{det}(I-\hat{\Delta} M)=0$ and $\bar{\sigma}(\hat{\Delta}) \leq \frac{1}{\beta}$. Now fix the real perturbations at these "optimal" values ( $\delta_{i}^{r}=\hat{\delta}_{i}^{r}, i=1, \cdots, m_{r}$ with $\left|\hat{\delta}_{i}^{r}\right| \leq \frac{1}{\beta}$ ). Then allow the complex part of $\Delta$ to vary, and consider minimizing $\bar{\sigma}(\Delta)$ subject to $\operatorname{det}(I-\Delta M)=0$. Performing a singular value\\
+decomposition (SVD) on $\Delta$, we obtain $\operatorname{det}(I-U \Sigma V M)=0$ where $U$ and $V$ are (block diagonal) unitary matrices and
+
+$$
+\begin{gathered}
+\Sigma=\operatorname{diag}\left(\hat{\delta}_{1}^{r} I_{k_{1}}, \cdots \hat{\delta}_{m_{r}}^{r} I_{k_{m_{r}}}, \delta_{1}^{c} I_{k_{m_{r}+1}}, \cdots\right. \\
+\left.\delta_{m_{c}}^{c} I_{k_{m_{r}+m_{c}}}, \gamma_{1}^{c}, \cdots, \gamma_{k}^{c}\right)
+\end{gathered}
+$$
+
+with $k=\sum_{i=m_{r}+m_{c}+1}^{m} k_{i}$. This is a polynomial in $\delta_{1}^{c}, \cdots$, $\delta_{m_{c}}^{c}, \gamma_{1}^{c}, \cdots, \gamma_{k}^{c}$ and so applying Lemma 4 we have a solution with $\left|\hat{\delta}_{1}^{c}\right|=\cdots=\left|\hat{\delta}_{m_{c}}^{c}\right|=\left|\hat{\gamma}_{1}^{c}\right|=\cdots=\left|\hat{\gamma}_{k}^{c}\right|=\frac{1}{\hat{\beta}}$ and $\hat{\beta} \geq \beta$. Now suppose $\hat{\beta}>\beta$, say $\hat{\beta}=\beta+\epsilon$ for some $\epsilon>0$, then since the roots of a polynomial are continuous functions of the coefficients, we can find a $\delta>0$ so that
+
+$$
+\begin{aligned}
+\left|\delta_{i}^{r}-\hat{\delta}_{i}^{r}\right|<\delta, i=1, \cdots, m_{r} \Rightarrow & \left|\delta_{i}^{c}-\hat{\delta}_{i}^{c}\right|<\frac{\epsilon}{2}, i=1, \cdots, m_{c} \\
+& \left|\gamma_{i}^{c}-\hat{\gamma}_{i}^{c}\right|<\frac{\epsilon}{2}, i=1, \cdots, k
+\end{aligned}
+$$
+
+Then, move each $\left|\delta_{i}^{r}\right|$ down by $\frac{\delta}{2}$, and we can find a $\Delta$ solving $\operatorname{det}(I-\Delta M)=0$ with $\bar{\sigma}(\Delta)<\frac{1}{\beta}$ contradicting the definition of $\mu$. Thus $\hat{\beta}=\beta$, and it is now easy to check that for this solution $\beta \hat{\Delta}=\hat{Q} \in \mathcal{Q}_{K}$ with $\rho_{R}(\hat{Q} M)=\beta=\mu_{K}(M)$.
+
+\section*{IV. Characterization of a Maximum Point}
+现在已经将问题转化成了下式，本节要解决的是：右边是非凹最大化，一般算法只能找到局部最大值，因此本节给出\hl{“一个点是局部极大值”的判别条件}，从而：
+\begin{itemize}
+    \item 知道迭代到什么时候算是局部结束（合格的局部极大值）
+    \item 根据此判断条件构造“块对齐/缩放”更新法则
+\end{itemize}
+We are interested in computing $\mu_{\mathcal{K}}(M)$, which by (9) and (12) is given by
+
+$$
+\mu_{\mathcal{K}}(M)=\max _{\Delta \in \mathbf{B} \bar{X}_{\mathcal{K}}} \rho_{R}(\Delta M)=\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M)
+$$
+
+For reasons of tractability we choose to consider the problem $\max _{Q \in \mathcal{Q}_{\mathcal{K}}} \rho_{R}(Q M)$. However, since this is a nonconcave problem we will in general only be able to find local maxima, and hence we will obtain a lower bound for $\mu_{\mathcal{K}}(M)$ (which is the global maximum). We would like this lower bound be "tight" (i.e., close to $\mu$ ) and so wish to rule out the maxima of $\rho_{R}(Q M)$ which we know are only local. Thus we only consider $Q \in \mathcal{Q}_{\mathcal{K}}$ which are local maxima of $\rho_{R}(Q M)$ with respect not only to $Q \in \mathcal{Q}_{\kappa}$ but also to $Q \in \mathbf{B} X_{K}$. In this section we will develop a characterization of such local maxima.
+
+Note that for any $Q \in \mathcal{Q}_{\mathcal{K}}$ and any $\Delta \in \mathbf{B} X_{\mathcal{K}}, Q \Delta \in \mathbf{B} X_{\mathcal{K}}$ and $\Delta Q \in \mathbf{B} X_{\kappa}$. Now suppose some matrix $Q \in \mathcal{Q}_{\kappa}$ achieves a local maximum of $\rho_{R}(Q M)$ over $Q \in \mathbf{B} X_{K}$. Then it is easy to show that the matrix $\hat{M}:=Q M$ has a local maximum of $\rho_{R}(\hat{Q} \hat{M})$ over $\hat{Q} \in \mathbf{B} X_{\mathcal{K}}$ at $\hat{Q}=I$. However, since the real elements of $Q$ are not restricted to be on their boundary, we can say more than this. For any matrix $Q \in \mathcal{Q}_{K}$ [see (5)] define the index sets
+\begin{questionnote}[author=JC, date=2025-10-27]
+    \subsection*{为什么要分\(\mathcal{J}\)，\(\hat{\mathcal{J}}\)并引入\(\hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})\)}\\
+    自己总结：
+    \begin{itemize}
+        \item 这一步的就是为了让原来不可微的标量块可微
+        \item 问题本质是实标量块的最优点一般是在边界处，而且只能取实数，不能像复块一样旋转，导致最优点处也是边界点处没有办法继续求导
+    \end{itemize}
+
+        \subsection*{问题本质：实标量块「卡在 ±1」导致函数不可微}
+
+        完全正确 👍
+
+        你这句话其实已经抓到了这一步的\textbf{核心动机}。我来用最通俗的方式把它讲清楚：
+
+        在 $\mu$-问题的结构化不确定集中，
+
+        \begin{itemize}
+        \item 复块、全复块都是\textbf{平滑的}（它们可以连续旋转或缩放，奇异值连续变化）；
+        \item 但\textbf{实标量块}只能取实数，而且在集合
+        \[
+        \mathcal{Q}_{\mathcal{K}} = \{\delta_i^r \in [-1,1],\ |\delta_i^c| = 1,\ \Delta_i^{C*}\Delta_i^C = I\}
+        \]
+        里，最优点通常出现在 \textbf{边界} $(|\delta_i^r| = 1)$。
+        \end{itemize}
+
+        当我们想在这个集合上做「方向导数」或「一阶条件」时，边界点就会出问题——因为你没法再往“外”微调；函数在那点变成了一个\textbf{不可微的“尖角”}。
+
+        直观类比：
+
+        \begin{quote}
+        想在 $[-1,1]$ 上求 $f(x)$ 的极大值，如果最优在 $x=1$，那右导数不存在（再往右就出界了）。
+        \end{quote}
+
+        \subsection*{解决办法：人为让它"稍微能动"}
+
+        于是论文引入了：
+
+        \begin{itemize}
+        \item 两个集合：
+        \begin{itemize}
+        \item $\mathcal{J}(Q)$：那些「已经贴边」的实块；
+        \item $\hat{\mathcal{J}}(Q)$：那些还在中间的实块；
+        \end{itemize}
+        \item 然后把约束集合放宽成
+        \[
+        \widehat{\mathbf{B}}\Delta_\varepsilon(\mathcal{J},\hat{\mathcal{J}})
+        \]
+        ——允许边界块 $|\delta_i^r|$ 稍微大一点（例如 $1+\varepsilon$）。
+        \end{itemize}
+
+        这样我们就可以在每个方向上都“轻轻动一下”，于是所有块的变化 $\dot{\Delta}$ 都是\textbf{可微的}，可以计算导数 $\dot{\lambda}(0)$ 并写出必要条件。
+
+        等推导完一阶条件（块对齐/缩放）后，再让 $\varepsilon \to 0^+$，回到原来的约束边界，结果不变。
+
+        \subsection*{换成一句话总结}
+
+        ✅ 这一步确实就是为了\textbf{让那些本来"卡死"的实标量块变得可微、可分析}，从而能统一地写出「方向导数 $\leq 0$」的条件。
+
+        \subsection*{再形象一点的比喻}
+
+        想象：
+
+        \begin{itemize}
+        \item 全复块是一个「圆」：任何方向都能滑动。
+        \item 实标量块是「线段」：两端（±1）是尖角，无法继续滑。
+        \end{itemize}
+
+        为了求"极大点的斜率为 0"，你得先把那根线段的端点\textbf{磨成圆角}，分析完之后再把圆角磨平回来。这就是引入 $\widehat{\mathbf{B}}\Delta_\varepsilon$ 的逻辑。
+
+        \textbf{所以，是的：这一整步的目的，就是让那些处在边界（±1）的实标量块暂时"可微"，保证我们能定义方向导数、建立一阶必要条件（即块对齐/缩放条件）。}
+
+\end{questionnote}
+
+\begin{align*}
+& \mathcal{J}(Q)=\left\{i \leq m_{r}:\left|\delta_{i}^{r}\right|=1\right\}  \tag{13}\\
+& \hat{\mathcal{J}}(Q)=\left\{i \leq m_{r}:\left|\delta_{i}^{r}\right|<1\right\} \tag{14}
+\end{align*}
+
+
+and define the allowable perturbation set
+
+
+\begin{align*}
+\hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})= & \left\{\Delta \in X_{\mathcal{K}}:\left|\delta_{i}^{r}\right| \leq 1, i \in \mathcal{J},\left|\delta_{i}^{r}\right|<1+\epsilon,\right. \\
+& i \in \hat{\mathcal{J}},\left|\delta_{i}^{c}\right| \leq 1, i=1, \cdots, m_{c}, \\
+& \left.\bar{\sigma}\left(\Delta_{i}^{C}\right) \leq 1, i=1, \cdots, m_{C}\right\} . \tag{15}
+\end{align*}
+
+
+We see that for sufficiently small $\epsilon>0$, for any $Q \in \mathcal{Q}_{\mathcal{K}}$ and any $\Delta \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}(Q), \hat{\mathcal{J}}(Q)), Q \Delta \in \mathbf{B} X_{\kappa}$ and $\Delta Q \in \mathbf{B} X_{\kappa}$. The point of all this is that if some matrix $Q \in \mathcal{Q}_{\mathcal{K}}$ achieves a local maximum of $\rho_{R}(Q M)$ over $Q \in \mathbf{B} X_{K}$, then the matrix $\hat{M}:=Q M$ has a local maximum of $\rho_{R}(\hat{Q} \hat{M})$ over $\hat{Q} \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}(Q), \hat{\mathcal{J}}(Q))$ (for some $\epsilon>0$ ) at $\hat{Q}=I$ (and in fact the converse is true, provided we assume that for every $i, \delta_{i}^{r} \neq 0$ ).
+
+Before proving the main result we need some preliminary lemmas. The following two linear algebra lemmas are due to Packard [2].
+
+Lemma 5 [2]: Let $y \in \mathcal{C}^{n}$ and $x \in \mathcal{C}^{n}$ be nonzero vectors. Then there exists a $d \in \mathcal{R}, d>0$ such that $y=d x$ iff $\operatorname{Re}\left(y^{*} G x\right) \leq 0$ for every $G \in \mathcal{C}^{n \times n}$ satisfying $G+G^{*} \leq 0$.
+
+Lemma 6 [2]: Let $y \in \mathcal{C}^{n}$ and $x \in \mathcal{C}^{n}$ be nonzero vectors. Then there exists a Hermitian, positive definite $D \in \mathcal{C}^{n \times n}$ such that $y=D x$ iff $y^{*} x \in \mathcal{R}$ and $y^{*} x>0$.
+
+Now define the closed half-space in the complex plane as, for some scalar $\psi \in \mathcal{R}$
+
+
+\begin{equation*}
+H^{\psi}=\left\{z: \operatorname{Re}\left(e^{j \psi} z\right) \leq 0\right\} \tag{16}
+\end{equation*}
+
+
+Then we have the following elementary linear algebra lemmas.\\
+Lemma 7: Given any set of complex scalars $\mathcal{Z}=\left\{z_{i}: i=\right. 1, \cdots, m\}$ and any real scalar $\psi$, then $\mathcal{Z} \subset H^{\psi}$ iff $\sum_{i=1}^{m} \alpha_{i} z_{i} \in H^{\psi}$ for all real nonnegative scalars $\alpha_{i}, i=1, \cdots, m$.
+
+Proof $(\Leftarrow)$ : For each $z_{k}$ choose $\alpha_{k}=1$ and $\alpha_{i}=0$ for $i \neq k$
+
+$$
+(\Rightarrow) \quad \operatorname{Re}\left(e^{j \psi} \sum_{i=1}^{m} \alpha_{i} z_{i}\right)=\sum_{i=1}^{m} \alpha_{i} \operatorname{Re}\left(e^{j \psi} z_{i}\right) \leq 0 .
+$$
+
+Lemma 8: Given any set of complex scalars $\mathcal{Z}=\left\{z_{i}: i=\right. 1, \cdots, m\}$, define $\lambda:=\sum_{i=1}^{m} \alpha_{i} z_{i}$ where $\alpha_{i}, i=1, \cdots, m$ are real nonnegative scalars. Then $\lambda$ is not real and positive for any choice of the above $\alpha_{i}$ 's iff $\mathcal{Z} \subset H^{\psi}$ for some $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$.
+
+Proof ( $\Leftarrow$ ): By Lemma $7 \mathcal{Z} \subset H^{\psi}$ implies $\lambda \in H^{\psi}$, and hence $\operatorname{Re}\left(e^{j \psi} \lambda\right) \leq 0$. Suppose $\lambda$ is real and positive. Then this implies $\operatorname{Re}\left(e^{j \psi}\right) \leq 0$ which means $\psi \notin\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$, which is a contradiction.\\
+$(\Rightarrow)$ : Assume $\lambda$ is never real and positive. Now suppose $\mathcal{Z} \not \subset H^{\psi}$ for any $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$. First choose $\psi=0$. Then, we must have at least one $z \in \mathcal{Z}$ with $\operatorname{Re}(z)>0$. Now we choose $\hat{z}_{1}$ as the element with $\operatorname{Re}(z)>0$ having minimum $|\arg (z)|$ (which must be nonzero). Now choose $\psi=\arg \left(\hat{z}_{1}\right)$ and define $\hat{\psi}=\frac{\pi}{2}-\psi$. Then, since $\hat{z}_{1} \in H^{\hat{\psi}}$, we must have a (nonzero) $\hat{z}_{2} \in \mathcal{Z}$ with $\hat{z}_{2} \notin H^{\hat{\psi}}$. Suppose
+
+$$
+\hat{z}_{1}=r_{1}(\cos \psi+j \sin \psi), \quad \hat{z}_{2}=r_{2}(\cos \phi+j \sin \phi)
+$$
+
+Then by our choice of $\hat{z}_{1}$ and $\hat{z}_{2}$, straightforward trigonometry yields the following facts: $|\sin \phi| \geq|\sin \psi|, \operatorname{sgn}(\sin \phi)=-\operatorname{sgn}(\sin \psi)$, $|\cos \phi| \leq|\cos \psi|$, and if $|\cos \phi|=|\cos \psi|$, then $\cos \phi=\cos \psi$. Now choose $\hat{\alpha}_{1}=\frac{1}{r_{1}|\sin \psi|}$ and $\hat{\alpha}_{2}=\frac{1}{r_{2}|\sin \phi|}$. Then we have
+
+$$
+\hat{\lambda}=\hat{\alpha}_{1} \hat{z}_{1}+\hat{\alpha}_{2} \hat{z}_{2}=\frac{\cos \psi}{|\sin \psi|}+\frac{\cos \phi}{|\sin \phi|}
+$$
+
+Thus $\hat{\lambda}$ is real and positive, which is a contradiction.\\
+Putting all this together we obtain the following alignment condition.
+\begin{researchnote}[author=JC, date=2025-10-23]
+    \subsection*{定理2提纲挈领：给出最大值的刻画}
+        从左特征向量和右特征值向量对齐的角度给出了最大值的刻画\\
+        定理2的结论说明了，在适当假设下（主导实特征值单、非退化等），若 $Q=I$ 是 $\rho_R(QM)$ 的局部极大，则\textbf{必须}存在\[y = e^{j\psi}Dx,\]
+        其中 $(x,y)$ 是该实特征值的右/左特征向量，$D$ 是\textbf{按块对角的正定缩放}（属于 $\mathcal D_{\mathcal K}$），$\psi\in(-\tfrac{\pi}{2},\tfrac{\pi}{2})$ 是一个全局相位。
+        对不同块还给出更细的\textbf{相位扇区}限制（实块边界/内部、复标量块、全复块分别怎么"对齐"）。
+
+        \textbf{一句话}：在每个不确定性块上，$y$ 和 $x$ 必须在一个正定缩放后\textbf{方向一致（alignment）}，否则不可能是极大点。
+        \subsection*{它带来的三件"硬工具"}
+
+            \subsubsection*{可判性（停机判据）}
+
+            \begin{itemize}
+            \item 你做任何上升迭代（幂法、块幂法、skewed-$\mu$ 迭代），当到达某个 $Q$ 时，检查是否存在 $D,\psi$ 使 $y=e^{j\psi}Dx$（按块检查式(24)那套关系）。
+            \item 若满足 $\Rightarrow$ 达到\textbf{合格的局部极大}；若不满足 $\Rightarrow$ 还存在能\textbf{继续上升}的可行方向，不能停。
+            \end{itemize}
+
+            \subsubsection*{可构造的上升方向}
+
+            \begin{itemize}
+            \item 定理的逆向思路：若未对齐，就能在对应块上构造一个允许的"方向" $G$ 使 $\Re(y^*Gx)>0$（一阶导数为正），从而继续把 $\rho_R$ 推高——这直接给出了\textbf{更新法则}（见下 §4）。
+            \end{itemize}
+
+            \subsubsection*{与 $D$-缩放上界的"桥"}
+
+            \begin{itemize}
+            \item 结论里出现的 $D\in\mathcal D_{\mathcal K}$ 与上界端的 $D$-缩放是\textbf{同一类对象}。
+            \item 启示：即使你只做"下界最大化"，到达合格极大点时，隐含着一个好的 $D$-缩放把 $(x,y)$ 对齐；这解释了为什么工程上 $(D)$–$(K)$ 能把上下界拉近，也指导如何初始化/温启动 $D$。
+            \end{itemize}
+            \subsubsection*{迭代步骤}
+            每一步：
+
+            \begin{enumerate}
+            \item 选一个 $Q\in\mathcal Q_{\mathcal K}$，算 $QM$ 的\textbf{主实特征对} $(\lambda_0,x,y)$；
+            \item \textbf{按块"对齐"更新}（来自定理 2 的必要条件）：
+            \begin{itemize}
+            \item 实标量块：$\delta_i^r \leftarrow \operatorname{sign}\big(\Re(y_{r_i}^*x_{r_i})\big)$（内部块趋向 $\pm j$ 扇区边界）；
+            \item 复标量块：$\delta_i^c \leftarrow \dfrac{y_{c_i}^*x_{c_i}}{|y_{c_i}^*x_{c_i}|}$；
+            \item 全复块：$\Delta_i^C \leftarrow \dfrac{y_{C_i}x_{C_i}^*}{|y_{C_i}|,|x_{C_i}|}$。
+            \end{itemize}
+            \item 用新块组成 $Q_{\text{new}}$，若 $\rho_R(Q_{\text{new}}M)$ 提升不明显或对齐条件已满足 $\Rightarrow$ \textbf{停}；否则继续。
+            \end{enumerate}
+
+\end{researchnote}
+\textbf{Theorem 2:} Suppose the matrix $M \in \mathcal{C}^{n \times n}$ has a distinct real eigenvalue $\lambda_{0}>0$ with right and left eigenvectors, $x$ and $y$, respectively, satisfying the nondegeneracy assumption. Further, suppose that $\rho_{R}(M)=\lambda_{0}$. Then if the function $\rho_{R}(Q M)$ attains a local maximum over the set $Q \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})$ (for some $\epsilon>0$ ) at $Q=I$, then there exists a matrix $D \in \mathcal{D}_{\mathcal{K}}$, with $\theta_{i}= \pm \frac{\pi}{2}$ for every $i \in \hat{\mathcal{J}}$, and a real scalar $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$ such that $y=e^{j \psi} D x$.
+
+Proof: First we parameterize the perturbation set. Consider $G \in X_{\mathcal{K}}$ with
+
+
+\begin{gather*}
+G=\text { block } \operatorname{diag}\left(g_{1}^{r} I_{k_{1}}, \cdots, g_{m_{r}}^{r} I_{k_{m_{r}}}, g_{1}^{c} I_{k_{m_{r}+1}}, \cdots\right. \\
+\left.g_{m_{c}}^{c} I_{k_{m_{r}+m_{c}}}, G_{1}^{C}, \cdots, G_{m_{C}}^{C}\right) \tag{17}
+\end{gather*}
+
+
+and the added restrictions
+
+
+\begin{align*}
+g_{i}^{r} \leq 0, \quad i \in \mathcal{J} \\
+\operatorname{Re}\left(g_{i}^{c}\right) \leq 0, \quad i=1, \cdots, m_{c}  \tag{18}\\
+G_{i}^{C}+G_{i}^{C *} \leq 0, \quad i=1, \cdots, m_{C}
+\end{align*}
+
+
+Now it can be shown that for some $\delta>0$, the set of all matrices $E(t):=(I+G t)(I-G t)^{-1}$ for $G$ as above and $t$ such that\\
+$t \bar{\sigma}(G) \in\left[\begin{array}{ll}0 & \delta\end{array}\right)$ is an open neighborhood of $\hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})$ about $E(0)=I$. So now define the matrix $R(t):=E(t) M$. Then it is clear that $\rho_{R}(Q M)$ has attained a local maximum over the set $Q \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})$ at $Q=I$ iff $\rho_{R}(R(t))$ has attained a local maximum over $t \geq 0$ at $t=0$ for arbitrary $G$ as above.
+
+Since $R(0)=M$ has a distinct real eigenvalue $\lambda_{0}$, we have (for some nonempty interval about the origin) an analytic function $\lambda(t)$, with $\lambda(0)=\lambda_{0}$, and $\lambda(t)$ an eigenvalue of $R(t)$. Thus we can differentiate to obtain
+
+
+\begin{equation*}
+\dot{\lambda}(0)=y^{*} \dot{R}(0) x=2 y^{*} G M x=2 \lambda_{0} y^{*} G x \tag{19}
+\end{equation*}
+
+
+In block notation this becomes
+
+
+\begin{equation*}
+\dot{\lambda}(0)=2 \lambda_{0}\left(\sum_{i=1}^{m_{r}} g_{i}^{r} y_{r_{i}}^{*} x_{r_{i}}+\sum_{i=1}^{m_{c}} g_{i}^{c} y_{c_{i}}^{*} x_{c_{i}}+\sum_{i=1}^{m_{C}} y_{C_{i}}^{*} G_{i}^{C} x_{C_{i}}\right) \tag{20}
+\end{equation*}
+
+
+Define the set of points
+
+
+\begin{align*}
+\mathcal{Z}=\left\{z_{i}: i=1, \cdots, m\right\}= & \left\{g_{i}^{r} y_{r_{i}}^{*} x_{r_{i}}: i=1, \cdots, m_{r}\right\} \\
+& \cup\left\{g_{i}^{c} y_{c_{i}}^{*} x_{c_{i}}: i=1, \cdots, m_{c}\right\} \\
+& \cup\left\{y_{C_{i}}^{*} G_{i}^{C} x_{C_{i}}: i=1, \cdots, m_{C}\right\} \tag{21}
+\end{align*}
+
+
+with the obvious identification for the elements $z_{i}$. Now since we are at a maximum point we have that $\dot{\lambda}(0)$ is never real and positive. Thus, noting that we may independently scale $g_{i}^{r}, g_{i}^{c}, G_{i}^{C}$ by arbitrary nonnegative scalars and still satisfy (18), applying Lemma 8 to (20) and (21) gives that this is true iff $\mathcal{Z} \subset H^{\psi}$ for some $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$ for each $G \in X_{\kappa}$ satisfying (18). Furthermore, since any summation of $G$ 's satisfying (18) also satisfies (18), Lemma 8 gives that this is true iff there is one $H^{\psi}$ which works for every $G$, i.e., there exists $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$ such that $\mathcal{Z} \subset H^{\psi}$ for all $G \in X_{\kappa}$ satisfying (18). From the definition of $H^{\psi}$ in (16), and $G$ in (17), (18), this is equivalent to
+
+
+\begin{align*}
+& \operatorname{Re}\left(e^{j \psi} g_{i}^{r} y_{r_{i}}^{*} x_{r_{i}}\right) \leq 0 \\
+& \quad \text { for all } g_{i}^{r} \in \mathcal{R} \text { with } g_{i}^{r} \leq 0, i=1, \cdots, m_{r} \\
+& \operatorname{Re}\left(e^{j \psi} g_{i}^{r} y_{r_{i}}^{*} x_{r_{i}}\right) \leq 0 \\
+& \quad \text { for all } g_{i}^{r} \in \mathcal{R}, i \in \hat{\mathcal{J}} \\
+& \operatorname{Re}\left(e^{j \psi} g_{i}^{c} y_{c_{i}}^{*} x_{c_{i}}\right) \leq 0 \\
+& \quad \text { for all } g_{i}^{c} \in \mathcal{C} \text { with } \operatorname{Re}\left(g_{i}^{c}\right) \leq 0, i=1, \cdots, m_{c} \\
+& \operatorname{Re}\left(e^{j \psi} y_{C_{i}}^{*} G_{i}^{C} x_{C_{i}}\right) \leq 0 \\
+& \quad \text { for all } G_{i}^{C} \text { with } G_{i}^{C}+G_{i}^{C *} \leq 0, i=1, \cdots, m_{C} \tag{22}
+\end{align*}
+
+
+for some $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$. It is now easy to check that the above conditions may be equivalently expressed as
+
+
+\begin{align*}
+\operatorname{Re}\left(e^{j \psi} y_{r_{i}}^{*} x_{r_{i}}\right) \geq 0, & i=1, \cdots, m_{r} \\
+\operatorname{Re}\left(e^{j \psi} y_{r_{i}}^{*} x_{r_{i}}\right)=0, & i \in \hat{\mathcal{J}} \\
+e^{j \psi} y_{c_{i}}^{*} x_{c_{i}} \in(0 \infty), & i=1, \cdots, m_{c} \\
+\operatorname{Re}\left(e^{j \psi} y_{C_{i}}^{*} G_{i}^{C} x_{C_{i}}\right) \leq 0, & \text { for all } G_{i}^{C} \text { with } G_{i}^{C}+G_{i}^{C *} \leq 0, \\
+& i=1, \cdots, m_{C} \tag{23}
+\end{align*}
+
+
+Since the scalar $e^{j \psi}$ terms may simply be absorbed into one of the vectors, we can apply Lemmas 5 and 6 to each block component of $x$ and $y$ to obtain the equivalent conditions
+
+\[
+\begin{array}{lr}
+y_{r_{i}}=e^{j \psi} e^{j \theta_{i}} D_{i} x_{r_{i}}, & 0<D_{i}=D_{i}^{*}, \theta_{i} \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right] \\
+& i=1, \cdots, m_{r} \\
+y_{r_{i}}=e^{j \psi} e^{j \theta_{i}} D_{i} x_{r_{i}}, & 0<D_{i}=D_{i}^{*}, \theta_{i}= \pm \frac{\pi}{2}, i \in \hat{\mathcal{J}} \\
+y_{c_{i}}=e^{j \psi} D_{i} x_{c_{i}}, & 0<D_{i}=D_{i}^{*}, i=1, \cdots, m_{c} \\
+y_{C_{i}}=e^{j \psi} d_{i} x_{C_{i}}, & 0<d_{i} \in \mathcal{R}, i=1, \cdots, m_{C} \tag{24}
+\end{array}
+\]
+
+Stacking these relations in matrix form yields $y=e^{j \psi} D x$ with $D$ of the required form.
+
+Remarks: Note from the proof that we immediately have a partial converse to Theorem 2, namely that if $y=e^{j \psi} D x$ under the above assumptions, then no directional derivative (in the above sense) of the eigenvalue achieving $\rho_{R}(Q M)$ over the set $Q \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}, \hat{\mathcal{J}})$ is real and positive at $Q=I$.
+
+\section*{V. A Decomposition at $\mu$}
+Theorem 2 gives us a characterization of a maximum point of $\rho_{R}(Q M)$ in terms of an alignment of the right and left eigenvectors of $Q M$. This leads directly to the following decomposition.
+
+\begin{researchnote}[author=JC, date=2025-10-27]
+    \subsection*{定理3提纲挈领：把极大点刻画成一个\(Q\)左乘，\(D\)两边缩放的标准特征值分解}
+     
+
+\end{researchnote}
+
+
+\textbf{Theorem 3:} Suppose $Q \in \mathcal{Q}_{\kappa}$ achieves a local maximum of $\rho_{R}(Q M)$ over $Q \in \mathbf{B} X_{K}$ and that the eigenvalue achieving $\rho_{R}(Q M)$, denoted $\beta$, is distinct and positive. Then, if the right and left eigenvectors of $Q M$, denoted $x$ and $y$, respectively, satisfy the nondegeneracy assumption, there exists a matrix $D \in \mathcal{D}_{\mathcal{K}}$ with $D^{2} \in \mathcal{D}_{\mathcal{K}}$ and $\theta_{i}= \pm \frac{\pi}{4}$ for $i \in \hat{\mathcal{J}}(Q)$ such that
+
+
+\begin{align*}
+Q D M D^{-1}(D x) & =\beta D x \\
+\left(x^{*} D^{*}\right) Q D^{*} M\left(D^{*}\right)^{-1} & =\beta x^{*} D^{*} \tag{25}
+\end{align*}
+
+
+with $\beta \leq \mu_{\mathcal{K}}(M)$. Furthermore, if the above maximum is global, then $\beta=\mu_{\kappa}(M)$.
+
+Proof: Since $Q \in \mathcal{Q}_{\mathcal{K}}$ is a local maximum of $\rho_{R}(Q M)$ over $Q \in \mathbf{B} X_{\mathcal{K}}$, the matrix $\hat{M}:=Q M$ achieves a local maximum of $\rho_{R}(\hat{Q} \hat{M})$ over $\hat{Q} \in \hat{\mathbf{B}} \Delta_{\epsilon}(\mathcal{J}(Q), \hat{\mathcal{J}}(Q))$ (for some $\epsilon>0$ ) at $\hat{Q}=I$. Now apply Theorem 2 to conclude $y=e^{j \psi} \hat{D} x$ with $\hat{D} \in \mathcal{D}_{\mathcal{K}}$ and $\hat{\theta}_{i}= \pm \frac{\pi}{2}$ for $i \in \hat{\mathcal{J}}(Q)$, then define $D$ as the unique matrix such that $D \in \mathcal{D}_{\mathcal{K}}$ and $D^{2}=\hat{D}$. Substitution of this into the right and left eigenvalue equations of $Q M$ and simple manipulations (note that for any $Q \in \mathcal{Q}_{\mathcal{K}}$ and any $D \in \mathcal{D}_{\mathcal{K}}, Q$ and $D$ commute) yield the results in (25). Finally, note from Theorem 1 that we have $\beta \leq \mu_{\kappa}(M)$, and if the above maximum is global then $\beta=\mu_{\mathcal{K}}(M)$.
+
+Remarks: Employing simple manipulations of (25) yields a partial converse of this theorem. If we have a decomposition as in (25) with $\beta$ real and positive and $x$ nonzero, then we have that $\beta$ is an eigenvalue of $Q M$ with right and left eigenvectors, $x$ and $y$, respectively [thus $\beta$ is a lower bound for $\left.\mu_{\mathcal{K}}(M)\right]$, where $y=r e^{j \psi} D^{2} x$ with $D$ as above, $r$ a positive real scalar (which we could thus absorb into $D$ ), and $\psi \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$. Thus defining $\hat{D}=r D^{2}$ we have $y=e^{j \psi} \hat{D} x$ with $\hat{D}$ as in Theorem 2 and $\psi \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$. If we add the further technical assumption that we are not in the special case of $\theta_{i}= \pm \frac{\pi}{4}$ for all $i=1, \cdots, m_{r}$ and $m_{c}=0, m_{C}=0$, then we have $\psi \in\left(-\frac{\pi}{2} \frac{\pi}{2}\right)$.
+
+Thus, we (almost) always have a decomposition at $\mu$ of the form (25), and any such decomposition gives us a lower bound for $\mu$. Now we reformulate this condition into a set of vector equations.\\
+引理9的作用：\hl{把定理3的分解等价重述为易于实现的向量方程组(27)}，便于构造/验证与数值迭代\\
+Lemma 9: Suppose we have matrices $Q \in \mathcal{Q}_{\kappa}$ with $\delta_{i}^{r} \neq 0$ for $i=1, \cdots, m_{r}$ and $\hat{D} \in \mathcal{D}_{\mathcal{K}}$ with $\hat{D}^{2} \in \mathcal{D}_{\mathcal{K}}$ and $\hat{\theta}_{i}= \pm \frac{\pi}{4}$ for $i \in \hat{\mathcal{J}}(Q)$. Then we have a nonzero vector $\hat{x}$ and a real positive scalar $\beta$ such that
+
+
+\begin{align*}
+Q \hat{D} M \hat{D}^{-1}(\hat{D} \hat{x}) & =\beta \hat{D} \hat{x} \\
+\left(\hat{x}^{*} \hat{D}^{*}\right) Q \hat{D}^{*} M\left(\hat{D}^{*}\right)^{-1} & =\beta \hat{x}^{*} \hat{D}^{*} \tag{26}
+\end{align*}
+
+
+iff there exists a matrix $D \in \mathcal{D}_{\mathcal{K}}$ with $\theta_{i}= \pm \frac{\pi}{2}$ for $i \in \hat{\mathcal{J}}(Q)$ and nonzero vectors $b, a, z, w$ such that
+
+\[
+\begin{array}{rlrl}
+M b & =\beta a & M^{*} z & =\beta w \\
+b & =Q a & b & =D^{-1} w \\
+z & =Q^{*} Q D a & z & =Q^{*} w \tag{27}
+\end{array}
+\]
+
+Proof ( $\Rightarrow$ ): Define $x=\hat{D} \hat{x}$ and $b, a, z, w$ as $b=\hat{D}^{-1} x, a= \hat{D}^{-1} Q^{-1} x, z=\hat{D} Q^{*} x, w=\hat{D} x$. Finally, define $D=\hat{D}^{2}$; the result follows.\\
+$(\Leftarrow)$ : Define $\hat{D}$ as the unique matrix $\hat{D} \in \mathcal{D}_{\mathcal{K}}$ such that $\hat{D}^{2}=D$, and $\hat{x}=b$, the result follows directly.
+
+\section*{VI. A Power Algorithm for the Lower Bound}
+\hl{开发一种算法计算引理9的解}
+In light of Lemma 9, the problem of computing a lower bound for $\mu_{\mathcal{K}}(M)$ is reduced to one of finding a solution to the set of equations in (27) which gives us a decomposition as in (25). We would like to develop an algorithm for computing such a solution. First note that if we partition $b, a, z, w$ compatibly with the block structure as in (11), then the set of constraint equations
+
+$$
+\begin{array}{ll}
+b=Q a & b=D^{-1} w \\
+z=Q^{*} Q D a & z=Q^{*} w
+\end{array}
+$$
+
+can be broken down into a series of $m$ similar independent constraint equations on the block components (since $Q$ and $D$ are block diagonal). These equations are of three types corresponding to a repeated real scalar block, a repeated complex scalar block, or a full complex block. We now consider a generic constraint of each type. The following two lemmas are due to Packard [2].
+
+\begin{researchnote}[author=JC, date=2025-10-27]
+    对上述的四条约束方程进行划分，可以分解为一系列关于块分量的相似独立约束方程（因为Q和D是块对角的），四条全局约束可以被逐块独立处理。这些方程分为三种类型，分别对应重复的实标量块、重复的复标量块或完全复块。现在我们考虑每种类型的一般约束。
+\end{researchnote}
+\hl{重复复标量块情形下的约束方程}
+Lemma 10 (Repeated Complex Scalar Block [2]): Let $b, a, z, w \in \mathcal{C}^{k}$ be nonzero vectors with $a^{*} w \neq 0$. Then there exists a complex scalar $q$ with $|q|=1$ and a complex matrix $D \in \mathcal{C}^{k \times k}$ with $0<D=D^{*}$ such that
+
+$$
+\begin{array}{ll}
+b=q a & b=D^{-1} w \\
+z=q^{*} q D a & z=q^{*} w
+\end{array}
+$$
+
+if and only if
+
+
+\begin{equation*}
+z=\frac{w^{*} a}{\left|w^{*} a\right|} w \quad b=\frac{a^{*} w}{\left|a^{*} w\right|} a \tag{28}
+\end{equation*}
+
+\hl{重复复标量块情形下的约束方程}
+Lemma 11 (Full Complex Block [2]): Let $b, a, z, w \in \mathcal{C}^{k}$ be nonzero vectors. There exists a complex matrix $Q \in \mathcal{C}^{k \times k}$ with $Q^{*} Q=I_{k}$ and a real positive scalar $d$ such that
+
+$$
+\begin{array}{ll}
+b=Q a & b=d^{-1} w \\
+z=Q^{*} Q d a & z=Q^{*} w
+\end{array}
+$$
+
+if and only if
+
+
+\begin{equation*}
+z=\frac{|w|}{|a|} a \quad b=\frac{|a|}{|w|} w \tag{29}
+\end{equation*}
+
+
+Now we consider a repeated real scalar block, bearing in mind that we have additional constraints if the real perturbation is not on the boundary (i.e., for $i \in \hat{\mathcal{J}}(Q)$ ).
+
+Lemma 12 (Repeated Real Scalar Block): Let $b, a, z, w \in \mathcal{C}^{k}$ be nonzero vectors with $a^{*} w \neq 0$. We have a real scalar $q$ with $|q| \leq 1$, a real scalar $\theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$, and a complex matrix $D \in \mathcal{C}^{k \times k}$ with $0<D=D^{*}$ such that
+
+$$
+\begin{array}{ll}
+b=q a & b=e^{-j \theta} D^{-1} w \\
+z=q^{*} q e^{j \theta} D a & z=q^{*} w
+\end{array}
+$$
+
+with $\theta= \pm \frac{\pi}{2}$ for $|q|<1$ iff
+
+
+\begin{equation*}
+z=q w \quad b=q a \tag{30}
+\end{equation*}
+
+
+with
+
+\[
+\begin{array}{ll}
+\operatorname{Re}\left(a^{*} w\right) \geq 0 & \text { for } q=1 \\
+\operatorname{Re}\left(a^{*} w\right) \leq 0 & \text { for } q=-1 \\
+\operatorname{Re}\left(a^{*} w\right)=0 & \text { for }|q|<1 \tag{31}
+\end{array}
+\]
+
+Proof ( $\Rightarrow$ ): Immediately we have $z=q w$ and $b=q a$. Thus $a^{*} w=\frac{1}{q} b^{*} w=\frac{1}{q} e^{j \theta} w^{*}\left(D^{*}\right)^{-1} w$. Now $q=1$ implies $\arg \left(a^{*} w\right)=\theta$, and hence $\operatorname{Re}\left(a^{*} w\right) \geq 0$. Similarly, $q=-1$ implies $\arg \left(a^{*} w\right)=\theta+\pi$ and hence $\operatorname{Re}\left(a^{*} w\right) \leq 0$. Finally, $|q|<1$ implies $\arg \left(a^{*} w\right)=\theta$ or $\theta+\pi$ with $\theta= \pm \frac{\pi}{2}$. Thus $\arg \left(a^{*} w\right)= \pm \frac{\pi}{2}$, and so $\operatorname{Re}\left(a^{*} w\right)=0$.\\
+$(\Leftarrow)$ : Immediately we have $b=q a$ and $z=q^{*} w$, and so $b^{*} w=q a^{*} w$. Denoting $\theta=\arg \left(b^{*} w\right)$, we see that for $q=1 \operatorname{Re}\left(a^{*} w\right) \geq 0$, which implies $\operatorname{Re}\left(b^{*} w\right) \geq 0$, and so $\theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$. Similarly for $q=-1 \operatorname{Re}\left(a^{*} w\right) \leq 0$, which implies $\operatorname{Re}\left(b^{*} w\right) \geq 0$, and so $\theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$. Finally for $|q|<1, \operatorname{Re}\left(a^{*} w\right)=0$ which implies $\operatorname{Re}\left(b^{*} w\right)=0$, and so $\theta= \pm \frac{\pi}{2}$. Now $b^{*}\left(e^{-j \theta} w\right)$ is real and positive, and so applying Lemma 6 we have a matrix $\hat{D}$ with $0<\hat{D}=\hat{D}^{*}$ such that $b=e^{-j \theta} \hat{D} w$. Define $D=\hat{D}^{-1}$, and we have $b=e^{-j \theta} D^{-1} w$ and $z=q^{*} w=q^{*} e^{j \theta} D b=q^{*} q e^{j \theta} D a$.
+
+These lemmas now allow us (with a few technical assumptions) to eliminate matrices $Q$ and $D$ from (27). To avoid the notation becoming excessive, we consider a simple block structure with $m_{r}=m_{c}=m_{C}=1$ for the remainder of this section. We stress that this is purely for notational convenience, and the general formulas for an arbitrary block structure, as defined in Section II, are simply obtained by duplicating the appropriate formulas for each block. So given $\mathcal{K}=\left(k_{1}, k_{2}, k_{3}\right)$, the appropriate scaling sets become
+
+
+\begin{align*}
+\mathcal{Q}_{\text {sub }}= & \left\{\text { block } \operatorname{diag}\left(q^{r} I_{k_{1}}, q^{c} I_{k_{2}}, Q^{C}\right): q^{r} \in[-11],\right. \\
+& \left.q^{c *} q^{c}=1, Q^{C *} Q^{C}=I_{k_{3}}\right\}  \tag{32}\\
+\mathcal{D}_{\text {sub }}= & \left\{\text { block } \operatorname{diag}\left(e^{j \theta} D_{1}, D_{2}, d I_{k_{3}}\right): \theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right],\right. \\
+& \left.0<D_{i}=D_{i}^{*} \in \mathcal{C}^{k_{i} \times k_{i}}, 0<d \in \mathcal{R}\right\} \tag{33}
+\end{align*}
+
+
+and we partition $b, a, z, w$ compatibly with this block structure as
+
+\[
+b=\left[\begin{array}{l}
+b_{1}  \tag{34}\\
+b_{2} \\
+b_{3}
+\end{array}\right], a=\left[\begin{array}{l}
+a_{1} \\
+a_{2} \\
+a_{3}
+\end{array}\right], z=\left[\begin{array}{l}
+z_{1} \\
+z_{2} \\
+z_{3}
+\end{array}\right], w=\left[\begin{array}{l}
+w_{1} \\
+w_{2} \\
+w_{3}
+\end{array}\right]
+\]
+
+where $b_{i}, a_{i}, z_{i}, w_{i} \in \mathcal{C}^{k_{i}}$. Then we obtain our final form of (27) as in the following theorem, which will form the basis of a power iteration to compute a lower bound for $\mu_{\mathcal{K}}(M)$.
+\hl{定理4：根据上述引理，得到式（27）的最终形式，也是幂迭代法的基础}
+\textbf{Theorem 4:} Suppose we have vectors $b, a, z, w \in \mathcal{C}^{n}$ partitioned as in (34) with $b_{i}, a_{i}, z_{i}, w_{i} \neq 0$ and $a_{1}^{*} w_{1}, a_{2}^{*} w_{2} \neq 0$. Then there exist matrices $Q \in \mathcal{Q}_{\text {sub }}$ and $D \in \mathcal{D}_{\text {sub }}$ and a positive real scalar $\beta$ such that
+
+$$
+\begin{array}{rlrl}
+M b & =\beta a & M^{*} z & =\beta w \\
+b & =Q a & b & =D^{-1} w \\
+z & =Q^{*} Q D a & z & =Q^{*} w
+\end{array}
+$$
+
+with $\theta \in\left[-\frac{\pi}{2} \frac{\pi}{2}\right]$, and $\theta= \pm \frac{\pi}{2}$ for $\left|q^{r}\right|<1$ iff
+
+
+\begin{align*}
+M b & =\beta a \\
+z_{1} & =q w_{1} \quad z_{2}=\frac{w_{2}^{*} a_{2}}{\left|w_{2}^{*} a_{2}\right|} w_{2} \quad z_{3}=\frac{\left|w_{3}\right|}{\left|a_{3}\right|} a_{3}  \tag{35}\\
+M^{*} z & =\beta w \\
+b_{1} & =q a_{1} \quad b_{2}=\frac{a_{2}^{*} w_{2}}{\left|a_{2}^{*} w_{2}\right|} a_{2} \quad b_{3}=\frac{\left|a_{3}\right|}{\left|w_{3}\right|} w_{3}
+\end{align*}
+
+
+for some real scalar $q \in[-11]$ with
+
+\[
+\begin{array}{ll}
+\operatorname{Re}\left(a_{1}^{*} w_{1}\right) \geq 0 & \text { for } q=1 \\
+\operatorname{Re}\left(a_{1}^{*} w_{1}\right) \leq 0 & \text { for } q=-1  \tag{36}\\
+\operatorname{Re}\left(a_{1}^{*} w_{1}\right)=0 & \text { for }|q|<1
+\end{array}
+\]
+
+Proof: Apply Lemmas 10-12 to the appropriate block components.
+
+Remarks: Since (35) and (36) are unaffected if we multiply $b$ and $a$ by an arbitrary positive real scalar $\alpha$, and $z$ and $w$ by an arbitrary positive real scalar $\gamma$, then in searching for solutions to these equations we may impose the additional restriction $|a|=|w|=1$.
+
+Any solution to (35) and (36) immediately gives us a decomposition as in (25), and hence $\beta$ is a lower bound for $\mu_{\mathcal{K}}(M)$. We also note that under certain technical assumptions (as given), there always exists a solution to these equations with $\beta=\mu_{\mathcal{K}}(M)$. Since we would like to find the largest $\beta$ we can that solves (35) and (36), we now propose finding a solution to this system of equations via the following power iteration:
+
+
+\begin{align*}
+\tilde{\beta}_{k+1} a_{k+1} & =M b_{k} \\
+z_{1_{k+1}} & =\tilde{q}_{k+1} w_{1_{k}} \quad z_{2_{k+1}}=\frac{w_{2_{k}}^{*} a_{2_{k+1}}}{\left|w_{2_{k}}^{*} a_{2_{k+1}}\right|} w_{2_{k}} \\
+z_{3_{k+1}} & =\frac{\left|w_{3_{k}}\right|}{\left|a_{3_{k+1}}\right|} a_{3_{k+1}} \\
+\hat{\beta}_{k+1} w_{k+1} & =M^{*} z_{k+1}  \tag{37}\\
+b_{1_{k+1}} & =\hat{q}_{k+1} a_{1_{k+1}} \quad b_{2_{k+1}}=\frac{a_{2_{k+1}}^{*} w_{2_{k+1}}}{\left|a_{2_{k+1}}^{*} w_{2_{k+1}}\right|} a_{2_{k+1}} \\
+b_{3_{k+1}} & =\frac{\left|a_{3_{k+1}}\right|}{\left|w_{3_{k+1}}\right|} w_{3_{k+1}}
+\end{align*}
+
+
+where $\tilde{q}_{k+1}$ and $\hat{q}_{k+1}$ evolve as
+
+$$
+\tilde{\alpha}_{k+1}=\operatorname{sgn}\left(\hat{q}_{k}\right) \frac{\left|b_{1_{k}}\right|}{\left|a_{1_{k+1}}\right|}+\operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k}}\right)
+$$
+
+If $\left|\tilde{\alpha}_{k+1}\right| \geq 1 \quad$ Then $\tilde{q}_{k+1}=\frac{\tilde{\alpha}_{k+1}}{\left|\tilde{\alpha}_{k+1}\right|} \quad$ Else $\tilde{q}_{k+1}=\tilde{\alpha}_{k+1}$
+
+
+\begin{equation*}
+\hat{\alpha}_{k+1}=\operatorname{sgn}\left(\tilde{q}_{k+1}\right) \frac{\left|b_{1_{k}}\right|}{\left|a_{1_{k+1}}\right|}+\operatorname{Re}\left(a_{1_{k+1}}^{*} w_{1_{k+1}}\right) \tag{38}
+\end{equation*}
+
+
+If $\left|\hat{\alpha}_{k+1}\right| \geq 1 \quad$ Then $\hat{q}_{k+1}=\frac{\hat{\alpha}_{k+1}}{\left|\hat{\alpha}_{k+1}\right|} \quad$ Else $\hat{q}_{k+1}=\hat{\alpha}_{k+1}$\\
+and $\tilde{\beta}_{k+1}, \hat{\beta}_{k+1}$ are chosen positive real so that $\left|a_{k+1}\right|=\left|w_{k+1}\right|=1$.\\
+It is now straightforward to verify that if the algorithm converges to some equilibrium point, then we satisfy the appropriate constraints on each block component; hence by Lemmas 10-12 we have nonzero vectors $b, a, z, w \in \mathcal{C}^{n}$, matrices $Q \in \mathcal{Q}_{\text {sub }}, D \in \mathcal{D}_{\text {sub }}$, and positive real scalars $\tilde{\beta}, \hat{\beta}$ such that
+
+\[
+\begin{array}{rlrl}
+M b & =\tilde{\beta} a & M^{*} z & =\hat{\beta} w \\
+b & =Q a & b & =D^{-1} w  \tag{39}\\
+z & =Q^{*} Q D a & z & =Q^{*} w
+\end{array}
+\]
+
+Thus if $\tilde{\beta}=\hat{\beta}$, then we satisfy (27) and so have a decomposition as in (25); hence $\tilde{\beta}$ is a lower bound for $\mu_{\mathcal{K}}(M)$ [associated with a local maximum of $\left.\rho_{R}(Q M)\right]$.
+
+We note that if $\tilde{\beta} \neq \hat{\beta}$, then we have not found a decomposition as in (25). However, from (39) we find that $Q M b=\tilde{\beta} b$ and $w^{*} Q M=\hat{\beta} w^{*}$. Thus we have that both $\tilde{\beta}$ and $\hat{\beta}$ are real positive eigenvalues of $Q M$, and so by Lemma 3, $\max (\tilde{\beta}, \hat{\beta})$ still gives us a lower bound for $\mu_{\mathcal{K}}(M)$.
+
+\section*{VII. Concluding Remarks}
+The algorithm described here has been implemented in software and is commercially available as part of the $\mu$-Tools toolbox [3]. We now have a good deal of numerical experience with the algorithm on benchmark problems, and in addition the code has been used for a number of real engineering applications which are detailed elsewhere\\[0pt]
+in the literature (e.g., see [8]). We have found that the algorithm typically performs very well in terms of convergence, accuracy of the resulting bound, and required computation. Space constraints preclude our including this material here, but we refer the interested reader to [9] and the references therein for a detailed numerical study of the algorithm performance as well as [10] for recent efforts at further enhancing the performance.
+
+\begin{researchnote}[author=JC, date=2025-10-23]
+    \subsubsection*{几何直觉理解$\mu$的含义}
+    系统的传递函数矩阵$G(s)$，要想判断这个系统的稳定性（内稳定），需要将$G(s)$转换为状态空间形式，这个实现最好是最小实现（即完全能控且完全能观的），其保证了没有零极点对消。\\
+    设传递函数矩阵$G(s)$的状态空间最小实现的系统矩阵为$A$，则稳定性判据为：如果系统矩阵$A$的所有特征值$\lambda_{k}$都满足$Re(\lambda_{k})<0$，则该系统是内稳的。\\
+    $A$的所有特征值$\lambda_{k}$是通过求解特征方程\( \det(\lambda I - A) = 0 \)得到的。\\
+
+
+    $M$是一个标称系统的传递函数复矩阵，$\Delta$是不确定性集合中的其中一个情况。我们现在判断含不确定性的系统矩阵$\Delta M$是否稳定。
+    要判断一个系统是否稳定，就要看该系统的矩阵的特征值的实部是否小于0，即矩阵的特征方程特征多项式不存在右半平面零点。
+    矩阵$\Delta M$的特征值$\lambda$决定系统是否碰到边界，$\lambda$是复数，如果$\lambda$的模小于1，则该
+    \begin{itemize}
+        \item 若所有的特征值都在
+    \end{itemize}
+\end{researchnote}
+
+
+\section*{Acknowledgment}
+The authors would like to thank A. Packard for helpful discussions and M. Newlin for help in implementing the lower-bound software.
+
+\section*{References}
+[1] J. Doyle, "Analysis of feedback systems with structured uncertainty," IEE Proc., Part D, vol. 129, pp. 242-250, 1982.\\[0pt]
+[2] A. Packard, M. K. H. Fan, and J. C. Doyle, "A power method for the structured singular value," in Proc. 27th Conf. Decision Contr., 1988, pp. 2132-2137.\\[0pt]
+[3] G. J. Balas, J. C. Doyle, K. Glover, A. K. Packard, and R. S. Smith, The $\mu$ Analysis and Synthesis Toolbox. MathWorks and MUSYN, 1991.\\[0pt]
+[4] M. K. H. Fan, A. L. Tits, and J. C. Doyle, "Robustness in the presence of mixed parametric uncertainty and unmodeled dynamics," IEEE Trans. Automat. Contr., vol. 36, pp. 25-38, 1991.\\[0pt]
+[5] P. M. Young, M. P. Newlin, and J. C. Doyle, "Practical computation of the mixed $\mu$ problem," in Proc. Amer. Contr. Conf., 1992, pp. 2190-2194.\\[0pt]
+[6] R. D. Braatz, P. M. Young, J. C. Doyle, and M. Morari, "Computational complexity of $\mu$ calculation," IEEE Trans. Automat. Contr., vol. 39, pp. 1000-1002, 1994.\\[0pt]
+[7] A. K. Packard and J. C. Doyle, "The complex structured singular value," Automatica, vol. 29, pp. 71-109, 1993.\\[0pt]
+[8] G. J. Balas and P. M. Young, "Control design for variations in structural natural frequencies," AIAA J. Guidance, Dynamics Contr., vol. 18, pp. 325-332, 1995.\\[0pt]
+[9] P. M. Young, M. P. Newlin, and J. C. Doyle, " $\mu$ analysis with real parametric uncertainty," in Proc. 30th Conf. Decision Contr., 1991, pp. 1251-1256.\\[0pt]
+[10] J. E. Tierno and P. M. Young, "An improved $\mu$ lower bound via adaptive power iteration," in 31st IEEE Conf. Decision Contr., 1992, pp. 3181-3186.
+
+\section*{Correction to "Stability Conditions for Multiclass Fluid Queueing Networks"}
+\section*{Dimitris Bertsimas, David Gamarnik, and John N. Tsitsiklis}
+In the above-mentioned paper, ${ }^{1}$ the recommending Associate Editor line in the first paragraph of the footnote on p. 1618 should have read: "Recommended by Associate Editor, W.-B. Gong."
+
+Manuscript received November 19, 1996.\\
+D. Bertsimas is with the Sloan School of Management and Operations Research Center, Massachusetts Institute of Technology, Cambridge, MA 02139 USA (e-mail: \href{mailto:dbertsim@ans.mit.edu}{dbertsim@ans.mit.edu}).\\
+D. Gamarnik is with the Operations Research Center, Massachusetts Institute of Technology, Cambridge, MA 02139 USA.\\
+J. N. Tsitsiklis is with the Laboratory for Information and Decision Sciences and Operations Research Center, Massachusetts Institute of Technology, Cambridge, MA 02139 USA.
+
+Publisher Item Identifier S 0018-9286(97)01533-X.\\
+${ }^{1}$ D. Bertsimas, D. Gamarkink, and J. N. Tsitsiklis, IEEE Trans. Automat. Contr., vol. 41, pp. 1618-1631, Nov. 1996.
+
+
+\end{document}

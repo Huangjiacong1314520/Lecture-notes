@@ -1,0 +1,1706 @@
+\documentclass[10pt]{article}
+\usepackage{researchnotes}
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{bbold}
+\usepackage{ulem}
+% 用于强制固定图片位置
+\usepackage{float}
+% ...
+% \begin{figure}[H]  % 强制放在当前位置
+
+
+
+\title{UNSTRUCTURED ANALYSIS THEOREM }
+
+\author{Given NS \& Perturbed Model Sets\\
+Then Closed-Loop Robust Stability\\
+if and only if Robust Stability Tests}
+\date{}
+
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+\section*{Chapter 8}
+\section*{Uncertainty and Robustness}
+In this chapter we briefly describe various types of uncertainties that can arise in physical systems, and we single out "unstructured uncertainties" as generic errors that are associated with all design models. We obtain robust stability tests for systems under various model uncertainty assumptions through the use of the small gain theorem. We also obtain some sufficient conditions for robust performance under unstructured uncertainties. The difficulty associated with MIMO robust performance design and the role of plant condition numbers for systems with skewed performance and uncertainty specifications are revealed. A simple example is also used to indicate the fundamental difference between the robustness of an SISO system and that of a MIMO system. In particular, we show that applying the SISO analysis/design method to a MIMO system may lead to erroneous results.
+\begin{researchnote}[author=JC, date=2025-10-16]
+\textbf{包含关系:}
+\[
+Q_d \subset \{\tilde{\Delta}_d(j\omega) : \|\tilde{\Delta}_d(s)\|_\infty \leq 1\}
+\]
+
+但关键是：在计算最坏情况增益时，这个包含关系实际上是"充分"的。
+
+\textbf{等价性定理:}
+
+对于最坏情况增益计算，有：
+\[
+\sup_{\tilde{\Delta}_d \in \Delta_d} \sigma(\mathcal{F}_u(D(j\omega), \tilde{\Delta}_d(j\omega))) 
+= \sup_{Q_d \in Q_d} \sigma(\mathcal{F}_u(D(j\omega), Q_d))
+\]
+
+这意味着：
+\begin{itemize}
+\item 虽然 $Q_d$ 是 $\tilde{\Delta}_d(j\omega)$ 的一个子集
+\item 但在寻找最大增益时，我们不会丢失任何信息
+\item 因为本质上这个 $Q_d$ 就是所有最坏增益对应的不确定性的集合
+\end{itemize}
+
+\end{researchnote}
+\begin{questionnote}[author=JC, date=2025-10-16]
+  \textbf{包含关系:}
+\[
+Q_d \subset \{\tilde{\Delta}_d(j\omega) : \|\tilde{\Delta}_d(s)\|_\infty \leq 1\}
+\]
+
+但关键是：在计算最坏情况增益时，这个包含关系实际上是"充分"的。
+
+\textbf{等价性定理:}
+
+对于最坏情况增益计算，有：
+\[
+\sup_{\tilde{\Delta}_d \in \Delta_d} \sigma(\mathcal{F}_u(D(j\omega), \tilde{\Delta}_d(j\omega))) 
+= \sup_{Q_d \in Q_d} \sigma(\mathcal{F}_u(D(j\omega), Q_d))
+\]
+
+这意味着：
+\begin{itemize}
+\item 虽然 $Q_d$ 是 $\tilde{\Delta}_d(j\omega)$ 的一个子集
+\item 但在寻找最大增益时，我们不会丢失任何信息
+\item 因为本质上这个 $Q_d$ 就是所有最坏增益对应的不确定性的集合
+\end{itemize}
+\end{questionnote}
+
+
+\subsection*{8.1 Model Uncertainty}
+Most control designs are based on the use of a design model. The relationship between models and the reality they represent is subtle and complex. A mathematical model provides a map from inputs to responses. The quality of a model depends on how closely its responses match those of the true plant. Since no single fixed model can respond exactly like the true plant, we need, at the very least, a set of maps. However, the modeling problem is much deeper - the universe of mathematical models from which a \hl{\textbf{model set} }is chosen is distinct from the universe of physical systems. Therefore, a model set that includes the true physical plant can never be constructed. It is necessary for the engineer to make a leap of faith regarding the applicability of a particular design based on a mathematical model. To be practical, a design technique must help make this leap small by accounting for the inevitable inadequacy of models. A good model should be simple enough to facilitate design, yet complex enough to give the engineer confidence that designs based on the model will work on the true plant.
+
+The term uncertainty refers to the differences or errors between models and reality,\\
+and whatever mechanism is used to express these errors will be called a representation of uncertainty. Representations of uncertainty vary primarily in terms of the amount of structure they contain. This reflects both our knowledge of the physical mechanisms that cause differences between the model and the plant and our ability to represent these mechanisms in a way that facilitates convenient manipulation. For example, consider the problem of bounding the magnitude of the effect of some uncertainty on the output of a nominally fixed linear system. A useful measure of uncertainty in this context is to provide a bound on the power spectrum of the output's deviation from its nominal response. In the simplest case, this power spectrum is assumed to be independent of the input. This is equivalent to assuming that the uncertainty is generated by an additive noise signal with a bounded power spectrum; the uncertainty is represented as additive noise. Of course, no physical system is linear with additive noise, but some aspects of physical behavior are approximated quite well using this model. This type of uncertainty received a great deal of attention in the literature during the 1960s and 1970s, and elegant solutions are obtained for many interesting problems (e.g., white noise propagation in linear systems, Wiener and Kalman filtering, and LQG optimal control). Unfortunately, LQG optimal control did not address uncertainty adequately and hence had less practical impact than might have been hoped.
+
+Generally, the deviation's power spectrum of the true output from the nominal will depend significantly on the input. For example, an additive noise model is entirely inappropriate for capturing uncertainty arising from variations in the material properties of physical plants. The actual construction of model sets for more general uncertainty can be quite difficult. For example, a set membership statement for the parameters of an otherwise known FDLTI model is a highly structured representation of uncertainty. It typically arises from the use of linear incremental models at various operating points (e.g., aerodynamic coefficients in flight control vary with flight environment and aircraft configurations, and equation coefficients in power plant control vary with aging, slag buildup, coal composition, etc.). In each case, the amounts of variation and any known relationships between parameters can be expressed by confining the parameters to appropriately defined subsets of parameter space. However, for certain classes of signals (e.g., high-frequency), the parameterized FDLTI model fails to describe the plant because the plant will always have dynamics that are not represented in the fixed order model.
+
+In general, we are forced to use not just a single parameterized model but model sets that allow for plant dynamics that are not explicitly represented in the model structure. A simple example of this involves using frequency domain bounds on transfer functions to describe a model set. To use such sets to describe physical systems, the bounds must roughly grow with frequency. In particular, at sufficiently high frequencies, phase is completely unknown (i.e., $\pm 180^{\circ}$ uncertainties). This is a consequence of dynamic properties that inevitably occur in physical systems. This gives a less structured representation of uncertainty.
+
+\begin{researchnote}[author=JC, date=2025-10-18]
+  不确定性的非结构化表示如下：下面一个加性不确定性一个乘性不确定性
+  假设P是标称模型，K是控制器
+  标称稳定性（NS）：如果K能使得标称模型P稳定
+  鲁棒稳定性（RS）：如果K能使得一族不确定性系统模型$\Pi$中的每个系统都稳定
+  标称性能（NP）：如果标称系统P的性能目标得到满足
+  鲁棒性能（RP）：如果$\Pi$中的每个系统都满足性能指标
+
+\end{researchnote}
+Examples of less structured representations of uncertainty are direct set membership statements for the transfer function matrix of the model. For instance, the statement
+
+
+\begin{equation*}
+P_{\Delta}(s)=P(s)+W_{1}(s) \Delta(s) W_{2}(s), \quad \bar{\sigma}[\Delta(j \omega)]<1, \forall \omega \geq 0, \tag{8.1}
+\end{equation*}
+
+
+where $W_{1}$ and $W_{2}$ are stable transfer matrices that characterize the spatial and frequency structure of the uncertainty, confines the matrix $P_{\Delta}$ to a neighborhood of the nominal model $P$. In particular, if $W_{1}=I$ and $W_{2}=w(s) I$, where $w(s)$ is a scalar function, then $P_{\Delta}$ describes a disk centered at $P$ with radius $w(j \omega)$ at each frequency, as shown in Figure 8.1. The statement does not imply a mechanism or structure that gives rise to $\Delta$. The uncertainty may be caused by parameter changes, as mentioned previously or by neglected dynamics, or by a host of other unspecified effects. An alternative statement to equation (8.1) is the so-called multiplicative form:
+
+
+\begin{equation*}
+P_{\Delta}(s)=\left(I+W_{1}(s) \Delta(s) W_{2}(s)\right) P(s) . \tag{8.2}
+\end{equation*}
+
+
+This statement confines $P_{\Delta}$ to a normalized neighborhood of the nominal model $P$. An advantage of equation (8.2) over (8.1) is that in equation (8.2) compensated transfer functions have the same uncertainty representation as the raw model (i.e., the weighting functions apply to $P K$ as well as $P$ ). Some other alternative set membership statements will be discussed later.
+
+\begin{researchnote}[author=JC, date=2025-10-18]
+  nyqusit图表示加性不确定性：标称模型$P(j\omega)$是图8.1里的弧线，不确定性大小$W(j\omega)$用频率点的圆的半径表示（周老师说加性不确定性是这样的，为什么是这样的，乘性不确定性如果要在这个图上表示会有什么区别）
+\end{researchnote}
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-03}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.1: Nyquist diagram of an uncertain model}
+\end{center}
+\end{figure}
+
+The best choice of uncertainty representation for a specific FDLTI model depends, of course, on the errors the model makes. In practice, it is generally possible to represent some of these errors in a highly structured parameterized form. These are usually the low-frequency error components. There are always remaining higher-frequency errors, however, which cannot be covered this way. These are caused by such effects as infinite-dimensional electromechanical resonance, time delays, diffusion processes, etc. Fortunately, the less structured representations, such as equations (8.1) and (8.2), are well suited to represent this latter class of errors. Consequently, equations (8.1) and\\
+(8.2) have become widely used "generic" uncertainty representations for FDLTI models. An important point is that the construction of the weighting matrices $W_{1}$ and $W_{2}$ for multivariable systems is not trivial.
+
+Motivated from these observations, we will focus for the moment on the multiplicative description of uncertainty. We will assume that $P_{\Delta}$ in equation (8.2) remains a strictly proper FDLTI system for all $\Delta$. More general perturbations (e.g., time varying, infinite dimensional, nonlinear) can also be covered by this set provided they are given appropriate "conic sector" interpretations via Parseval's theorem. This connection is developed in [Safonov, 1980] and [Zames, 1966] and will not be pursued here.
+
+When used to represent the various high-frequency mechanisms mentioned previously, the weighting functions in equation (8.2) commonly have the properties illustrated in Figure 8.2. They are small ( $\ll 1$ ) at low frequencies and increase to unity and above at higher frequencies. The growth with frequency inevitably occurs because phase uncertainties eventually exceed $\pm 180$ degrees and magnitude deviations eventually exceed the nominal transfer function magnitudes. Readers who are skeptical about this reality are encouraged to try a few experiments with physical devices.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-04}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.2: Typical behavior of multiplicative uncertainty: $p_{\delta}(s)=[1+w(s)\delta(s)]p(s)$}\end{center}
+\end{figure}
+
+Also note that the representation of uncertainty in equation (8.2) can be used to include perturbation effects that are in fact certain. A nonlinear element may be quite accurately modeled, but because our design techniques cannot effectively deal with the nonlinearity, it is treated as a conic sector nonlinearity. ${ }^{1}$ As another example, we may deliberately choose to ignore various known dynamic characteristics in order to achieve a simple nominal design model. One such instance is the model reduction process discussed in the last chapter.
+
+\footnotetext{${ }^{1}$ See, for example, Safonov [1980] and Zames [1966].
+}
+
+\begin{researchnote}[author=JC, date=2025-10-18]
+  图8.3，频率响应$P_{0}+W\Delta$在图中显示为圆圈（$W$是最大不确定性），但这实际上是保守的描述，因为很多不确定性可能都取不到，可能在图中只是图中的菱形
+\end{researchnote}
+Example 8.1 Let a dynamical system be described by
+
+$$
+P(s, \alpha, \beta)=\frac{10\left((2+0.2 \alpha) s^{2}+(2+0.3 \alpha+0.4 \beta) s+(1+0.2 \beta)\right)}{\left(s^{2}+0.5 s+1\right)\left(s^{2}+2 s+3\right)\left(s^{2}+3 s+6\right)}, \quad \alpha, \beta \in[-1,1]
+$$
+
+Then for each frequency, all possible frequency responses with varying parameters $\alpha$ and $\beta$ are in a box, as shown in Figure 8.3. We can also obtain an unstructured uncertainty bound for this system. In fact, we have
+
+$$
+P(s, \alpha, \beta) \in\left\{P_{0}+W \Delta \mid\|\Delta\| \leq 1\right\}
+$$
+
+with $P_{0}:=P(s, 0,0)$ and
+
+$$
+W(s)=P(s, 1,1)-P(s, 0,0)=\frac{10\left(0.2 s^{2}+0.7 s+0.2\right)}{\left(s^{2}+0.5 s+1\right)\left(s^{2}+2 s+3\right)\left(s^{2}+3 s+6\right)}
+$$
+
+The frequency response $P_{0}+W \Delta$ is shown in Figure 8.3 as circles.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-05}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.3: Nyquist diagram of uncertain system and disk covering}
+\end{center}
+\end{figure}
+\begin{researchnote}[author=JC, date=2025-10-20]
+  图8.3中，频率响应$P_{0}+W\Delta$在奈奎斯特图中展示的是圆盘，因为相当于把所有不确定性放在一起作为一个大不确定性（即$\Delta$）去覆盖，看最大值，然后取这个最大值作为半径画圆。但是实际上$\alpha和\beta$变化时，应该是菱形内。因此实际上用圆盘是对原问题的一个简化。\\
+  而且圆盘其实是复平面，而$\alpha和\beta$是实数，其实是线段。\\
+  图8.4中，频率响应$P_{0}+W_{1}\Delta_{1}+W_{2}\Delta_{2}$是把两个不确定性分开表示，分别用两个复平面的圆去遮住两个不确定性。由于分为两个$\delta$，系统的复杂度提升了，相当于结构性不确定性。\\
+  但是如果把这两个圆加起来会更加保守，因为两个加起来画出来的圆更大。
+\end{researchnote}
+\begin{questionnote}[author=JC, date=2025-10-20]
+  \hl{那你做结构性不确定性有什么用？结构性不确定性甚至比非结构不确定性的更保守？}
+  周老师说：建立含不确定性的系统模型时，找到最简单的，最不保守的不确定性模型是非常重要的，这会直接影响到我们最后的控制效果。
+\end{questionnote}
+
+Another way to bound the frequency response is to treat $\alpha$ and $\beta$ as norm bounded uncertainties; that is,
+
+$$
+P(s, \alpha, \beta) \in\left\{P_{0}+W_{1} \Delta_{1}+W_{2} \Delta_{2} \mid\left\|\Delta_{i}\right\|_{\infty} \leq 1\right\}
+$$
+
+with $P_{0}=P(s, 0,0)$ and
+
+$$
+W_{1}=\frac{10\left(0.2 s^{2}+0.3 s\right)}{\left(s^{2}+0.5 s+1\right)\left(s^{2}+2 s+3\right)\left(s^{2}+3 s+6\right)}
+$$
+
+$$
+W_{2}=\frac{10(0.4 s+0.2)}{\left(s^{2}+0.5 s+1\right)\left(s^{2}+2 s+3\right)\left(s^{2}+3 s+6\right)}
+$$
+
+It is in fact easy to show that
+
+$$
+\left\{P_{0}+W_{1} \Delta_{1}+W_{2} \Delta_{2} \mid\left\|\Delta_{i}\right\|_{\infty} \leq 1\right\}=\left\{P_{0}+W \Delta \mid\|\Delta\|_{\infty} \leq 1\right\}
+$$
+
+with $|W|=\left|W_{1}\right|+\left|W_{2}\right|$. The frequency response $P_{0}+W \Delta$ is shown in Figure 8.4. This bounding is clearly more conservative.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-06}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.4: A conservative covering}
+\end{center}
+\end{figure}
+
+\textbf{Example 8.2} Consider a process control model
+
+$$
+G(s)=\frac{k e^{-\tau s}}{T s+1}, \quad 4 \leq k \leq 9,2 \leq T \leq 3,1 \leq \tau \leq 2
+$$
+
+Take the nominal model as (the simplest way to choose the nomimal model is choosing the middle number of uncertainties)
+\begin{researchnote}[author=JC, date=2025-10-16]
+  取标称模型最简单的方式就是选择各个不确定性的中间值，比如$t$取1.5，$k$取6.5\\
+  注意这里的$e^{-\tau s}$展开成了$\frac{1}{1+\tau s}$，$\tau$取1.5
+
+\end{researchnote}
+
+$$
+G_{0}(s)=\frac{6.5}{(2.5 s+1)(1.5 s+1)}
+$$
+
+Then for each frequency, all possible frequency responses are in a box, as shown in Figure 8.5. To obtain an unstructured uncertainty bound for this system, plot the error
+\begin{researchnote}[author=JC, date=2025-10-20]
+  真实模型减标称模型就是加性不确定性$\Delta_{a}$
+\end{researchnote}
+$$
+\Delta_{a}(j \omega)=G(j \omega)-G_{0}(j \omega)
+$$
+
+for a set of parameters, as shown in Figure 8.6, and then use the Matlab command ginput to pick a set of upper-bound frequency responses and use fitmag to fit a stable and minimum phase transfer function to the upper-bound frequency responses.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-07}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.5: Uncertain delay system and $G_{0}$\\这个图代表含各种不同的不确定性（包括延迟）的系统会导致形状很复杂的频率响应}
+\end{center}
+\end{figure}
+
+$\gg \mathbf{m f}=\operatorname{ginput}(\mathbf{5 0}) \quad \%$ pick 50 points: the first column of mf is the frequency points and the second column of mf is the corresponding magnitude responses.\\
+$\gg \operatorname{magg}=\operatorname{vpck}(\operatorname{mf}(:, 2), \operatorname{mf}(:, 1)) ; \quad \%$ pack them as a varying matrix.\\
+$\gg \mathbf{W}_{\mathbf{a}}=\mathbf{f i t m a g}(\mathbf{m a g g}) ; \quad \%$ choose the order of $W_{a}$ online. A third-order $W_{a}$ is sufficient for this example.\\
+$\gg[\mathbf{A}, \mathbf{B}, \mathbf{C}, \mathbf{D}]=\mathbf{u n p c k}\left(\mathbf{W}_{\mathbf{a}}\right) \quad \%$ converting into state-space.\\
+$\gg[\mathbf{Z}, \mathbf{P}, \mathbf{K}]=\operatorname{ss2} \mathbf{z p}(\mathbf{A}, \mathbf{B}, \mathbf{C}, \mathbf{D}) \quad \%$ converting into zero/pole/gain form.\\
+We get
+
+$$
+W_{a}(s)=\frac{0.0376(s+116.4808)(s+7.4514)(s+0.2674)}{(s+1.2436)(s+0.5575)(s+4.9508)}
+$$
+
+and the frequency response of $W_{a}$ is also plotted in Figure 8.6. \\Similarly, define the multiplicative uncertainty
+类似的，我们也可以做一个乘性的
+
+$$
+\Delta_{m}(s):=\frac{G(s)-G_{0}(s)}{G_{0}(s)}
+$$
+
+and a $W_{m}$ can be found such that $\left|\Delta_{m}(j \omega)\right| \leq\left|W_{m}(j \omega)\right|$, as shown in Figure 8.7. A $W_{m}$ is given by
+
+$$
+W_{m}=\frac{2.8169(s+0.212)\left(s^{2}+2.6128 s+1.732\right)}{s^{2}+2.2425 s+2.6319}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-08(1)}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.6: $\Delta_{a}$ (dashed line) and a bound $W_{a}$ (solid line)\\对加性不确定性$\Delta_{a}$做频率响应仿真（取不同的$k$、$t$和$\tau$），并对上界误差取点做一个曲线拟合得出一个传递函数，也就相当于求出各个频率上的$W$的大小，圆的半径}\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-08}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.7: \$\textbackslash Delta\_\{m}\$ (dashed line) and a bound $W_{m}$ (solid line)\}\end{center}
+\end{figure}
+
+Note that this $W_{m}$ is not proper since $G_{0}$ and $G$ do not have the same relative degrees. To get a proper $W_{m}$, we need to choose a nominal model $G_{0}$ having the same the relative order as that of $G$.
+
+\begin{researchnote}[author=JC, date=2025-10-16]
+  真正的比较难的是什么？就是我们如果有个实际系统，我们又不知道它的模型，也不知道参数，这个时候要确定它的标称模型和它的不确定性相对来说是一个比较困难的问题。\\
+  有了不确定性模型之后其实很多后面相对来说都有程式可以follow：\\
+  \textbf{总结一下流程：}
+  \begin{enumerate}
+    \item 对实际系统进行建模，得到其不确定性模型以及标称模型
+    \item 得到加性或者乘性不确定性，或者说模型误差？
+    \item 对不确定性或者说建模误差大小进行分析：求其频率响应曲线，并求对其上界进行拟合得到$W$
+  \end{enumerate}
+
+\end{researchnote}
+
+The following terminologies are used in this book:\\
+Definition 8.1 Given the description of an uncertainty model set $\boldsymbol{\Pi}$ and a set of performance objectives, suppose $P \in \boldsymbol{\Pi}$ is the nominal design model and $K$ is the resulting controller. Then the closed-loop feedback system is said to have\\
+\hl{Nominal Stability (NS):} if $K$ internally stabilizes the nominal model $P$.\\
+\hl{Robust Stability (RS):} if $K$ internally stabilizes every plant belonging to $\boldsymbol{\Pi}$.\\
+\hl{Nominal Performance (NP):} if the performance objectives are satisfied for the nominal plant $P$.\\
+\hl{Robust Performance (RP):} if the performance objectives are satisfied for every plant belonging to $\boldsymbol{\Pi}$.
+
+The nominal stability and performance can be easily checked using various standard techniques. The conditions for which the robust stability and robust performance are satisfied under various assumptions on the uncertainty set $\boldsymbol{\Pi}$ will be considered in the following sections.
+
+Related MATLAB Commands: magfit, drawmag, fitsys, genphase, vunpck, vabs, vinv, vimag, vreal, vcjt, vebe
+
+\subsection*{8.2 Small Gain Theorem}
+\begin{researchnote}[author=JC, date=2025-10-20]
+  小增益定理是研究鲁棒稳定性或鲁棒性能的最关键的一个结果。\\
+  其要解决的问题如下：\\
+  $M$和$\Delta$本身是稳定的，当这个回路中没有$\Delta$或者说$\Delta=0$时候系统是稳定的，我想知道当$\Delta$不为$0$的时候，这个回路是否稳定？\\
+  由连续性定理，由于$\Delta=0$的时候系统是稳定的，那么当$\Delta$非常小的时候系统肯定也是稳定的，因为相当于扰动非常小，那么我的问题在于当$\Delta$多大的时候系统是不稳定的？换句话说，我现在想知道这个$\Delta$能够达到多大（或者说它的$H_{\infty}$范数能够达到多大），还能保持我的系统稳定？
+
+\end{researchnote}
+
+This section and the next section consider the stability test of a nominally stable system under unstructured perturbations. The basis for the robust stability criteria derived in the sequel is the so-called small gain theorem.
+
+Consider the interconnected system shown in Figure 8.8 with $M(s)$ a stable $p \times q$ transfer matrix.
+
+\textbf{Theorem 8.1 (Small Gain Theorem)}Suppose $M \in \mathcal{R} \mathcal{H}_{\infty}$ and let $\gamma>0$. Then the interconnected system shown in Figure 8.8 is well-posed and internally stable for all $\Delta(s) \in \mathcal{R} \mathcal{H}_{\infty}$ with\\
+(a) $\|\Delta\|_{\infty} \leq 1 / \gamma$ if and only if $\|M(s)\|_{\infty}<\gamma$\\
+(b) $\|\Delta\|_{\infty}<1 / \gamma$ if and only if $\|M(s)\|_{\infty} \leq \gamma$
+\begin{researchnote}[author=JC, date=2025-10-20]
+  小增益定理中，所谓的“小”指的是回路的两个$H_{\infty}$相乘$\|M(s)\|_{\infty}\|\Delta\|_{\infty}<1$。\\
+  只要他们乘起来小于1，这个系统就是稳定的。
+
+\end{researchnote}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-10}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.8: $M-\Delta$ loop for stability analysis}
+\end{center}
+\end{figure}
+
+\begin{researchnote}[author=JC, date=2025-10-20]
+  小增益定理证明：\\
+  假设$\gamma$是1
+  \begin{enumerate}
+    \item 先推充分性：假设M的范数是小于1的（即$\|M(s)\|_{\infty} < 1$），且有$\|\Delta\|_{\infty} \leq 1 $，看互联系统是否适定且内稳（即$det(I-M\Delta) \neq 0$）
+    \item 后推必要性：如果系统是稳定的，那么M的范数一定要小于1（即$\|M(s)\|_{\infty} < 1$）。假设$\|M(s)\|_{\infty} \geq 1$，看是否会存在$\|\Delta\|_{\infty} \leq 1 $使得系统不稳定（$det(I-M\Delta)$在虚轴上为零），如果存在，就说明系统肯定在这种情况下是不稳定的。我们现在就是努力找到这么一个$\|\Delta\|_{\infty} \leq 1 $。
+  \end{enumerate}
+
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理证明}
+    \captionsetup{labelformat=empty}
+    % \caption{}
+  \end{center}
+  \end{figure}
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理证明2}
+    \captionsetup{labelformat=empty}
+    % \caption{}
+  \end{center}
+  \end{figure}
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理证明3.jpg}
+    \captionsetup{labelformat=empty}
+    % \caption{}
+  \end{center}
+  \end{figure}
+
+\end{researchnote}
+
+
+\textbf{Proof.} We shall only prove part (a). The proof for part (b) is similar. Without loss of generality, assume $\gamma=1$.\\
+注意，假设$\gamma=1$并不影响一般性，因为要是$\gamma=10$，只需要对$\Delta$乘以$10$，$M$除以$10$即可。\\
+(Sufficiency) It is clear that $M(s) \Delta(s)$ is stable since both $M(s)$ and $\Delta(s)$ are stable. Thus by Theorem 5.5 (or Corollary 5.4) the closed-loop system is stable if $\operatorname{det}(I-M \Delta)$ has no zero in the closed right-half plane for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ and $\|\Delta\|_{\infty} \leq 1$. Equivalently, the closed-loop system is stable if
+
+$$
+\inf _{s \in \overline{\mathbb{C}}_{+}} \underline{\sigma}(I-M(s) \Delta(s)) \neq 0
+$$
+
+for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ and $\|\Delta\|_{\infty} \leq 1$. But this follows from
+
+$$
+\inf _{s \in \overline{\mathbb{C}}_{+}} \underline{\sigma}(I-M(s) \Delta(s)) \geq 1-\sup _{s \in \overline{\mathbb{C}}_{+}} \bar{\sigma}(M(s) \Delta(s))=1-\|M(s) \Delta(s)\|_{\infty} \geq 1-\|M(s)\|_{\infty}>0
+$$
+
+(Necessity) This will be shown by contradiction. Suppose $\|M\|_{\infty} \geq 1$. We will show that there exists a $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty} \leq 1$ such that $\operatorname{det}(I-M(s) \Delta(s))$ has a zero on the imaginary axis, so the system is unstable. Suppose $\omega_{0} \in \mathbb{R}_{+} \cup\{\infty\}$ is such that $\bar{\sigma}\left(M\left(j \omega_{0}\right)\right) \geq 1$. Let $M\left(j \omega_{0}\right)=U\left(j \omega_{0}\right) \Sigma\left(j \omega_{0}\right) V^{*}\left(j \omega_{0}\right)$ be a singular value decomposition with
+
+$$
+\begin{aligned}
+U\left(j \omega_{0}\right) & =\left[\begin{array}{llll}
+u_{1} & u_{2} & \cdots & u_{p}
+\end{array}\right] \\
+V\left(j \omega_{0}\right) & =\left[\begin{array}{llll}
+v_{1} & v_{2} & \cdots & v_{q}
+\end{array}\right] \\
+\Sigma\left(j \omega_{0}\right) & =\left[\begin{array}{lll}
+\sigma_{1} & & \\
+& \sigma_{2} & \\
+& & \ddots
+\end{array}\right]
+\end{aligned}
+$$
+
+To obtain a contradiction, it now suffices to construct a $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ such that $\Delta\left(j \omega_{0}\right)= \frac{1}{\sigma_{1}} v_{1} u_{1}^{*}$ and $\|\Delta\|_{\infty} \leq 1$. Indeed, for such $\Delta(s)$,
+
+$$
+\operatorname{det}\left(I-M\left(j \omega_{0}\right) \Delta\left(j \omega_{0}\right)\right)=\operatorname{det}\left(I-U \Sigma V^{*} v_{1} u_{1}^{*} / \sigma_{1}\right)=1-u_{1}^{*} U \Sigma V^{*} v_{1} / \sigma_{1}=0
+$$
+
+and thus the closed-loop system is either not well-posed (if $\omega_{0}=\infty$ ) or unstable (if $\omega \in \mathbb{R}$ ). There are two different cases:\\
+(1) $\omega_{0}=0$ or $\infty$ : then $U$ and $V$ are real matrices. In this case, $\Delta(s)$ can be chosen as
+
+$$
+\Delta=\frac{1}{\sigma_{1}} v_{1} u_{1}^{*} \in \mathbb{R}^{q \times p}
+$$
+
+(2) $0<\omega_{0}<\infty$ : write $u_{1}$ and $v_{1}$ in the following form:
+
+$$
+u_{1}^{*}=\left[\begin{array}{llll}
+u_{11} e^{j \theta_{1}} & u_{12} e^{j \theta_{2}} & \cdots & u_{1 p} e^{j \theta_{p}}
+\end{array}\right], \quad v_{1}=\left[\begin{array}{c}
+v_{11} e^{j \phi_{1}} \\
+v_{12} e^{j \phi_{2}} \\
+\vdots \\
+v_{1 q} e^{j \phi_{q}}
+\end{array}\right]
+$$
+
+where $u_{1 i} \in \mathbb{R}$ and $v_{1 j} \in \mathbb{R}$ are chosen so that $\theta_{i}, \phi_{j} \in[-\pi, 0)$ for all $i, j$.\\
+Choose $\beta_{i} \geq 0$ and $\alpha_{j} \geq 0$ so that
+
+$$
+\angle\left(\frac{\beta_{i}-j \omega_{0}}{\beta_{i}+j \omega_{0}}\right)=\theta_{i}, \quad \angle\left(\frac{\alpha_{j}-j \omega_{0}}{\alpha_{j}+j \omega_{0}}\right)=\phi_{j}
+$$
+
+for $i=1,2, \ldots, p$ and $j=1,2, \ldots, q$. Let
+
+$$
+\Delta(s)=\frac{1}{\sigma_{1}}\left[\begin{array}{c}
+v_{11} \frac{\alpha_{1}-s}{\alpha_{1}+s} \\
+\vdots \\
+v_{1 q} \frac{\alpha_{q}-s}{\alpha_{q}+s}
+\end{array}\right]\left[\begin{array}{lll}
+u_{11} \frac{\beta_{1}-s}{\beta_{1}+s} & \cdots & u_{1 p} \frac{\beta_{p}-s}{\beta_{p}+s}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+Then $\|\Delta\|_{\infty}=1 / \sigma_{1} \leq 1$ and $\Delta\left(j \omega_{0}\right)=\frac{1}{\sigma_{1}} v_{1} u_{1}^{*}$.
+
+The theorem still holds even if $\Delta$ and $M$ are infinite dimensional. This is summarized as the following corollary.
+
+\hl{推论和remark的内容}
+  \begin{itemize}
+  \item 小增益定理在$\Delta$和$M$是无限维时，小增益定理仍然成立
+  \item 以及即使$\Delta$是具有适当定义的稳定性概念的非线性时变“稳定”算子，小增益定理也足以保证内部稳定性
+  \end{itemize}
+
+\hl{\textbf{Corollary 8.2} The following statements are equivalent:}\\
+(i) The system is well-posed and internally stable for all $\Delta \in \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1 / \gamma$;\\
+(ii) The system is well-posed and internally stable for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1 / \gamma$;\\
+(iii) The system is well-posed and internally stable for all $\Delta \in \mathbb{C}^{q \times p}$ with $\|\Delta\|<1 / \gamma$;\\
+(iv) $\|M\|_{\infty} \leq \gamma$.
+
+\textbf{Remark 8.1} It can be shown that the small gain condition is sufficient to guarantee internal stability even if $\Delta$ is a nonlinear and time-varying "stable" operator with an appropriately defined stability notion, see Desoer and Vidyasagar [1975].
+
+The following lemma shows that if $\|M\|_{\infty}>\gamma$, there exists a destabilizing $\Delta$ with $\|\Delta\|_{\infty}<1 / \gamma$ such that the closed-loop system has poles in the open right-half plane. (This is stronger than what is given in the proof of Theorem 8.1.)\\
+Lemma 8.3 Suppose $M \in \mathcal{R} \mathcal{H}_{\infty}$ and $\|M\|_{\infty}>\gamma$. Then there exists a $\sigma_{0}>0$ such that for any given $\sigma \in\left[0, \sigma_{0}\right]$ there exists a $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1 / \gamma$ such that $\operatorname{det}(I-M(s) \Delta(s))$ has a zero on the axis $\operatorname{Re}(s)=\sigma$.
+
+Proof. Without loss of generality, assume $\gamma=1$. Since $M \in \mathcal{R} \mathcal{H}_{\infty}$ and $\|M\|_{\infty}>1$, there exists a $0<\omega_{0}<\infty$ such that $\left\|M\left(j \omega_{0}\right)\right\|>1$. Given any $\gamma$ such that $1<\gamma<\left\|M\left(j \omega_{0}\right)\right\|$, there is a sufficiently small $\sigma_{0}>0$ such that
+
+$$
+\min _{\sigma \in\left[0, \sigma_{0}\right]}\left\|M\left(\sigma+j \omega_{0}\right)\right\| \geq \gamma
+$$
+
+and
+
+$$
+\sqrt{\frac{\omega_{0}^{2}+\left(\sigma_{0}+\alpha\right)^{2}}{\omega_{0}^{2}+\left(\sigma_{0}-\alpha\right)^{2}}} \sqrt{\frac{\omega_{0}^{2}+\left(\sigma_{0}+\beta\right)^{2}}{\omega_{0}^{2}+\left(\sigma_{0}-\beta\right)^{2}}}<\gamma
+$$
+
+for any $\alpha \geq 0$ and $\beta \geq 0$.\\
+Now let $\sigma \in\left[0, \sigma_{0}\right]$ and let $M\left(\sigma+j \omega_{0}\right)=U \Sigma V^{*}$ be a singular value decomposition with
+
+$$
+\begin{aligned}
+& U=\left[\begin{array}{llll}
+u_{1} & u_{2} & \cdots & u_{p}
+\end{array}\right] \\
+& V=\left[\begin{array}{llll}
+v_{1} & v_{2} & \cdots & v_{q}
+\end{array}\right] \\
+& \Sigma=\left[\begin{array}{lll}
+\sigma_{1} & & \\
+& \sigma_{2} & \\
+& & \ddots
+\end{array}\right] .
+\end{aligned}
+$$
+
+Write $u_{1}$ and $v_{1}$ in the following form:
+
+$$
+u_{1}^{*}=\left[\begin{array}{llll}
+u_{11} e^{j \theta_{1}} & u_{12} e^{j \theta_{2}} & \cdots & u_{1 p} e^{j \theta_{p}}
+\end{array}\right], \quad v_{1}=\left[\begin{array}{c}
+v_{11} e^{j \phi_{1}} \\
+v_{12} e^{j \phi_{2}} \\
+\vdots \\
+v_{1 q} e^{j \phi_{q}}
+\end{array}\right]
+$$
+
+where $u_{1 i} \in \mathbb{R}$ and $v_{1 j} \in \mathbb{R}$ are chosen so that $\theta_{i}, \phi_{j} \in[-\pi, 0)$ for all $i, j$.\\
+Choose $\beta_{i} \geq 0$ and $\alpha_{j} \geq 0$ so that
+
+$$
+\angle\left(\frac{\beta_{i}-\sigma-j \omega_{0}}{\beta_{i}+\sigma+j \omega_{0}}\right)=\theta_{i}, \quad \angle\left(\frac{\alpha_{j}-\sigma-j \omega_{0}}{\alpha_{j}+\sigma+j \omega_{0}}\right)=\phi_{j}
+$$
+
+for $i=1,2, \ldots, p$ and $j=1,2, \ldots, q$. Let
+
+$$
+\Delta(s)=\frac{1}{\sigma_{1}}\left[\begin{array}{c}
+\tilde{\alpha}_{1} v_{11} \frac{\alpha_{1}-s}{\alpha_{1}+s} \\
+\vdots \\
+\tilde{\alpha}_{q} v_{1 q} \frac{\alpha_{q}-s}{\alpha_{q}+s}
+\end{array}\right]\left[\begin{array}{lll}
+\tilde{\beta}_{1} u_{11} \frac{\beta_{1}-s}{\beta_{1}+s} & \cdots & \tilde{\beta}_{p} u_{1 p} \frac{\beta_{p}-s}{\beta_{p}+s}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+where
+
+$$
+\tilde{\beta}_{i}:=\sqrt{\frac{\omega_{0}^{2}+\left(\sigma+\beta_{i}\right)^{2}}{\omega_{0}^{2}+\left(\sigma-\beta_{i}\right)^{2}}}, \quad \tilde{\alpha}_{j}:=\sqrt{\frac{\omega_{0}^{2}+\left(\sigma+\alpha_{j}\right)^{2}}{\omega_{0}^{2}+\left(\sigma-\alpha_{j}\right)^{2}}}
+$$
+
+Then
+
+$$
+\|\Delta\|_{\infty} \leq \frac{\max _{j}\left\{\tilde{\alpha}_{j}\right\} \max _{i}\left\{\tilde{\beta}_{i}\right\}}{\sigma_{1}} \leq \frac{\max _{j}\left\{\tilde{\alpha}_{j}\right\} \max _{i}\left\{\tilde{\beta}_{i}\right\}}{\gamma}<1
+$$
+
+and
+
+$$
+\begin{gathered}
+\Delta\left(\sigma+j \omega_{0}\right)=\frac{1}{\sigma_{1}} v_{1} u_{1}^{*} \\
+\operatorname{det}\left(I-M\left(\sigma+j \omega_{0}\right) \Delta\left(\sigma+j \omega_{0}\right)\right)=0
+\end{gathered}
+$$
+
+Hence $s=\sigma+j \omega_{0}$ is a zero for the transfer function $\operatorname{det}(I-M(s) \Delta(s))$. \(\square\)
+
+The preceding lemma plays a key role in the necessity proofs of many robust stability tests in the sequel.
+
+\subsection*{8.3 Stability under Unstructured Uncertainties}
+\begin{researchnote}[author=JC, date=2025-10-20]
+  之前是对一般性的不确定性说他的稳定性，用一个小增益定理来看。
+  \subsection*{方法论：任何的情况都可以用这种方法来做，都是化成能用小增益定理解决的形式：}
+  \begin{enumerate}
+    \item 画出系统框图
+    \item 然后重画系统为$M$和$\Delta$的形式，其实就是把$\Delta$以外的都当成$M$
+    \item 写出新的$M$的表达式，注意是从$\Delta$的输出箭头（作为向前的方向）开始看，注意箭头方向，向前的是前向通路，反向的箭头是反馈通路
+  \end{enumerate}
+  整个8.3节都是对这种方法论的举例
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理应用举例1.jpg}
+    \captionsetup{labelformat=empty}
+    \caption{加性不确定性}
+  \end{center}
+  \end{figure}
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理应用举例2.jpg}
+    \captionsetup{labelformat=empty}
+    \caption{乘性不确定性}
+  \end{center}
+  \end{figure}
+
+  \begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=\textwidth]{小增益定理应用举例3.jpg}
+    \captionsetup{labelformat=empty}
+    \caption{左互质因子不确定性}
+  \end{center}
+  \end{figure}
+
+\end{researchnote}
+The small gain theorem in the last section will be used here to derive robust stability tests under various assumptions of model uncertainties. The modeling error $\Delta$ will again be assumed to be stable. (Most of the robust stability tests discussed in the sequel can be generalized easily to the unstable $\Delta$ case with some mild assumptions on the number of unstable poles of the uncertain model; we encourage readers to fill in the details.) In addition, we assume that the modeling error $\Delta$ is suitably scaled with weighting functions $W_{1}$ and $W_{2}$ (i.e., the uncertainty can be represented as $W_{1} \Delta W_{2}$ ).
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-13}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.9: Unstructured robust stability analysis}
+\end{center}
+\end{figure}
+
+We shall consider the standard setup shown in Figure 8.9, where $\boldsymbol{\Pi}$ is the set of uncertain plants with $P \in \boldsymbol{\Pi}$ as the nominal plant and with $K$ as the internally stabilizing controller for $P$. The sensitivity and complementary sensitivity matrix functions are defined, as usual, as
+
+$$
+S_{o}=(I+P K)^{-1}, \quad T_{o}=I-S_{o}
+$$
+
+and
+
+$$
+S_{i}=(I+K P)^{-1}, \quad T_{i}=I-S_{i} .
+$$
+
+Recall that the closed-loop system is well-posed and internally stable if and only if
+
+$$
+\left[\begin{array}{cc}
+I & K \\
+-\Pi & I
+\end{array}\right]^{-1}=\left[\begin{array}{cc}
+(I+K \Pi)^{-1} & -K(I+\Pi K)^{-1} \\
+(I+\Pi K)^{-1} \Pi & (I+\Pi K)^{-1}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+for all $\Pi \in \mathbf{\Pi}$.
+
+\subsection*{8.3.1 Additive Uncertainty}
+We assume that the model uncertainty can be represented by an additive perturbation:
+
+$$
+\boldsymbol{\Pi}=P+W_{1} \Delta W_{2}
+$$
+
+Theorem 8.4 Let $\boldsymbol{\Pi}=\left\{P+W_{1} \Delta W_{2}: \Delta \in \mathcal{R} \mathcal{H}_{\infty}\right\}$ and let $K$ be a stabilizing controller for the nominal plant $P$. Then the closed-loop system is well-posed and internally stable for all $\|\Delta\|_{\infty}<1$ if and only if $\left\|W_{2} K S_{o} W_{1}\right\|_{\infty} \leq 1$.
+
+Proof. Let $\Pi=P+W_{1} \Delta W_{2} \in \boldsymbol{\Pi}$. Then
+
+$$
+\begin{gathered}
+{\left[\begin{array}{cc}
+I & K \\
+-\Pi & I
+\end{array}\right]^{-1}} \\
+=\left[\begin{array}{cc}
+\left(I+K S_{o} W_{1} \Delta W_{2}\right)^{-1} S_{i} & -K S_{o}\left(I+W_{1} \Delta W_{2} K S_{o}\right)^{-1} \\
+\left(I+S_{o} W_{1} \Delta W_{2} K\right)^{-1} S_{o}\left(P+W_{1} \Delta W_{2}\right) & S_{o}\left(I+W_{1} \Delta W_{2} K S_{o}\right)^{-1}
+\end{array}\right]
+\end{gathered}
+$$
+
+is well-posed and internally stable if $\left(I+\Delta W_{2} K S_{o} W_{1}\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ since
+
+$$
+\begin{aligned}
+\operatorname{det}\left(I+K S_{o} W_{1} \Delta W_{2}\right) & =\operatorname{det}\left(I+W_{1} \Delta W_{2} K S_{o}\right)=\operatorname{det}\left(I+S_{o} W_{1} \Delta W_{2} K\right) \\
+& =\operatorname{det}\left(I+\Delta W_{2} K S_{o} W_{1}\right)
+\end{aligned}
+$$
+
+But $\left(I+\Delta W_{2} K S_{o} W_{1}\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ is guaranteed if $\left\|\Delta W_{2} K S_{o} W_{1}\right\|_{\infty}<1$ (small gain theorem). Hence $\left\|W_{2} K S_{o} W_{1}\right\|_{\infty} \leq 1$ is sufficient for robust stability.
+
+To show the necessity, note that robust stability implies that
+
+$$
+K(I+\Pi K)^{-1}=K S_{o}\left(I+W_{1} \Delta W_{2} K S_{o}\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+for all admissible $\Delta$. This, in turn, implies that
+
+$$
+\Delta W_{2} K(I+\Pi K)^{-1} W_{1}=I-\left(I+\Delta W_{2} K S_{o} W_{1}\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+for all admissible $\Delta$. By the small gain theorem, this is true for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ only if $\left\|W_{2} K S_{o} W_{1}\right\|_{\infty} \leq 1$.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-15}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.10: Output multiplicative perturbed systems}
+\end{center}
+\end{figure}
+
+\subsection*{8.3.2 Multiplicative Uncertainty}
+In this section, we assume that the system model is described by the following set of multiplicative perturbations:
+
+$$
+\boldsymbol{\Pi}=\left(I+W_{1} \Delta W_{2}\right) P
+$$
+
+with $W_{1}, W_{2}, \Delta \in \mathcal{R} \mathcal{H}_{\infty}$. Consider the feedback system shown in Figure 8.10.\\
+Theorem 8.5 Let $\boldsymbol{\Pi}=\left\{\left(I+W_{1} \Delta W_{2}\right) P: \Delta \in \mathcal{R} \mathcal{H}_{\infty}\right\}$ and let $K$ be a stabilizing controller for the nominal plant $P$. Then the closed-loop system is well-posed and internally stable for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ if and only if $\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1$.
+
+Proof. We shall first prove that the condition is necessary for robust stability. Suppose $\left\|W_{2} T_{o} W_{1}\right\|_{\infty}>1$. Then by Lemma 8.3, for any given sufficiently small $\sigma>0$, there is a $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ such that $\left(I+\Delta W_{2} T_{o} W_{1}\right)^{-1}$ has poles on the axis $\operatorname{Re}(s)=\sigma$. This implies that
+
+$$
+(I+\Pi K)^{-1}=S_{o}\left(I+W_{1} \Delta W_{2} T_{o}\right)^{-1}
+$$
+
+has poles on the axis $\operatorname{Re}(s)=\sigma$ since $\sigma$ can always be chosen so that the unstable poles are not cancelled by the zeros of $S_{o}$. Hence $\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1$ is necessary for robust stability. The sufficiency follows from the small gain theorem.
+
+\subsection*{8.3.3 Coprime Factor Uncertainty}
+
+As another example, consider a left coprime factor perturbed plant described in Figure 8.11.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-16}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.11: Left coprime factor perturbed systems}
+\end{center}
+\end{figure}
+
+Theorem 8.6 Let
+
+$$
+\Pi=\left(\tilde{M}+\tilde{\Delta}_{M}\right)^{-1}\left(\tilde{N}+\tilde{\Delta}_{N}\right)
+$$
+
+with $\tilde{M}, \tilde{N}, \tilde{\Delta}_{M}, \tilde{\Delta}_{N} \in \mathcal{R} \mathcal{H}_{\infty}$. The transfer matrices ( $\tilde{M}, \tilde{N}$ ) are assumed to be a stable left coprime factorization of $P$ (i.e., $P=\tilde{M}^{-1} \tilde{N}$ ), and $K$ internally stabilizes the nominal system $P$. Define $\Delta:=\left[\begin{array}{cc}\tilde{\Delta}_{N} & \tilde{\Delta}_{M}\end{array}\right]$. Then the closed-loop system is wellposed and internally stable for all $\|\Delta\|_{\infty}<1$ if and only if
+
+$$
+\left\|\left[\begin{array}{c}
+K \\
+I
+\end{array}\right](I+P K)^{-1} \tilde{M}^{-1}\right\|_{\infty} \leq 1
+$$
+
+Proof. Let $K=U V^{-1}$ be a right coprime factorization over $\mathcal{R} \mathcal{H}_{\infty}$. By Lemma 5.7, the closed-loop system is internally stable if and only if
+
+
+\begin{equation*}
+\left(\left(\tilde{N}+\tilde{\Delta}_{N}\right) U+\left(\tilde{M}+\tilde{\Delta}_{M}\right) V\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty} \tag{8.3}
+\end{equation*}
+
+
+Since $K$ stabilizes $P,(\tilde{N} U+\tilde{M} V)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$. Hence equation (8.3) holds if and only if
+
+$$
+\left(I+\left(\tilde{\Delta}_{N} U+\tilde{\Delta}_{M} V\right)(\tilde{N} U+\tilde{M} V)^{-1}\right)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+By the small gain theorem, the above is true for all $\|\Delta\|_{\infty}<1$ if and only if
+
+$$
+\left\|\left[\begin{array}{l}
+U \\
+V
+\end{array}\right](\tilde{N} U+\tilde{M} V)^{-1}\right\|_{\infty}=\left\|\left[\begin{array}{c}
+K \\
+I
+\end{array}\right](I+P K)^{-1} \tilde{M}^{-1}\right\|_{\infty} \leq 1
+$$ \(\square\)
+
+
+
+\subsection*{8.3.4 Unstructured Robust Stability Tests}
+Table 8.1 summaries robust stability tests on the plant uncertainties under various assumptions. All of the tests pertain to the standard setup shown in Figure 8.9, where $\boldsymbol{\Pi}$ is the set of uncertain plants with $P \in \boldsymbol{\Pi}$ as the nominal plant and with $K$ as the internally stabilizing controller of $P$.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\multicolumn{3}{|c|}{$W_{1} \in \mathcal{R} \mathcal{H}_{\infty} \quad W_{2} \in \mathcal{R} \mathcal{H}_{\infty} \quad \Delta \in \mathcal{R} \mathcal{H}_{\infty} \quad\|\Delta\|_{\infty}<1$} \\
+\hline
+Perturbed Model Sets $\Pi$ & Representative Types of Uncertainty Characterized & Robust Stability Tests \\
+\hline
+$\left(I+W_{1} \Delta W_{2}\right) P$ & output (sensor) errors neglected HF dynamics uncertain rhp zeros & $\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+$P\left(I+W_{1} \Delta W_{2}\right)$ & input (actuators) errors neglected HF dynamics uncertain rhp zeros & $\left\|W_{2} T_{i} W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+$\left(I+W_{1} \Delta W_{2}\right)^{-1} P$ & LF parameter errors uncertain rhp poles & $\left\|W_{2} S_{o} W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+$P\left(I+W_{1} \Delta W_{2}\right)^{-1}$ & LF parameter errors uncertain rhp poles & $\left\|W_{2} S_{i} W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+$P+W_{1} \Delta W_{2}$ & additive plant errors neglected HF dynamics uncertain rhp zeros & $\left\|W_{2} K S_{o} W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+$P\left(I+W_{1} \Delta W_{2} P\right)^{-1}$ & LF parameter errors uncertain rhp poles & $\left\|W_{2} S_{o} P W_{1}\right\|_{\infty} \leq 1$ \\
+\hline
+\begin{tabular}{l}
+\( \left(\tilde{M}+\tilde{\Delta}_{M}\right)^{-1}\left(\tilde{N}+\tilde{\Delta}_{N}\right) \) \\
+$P=\tilde{M}^{-1} \tilde{N}$ \( \Delta=\left[\begin{array}{ll} \tilde{\Delta}_{N} & \tilde{\Delta}_{M} \end{array}\right] \) \\
+\end{tabular} & \begin{tabular}{l}
+LF parameter errors neglected HF dynamics \\
+uncertain rhp poles \& zeros \\
+\end{tabular} & $\left\|\left[\begin{array}{c}K \\ I\end{array}\right] S_{o} \tilde{M}^{-1}\right\|_{\infty} \leq 1$ \\
+\hline
+\( \begin{aligned} & \left(N+\Delta_{N}\right)\left(M+\Delta_{M}\right)^{-1} \\ & P=N M^{-1} \\ & \Delta=\left[\begin{array}{c} \Delta_{N} \\ \Delta_{M} \end{array}\right] \end{aligned} \) & \begin{tabular}{l}
+LF parameter errors neglected HF dynamics \\
+uncertain rhp poles \& zeros \\
+\end{tabular} & $\left\|M^{-1} S_{i}\left[\begin{array}{ll}K & I\end{array}\right]\right\|_{\infty} \leq 1$ \\
+\hline
+\end{tabular}
+\captionsetup{labelformat=empty}
+\caption{Table 8.1: Unstructured robust stability tests (HF: high frequency, LF: low frequency)}
+\end{center}
+\end{table}
+
+Table 8.1 should be interpreted as follows:
+
+The table also indicates representative types of physical uncertainties that can be usefully represented by cone-bounded perturbations inserted at appropriate locations. For example, the representation $P_{\Delta}=\left(I+W_{1} \Delta W_{2}\right) P$ in the first row is useful for output errors at high frequencies (HF), covering such things as unmodeled high-frequency dynamics of sensors or plants, including diffusion processes, transport lags, electromechanical resonances, etc. The representation $P_{\Delta}=P\left(I+W_{1} \Delta W_{2}\right)$ in the second row covers similar types of errors at the inputs. Both cases should be contrasted with the third and the fourth rows, which treat $P\left(I+W_{1} \Delta W_{2}\right)^{-1}$ and $\left(I+W_{1} \Delta W_{2}\right)^{-1} P$. These representations are more useful for variations in modeled dynamics, such as lowfrequency (LF) errors produced by parameter variations with operating conditions, with aging, or across production copies of the same plant.
+
+Note from the table that the stability requirements on $\Delta$ do not limit our ability to represent variations in either the number or locations of rhp singularities, as can be seen from some simple examples.
+
+Example 8.3 Suppose an uncertain system with changing numbers of right-half plane poles is described by
+
+$$
+P_{\Delta}=\left\{\frac{1}{s-\delta}: \delta \in \mathbb{R},|\delta| \leq 1\right\}
+$$
+
+Then $P_{1}=\frac{1}{s-1} \in P_{\Delta}$ has one right-half plane pole and $P_{2}=\frac{1}{s+1} \in P_{\Delta}$ has no right-half plane pole. Nevertheless, the set of $P_{\Delta}$ can be covered by a set of feedback uncertain plants:
+
+$$
+P_{\Delta} \subset \Pi:=\left\{P(1+\delta P)^{-1}: \delta \in \mathcal{R} \mathcal{H}_{\infty}, \quad\|\delta\|_{\infty} \leq 1\right\}
+$$
+
+with $P=\frac{1}{s}$.
+
+Example 8.4 As another example, consider the following set of plants:
+
+$$
+P_{\Delta}=\frac{s+1+\alpha}{(s+1)(s+2)},|\alpha| \leq 2
+$$
+
+This set of plants has changing numbers of right-half plane zeros since the plant has no right-half plane zero when $\alpha=0$ and has one right-half plane zero when $\alpha=-2$. The uncertain plant can be covered by a set of multiplicative perturbed plants:
+
+$$
+P_{\Delta} \subset \boldsymbol{\Pi}:=\left\{\frac{1}{s+2}\left(1+\frac{2 \delta}{s+1}\right), \delta \in \mathcal{R} \mathcal{H}_{\infty}, \quad\|\delta\|_{\infty} \leq 1\right\} .
+$$
+
+It should be noted that this covering can be quite conservative.
+
+\subsection*{8.4 Robust Performance}
+Consider the perturbed system shown in Figure 8.12 with the set of perturbed models described by a set $\boldsymbol{\Pi}$. Suppose the weighting matrices $W_{d}, W_{e} \in \mathcal{R} \mathcal{H}_{\infty}$ and the performance criterion is to keep the error $e$ as small as possible in some sense for all possible models belonging to the set $\boldsymbol{\Pi}$. In general, the set $\boldsymbol{\Pi}$ can be either a parameterized set or an unstructured set such as those described in Table 8.1. The performance specifications are usually specified in terms of the magnitude of each component $e$ in the time domain with respect to bounded disturbances, or, alternatively and more conveniently, some requirements on the closed-loop frequency response of the transfer matrix between $\tilde{d}$ and $e$ (say, integral of square error or the magnitude of the steady-state error with respect to sinusoidal disturbances). The former design criterion leads to the so-called\\
+$\mathcal{L}_{1}$-optimal control framework and the latter leads to $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ design frameworks, respectively. In this section, we will focus primarily on the $\mathcal{H}_{\infty}$ performance objectives with unstructured model uncertainty descriptions. The performance under structured uncertainty will be considered in Chapter 10.
+
+Suppose the performance criterion is to keep the worst-case energy of the error $e$ as small as possible over all $\tilde{d}$ of unit energy, for example,
+
+$$
+\sup _{\|\tilde{d}\|_{2} \leq 1}\|e\|_{2} \leq \epsilon
+$$
+
+for some small $\epsilon$. By scaling the error $e$ (i.e., by properly selecting $W_{e}$ ) we can assume without loss of generality that $\epsilon=1$.
+
+
+\begin{researchnote}[author=JC, date=2025-10-20]
+  考虑具有不确定性对象$P_{\Delta}$的反馈系统，并假设我们现在考虑的只是一个扰动问题，扰动传递函数也即加权灵敏度函数定义为从$\tilde{d}$到$e$的传递函数。\\
+  \begin{equation*}
+  T_{e \tilde{d}}=W_{e}\left(I+P_{\Delta} K\right)^{-1} W_{d}, \quad P_{\Delta} \in \boldsymbol{\Pi} . \tag{8.4}
+  \end{equation*}
+
+  假设我们的性能目标是其$H_{\infty}$范数小于等于1。\\
+  \begin{equation*}
+  \left\|T_{e \tilde{d}}\right\|_{\infty} \leq 1, \quad \forall P_{\Delta} \in \mathbf{\Pi} \tag{8.5}
+  \end{equation*}
+
+  并假设这个不确定性只是一个乘性的不确定性（单纯只是因为这样推导出来的结果形式比较简单，以乘性举例，其实都是类似的）。
+  \begin{equation*}
+  \boldsymbol{\Pi}:=\left\{\left(I+W_{1} \Delta W_{2}\right) P: \quad \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\} \tag{8.6}
+  \end{equation*}
+
+  \hl{想要知道满足什么样的条件，才能满足我们想要的鲁棒性能？}\\
+  \textbf{这章的书里还有很多视频里没讲到的}
+
+\end{researchnote}
+% 为了记笔记方便，我把图形挪到公式这里来了
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-19}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.12: Diagram for robust performance analysis}
+\end{center}
+\end{figure}
+
+Let $T_{e \tilde{d}}$ denote the transfer matrix between $\tilde{d}$ and $e$, then
+
+
+\begin{equation*}
+T_{e \tilde{d}}=W_{e}\left(I+P_{\Delta} K\right)^{-1} W_{d}, \quad P_{\Delta} \in \boldsymbol{\Pi} . \tag{8.4}
+\end{equation*}
+
+
+Then the robust performance criterion in this case can be described as requiring that the closed-loop system be robustly stable and that
+
+
+\begin{equation*}
+\left\|T_{e \tilde{d}}\right\|_{\infty} \leq 1, \quad \forall P_{\Delta} \in \mathbf{\Pi} \tag{8.5}
+\end{equation*}
+
+
+More specifically, an output multiplicatively perturbed system will be analyzed first. The analysis for other classes of models can be done analogously. The perturbed model can be described as
+
+
+\begin{equation*}
+\boldsymbol{\Pi}:=\left\{\left(I+W_{1} \Delta W_{2}\right) P: \quad \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\} \tag{8.6}
+\end{equation*}
+
+
+with $W_{1}, W_{2} \in \mathcal{R} \mathcal{H}_{\infty}$. The explicit system diagram is as shown in Figure 8.10. For this class of models, we have
+
+$$
+T_{e \tilde{d}}=W_{e} S_{o}\left(I+W_{1} \Delta W_{2} T_{o}\right)^{-1} W_{d}
+$$
+
+and the robust performance is satisfied iff
+
+$$
+\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1
+$$
+
+and
+
+$$
+\left\|T_{e \tilde{d}}\right\|_{\infty} \leq 1, \forall \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1
+$$
+
+\begin{researchnote}[author=JC, date=2025-10-20]
+  鲁棒性能的精确分析需要到第十章才能揭晓。\\
+  但是可以直观感受到，如果一个系统的标称性能很好，鲁棒稳定性也很好，那很有可能就可以满足鲁棒性能。\\
+  目前能给出的是一些能保证鲁棒性能的充分条件，如下定理给出的(i)(ii)
+\end{researchnote}
+The exact analysis for this robust performance problem is not trivial and will be given in Chapter 10. However, some sufficient conditions are relatively easy to obtain by bounding these two inequalities, and they may shed some light on the nature of these problems. It will be assumed throughout that the controller $K$ internally stabilizes the nominal plant $P$.
+
+\textbf{Theorem 8.7} Suppose $P_{\Delta} \in\left\{\left(I+W_{1} \Delta W_{2}\right) P: \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\}$ and $K$ internally stabilizes $P$. Then the system robust performance is guaranteed if either one of the following conditions is satisfied:\\
+
+(i) for each frequency $\omega$
+
+
+\begin{equation*}
+\bar{\sigma}\left(W_{d}\right) \bar{\sigma}\left(W_{e} S_{o}\right)+\bar{\sigma}\left(W_{1}\right) \bar{\sigma}\left(W_{2} T_{o}\right) \leq 1 \tag{8.7}
+\end{equation*}
+
+
+(ii) for each frequency $\omega$
+
+
+\begin{equation*}
+\kappa\left(W_{1}^{-1} W_{d}\right) \bar{\sigma}\left(W_{e} S_{o} W_{d}\right)+\bar{\sigma}\left(W_{2} T_{o} W_{1}\right) \leq 1 \tag{8.8}
+\end{equation*}
+
+
+where $W_{1}$ and $W_{d}$ are assumed to be invertible and $\kappa\left(W_{1}^{-1} W_{d}\right)$ is the condition number.
+
+\textbf{Proof.} It is obvious that both condition (8.7) and condition (8.8) guarantee that $\left\|W_{2} T_{o} W_{1}\right\|_{\infty} \leq 1$. So it is sufficient to show that $\left\|T_{e \tilde{d}}\right\|_{\infty} \leq 1, \forall \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1$. Now for any frequency $\omega$, it is easy to see that
+
+$$
+\begin{aligned}
+\bar{\sigma}\left(T_{e \tilde{d}}\right) & \leq \bar{\sigma}\left(W_{e} S_{o}\right) \bar{\sigma}\left[\left(I+W_{1} \Delta W_{2} T_{o}\right)^{-1}\right] \bar{\sigma}\left(W_{d}\right) \\
+& =\frac{\bar{\sigma}\left(W_{e} S_{o}\right) \bar{\sigma}\left(W_{d}\right)}{\underline{\sigma}\left(I+W_{1} \Delta W_{2} T_{o}\right)} \leq \frac{\bar{\sigma}\left(W_{e} S_{o}\right) \bar{\sigma}\left(W_{d}\right)}{1-\bar{\sigma}\left(W_{1} \Delta W_{2} T_{o}\right)} \\
+& \leq \frac{\bar{\sigma}\left(W_{e} S_{o}\right) \bar{\sigma}\left(W_{d}\right)}{1-\bar{\sigma}\left(W_{1}\right) \bar{\sigma}\left(W_{2} T_{o}\right) \bar{\sigma}(\Delta)}
+\end{aligned}
+$$
+
+Hence condition (8.7) guarantees $\bar{\sigma}\left(T_{e \tilde{d}}\right) \leq 1$ for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ at all frequencies.
+
+Similarly, suppose $W_{1}$ and $W_{d}$ are invertible; write
+
+$$
+T_{e \tilde{d}}=W_{e} S_{o} W_{d}\left(W_{1}^{-1} W_{d}\right)^{-1}\left(I+\Delta W_{2} T_{o} W_{1}\right)^{-1}\left(W_{1}^{-1} W_{d}\right)
+$$
+
+and then
+
+$$
+\bar{\sigma}\left(T_{e \tilde{d}}\right) \leq \frac{\bar{\sigma}\left(W_{e} S_{o} W_{d}\right) \kappa\left(W_{1}^{-1} W_{d}\right)}{1-\bar{\sigma}\left(W_{2} T_{o} W_{1}\right) \bar{\sigma}(\Delta)}
+$$
+
+Hence by condition (8.8), $\bar{\sigma}\left(T_{e \tilde{d}}\right) \leq 1$ is guaranteed for all $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ with $\|\Delta\|_{\infty}<1$ at all frequencies.
+
+\textbf{Remark 8.2} It is not hard to show that either one of the conditions in the theorem is also necessary for scalar valued systems.
+
+\textbf{Remark 8.3} Suppose $\kappa\left(W_{1}^{-1} W_{d}\right) \approx 1$ (weighting matrices satisfying this condition are usually called round weights). This is particularly the case if $W_{1}=w_{1}(s) I$ and $W_{d}=w_{d}(s) I$. Recall that $\bar{\sigma}\left(W_{e} S_{o} W_{d}\right) \leq 1$ is the necessary and sufficient condition for nominal performance and that $\bar{\sigma}\left(W_{2} T_{o} W_{1}\right) \leq 1$ is the necessary and sufficient condition for robust stability. Hence the condition (ii) in Theorem 8.7 is almost guaranteed by $\mathrm{NP}+\mathrm{RS}$ (i.e., RP is almost guaranteed by $\mathrm{NP}+\mathrm{RS}$ ). Since RP implies $\mathrm{NP}+\mathrm{RS}$, we have $\mathrm{NP}+\mathrm{RS} \approx \mathrm{RP}$. (In contrast, such a conclusion cannot be drawn in the skewed case, which will be considered in the next section.) Since condition (ii) implies NP + RS, we can also conclude that condition (ii) is almost equivalent to RP (i.e., beside being sufficient, it is almost necessary).
+
+\textbf{Remark 8.4} Note that in light of the equivalence relation between the robust stability and nominal performance, it is reasonable to conjecture that the preceding robust performance problem is equivalent to the robust stability problem in Figure 8.9 with the uncertainty model set given by
+
+$$
+\boldsymbol{\Pi}:=\left(I+W_{d} \Delta_{e} W_{e}\right)^{-1}\left(I+W_{1} \Delta W_{2}\right) P
+$$
+
+and $\left\|\Delta_{e}\right\|_{\infty}<1,\|\Delta\|_{\infty}<1$, as shown in Figure 8.13. This conjecture is indeed true; however, the equivalent model uncertainty is structured, and the exact stability analysis for such systems is not trivial and will be studied in Chapter 10.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-22}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.13: Robust performance with unstructured uncertainty vs. robust stability with structured uncertainty}
+\end{center}
+\end{figure}
+
+Remark 8.5 Note that if $W_{1}$ and $W_{d}$ are invertible, then $T_{e \tilde{d}}$ can also be written as
+
+$$
+T_{e \tilde{d}}=W_{e} S_{o} W_{d}\left[I+\left(W_{1}^{-1} W_{d}\right)^{-1} \Delta W_{2} T_{o} W_{1}\left(W_{1}^{-1} W_{d}\right)\right]^{-1}
+$$
+
+So another alternative sufficient condition for robust performance can be obtained as
+
+$$
+\bar{\sigma}\left(W_{e} S_{o} W_{d}\right)+\kappa\left(W_{1}^{-1} W_{d}\right) \bar{\sigma}\left(W_{2} T_{o} W_{1}\right) \leq 1
+$$
+
+A similar situation also occurs in the skewed case below. We will not repeat all these variations.
+
+\subsection*{8.5 Skewed Specifications}
+\begin{researchnote}[author=JC, date=2025-10-20]
+  什么是偏斜问题：扰动和不确定性不在一块了，即不同时在输出或者同时在输入处，所谓考虑具有非对称指标的系统（\hlr{即不确定性和性能不在同一位置测量？}）。\\
+
+  偏斜指标下，鲁棒性能更难满足。
+  
+  如图8.14所示
+
+  假设 $P_{\Delta} \in \boldsymbol{\Pi}=\left\{P\left(I+W_{1} \Delta W_{2}\right): \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\}$ 并且 $K$ internally stabilizes（镇定）$P$。
+  \begin{itemize}
+    \item 鲁棒稳定性：$\left\|W_{2} T_{i} W_{1}\right\|_{\infty} \leq 1$
+    \item 标称性能：$\left\|W_{e} S_{o} W_{d}\right\|_{\infty} \leq 1$
+  \end{itemize}
+  则鲁棒性能是有保证的，如果满足：
+  $$
+  \bar{\sigma}\left(W_{e} S_{o}\right)+\kappa(P) \bar{\sigma}\left(w_{t} T_{o}\right) \leq 1, \forall \omega
+  $$
+  但视频中给出了偏斜指标鲁棒性能证明，书中似乎没有：
+  \begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=\textwidth]{偏斜指标鲁棒性能证明.jpg}
+      \captionsetup{labelformat=empty}
+      % \caption{偏斜指标鲁棒性能证明，书中似乎没有推导}
+    \end{center}
+  \end{figure}
+  将这些条件与非倾斜问题所获得的条件进行比较可以看出，与鲁棒稳定性相关的条件按\hl{对象的条件数}进行了缩放。由于$\kappa(P) \geq1$，显然如果对象的条件数不佳，倾斜指标将更难满足。这个问题将在第10章10.3.3节中进行更详细的讨论。
+
+\end{researchnote}
+
+
+We now consider the system with skewed specifications (i.e., the uncertainty and performance are not measured at the same location). For instance, the system performance is still measured in terms of output sensitivity, but the uncertainty model is in input multiplicative form:
+
+$$
+\boldsymbol{\Pi}:=\left\{P\left(I+W_{1} \Delta W_{2}\right): \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-23}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.14: Skewed problems}
+\end{center}
+\end{figure}
+
+The system block diagram is shown in Figure 8.14.\\
+For systems described by this class of models, the robust stability condition becomes
+
+$$
+\left\|W_{2} T_{i} W_{1}\right\|_{\infty} \leq 1,
+$$
+
+and the nominal performance condition becomes
+
+$$
+\left\|W_{e} S_{o} W_{d}\right\|_{\infty} \leq 1 .
+$$
+
+To consider the robust performance, let $\tilde{T}_{e \tilde{d}}$ denote the transfer matrix from $\tilde{d}$ to $e$. Then
+
+$$
+\begin{aligned}
+\tilde{T}_{e \tilde{d}} & =W_{e} S_{o}\left(I+P W_{1} \Delta W_{2} K S_{o}\right)^{-1} W_{d} \\
+& =W_{e} S_{o} W_{d}\left[I+\left(W_{d}^{-1} P W_{1}\right) \Delta\left(W_{2} T_{i} W_{1}\right)\left(W_{d}^{-1} P W_{1}\right)^{-1}\right]^{-1}
+\end{aligned}
+$$
+
+The last equality follows if $W_{1}, W_{d}$, and $P$ are invertible and, if $W_{2}$ is invertible, can also be written as
+
+$$
+\tilde{T}_{e \tilde{d}}=W_{e} S_{o} W_{d}\left(W_{1}^{-1} W_{d}\right)^{-1}\left[I+\left(W_{1}^{-1} P W_{1}\right) \Delta\left(W_{2} P^{-1} W_{2}^{-1}\right)\left(W_{2} T_{o} W_{1}\right)\right]^{-1}\left(W_{1}^{-1} W_{d}\right) .
+$$
+
+Then the following results follow easily.\\
+\textbf{Theorem 8.8} Suppose $P_{\Delta} \in \boldsymbol{\Pi}=\left\{P\left(I+W_{1} \Delta W_{2}\right): \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\}$ and $K$ internally stabilizes $P$. Assume that $P, W_{1}, W_{2}$, and $W_{d}$ are square and invertible. Then the system robust performance is guaranteed if either one of the following conditions is satisfied:\\
+(i) for each frequency $\omega$
+
+
+\begin{equation*}
+\bar{\sigma}\left(W_{e} S_{o} W_{d}\right)+\kappa\left(W_{d}^{-1} P W_{1}\right) \bar{\sigma}\left(W_{2} T_{i} W_{1}\right) \leq 1 ; \tag{8.9}
+\end{equation*}
+
+
+(ii) for each frequency $\omega$
+
+
+\begin{equation*}
+\kappa\left(W_{1}^{-1} W_{d}\right) \bar{\sigma}\left(W_{e} S_{o} W_{d}\right)+\bar{\sigma}\left(W_{1}^{-1} P W_{1}\right) \bar{\sigma}\left(W_{2} P^{-1} W_{2}^{-1}\right) \bar{\sigma}\left(W_{2} T_{o} W_{1}\right) \leq 1 . \tag{8.10}
+\end{equation*}
+
+
+Remark 8.6 If the appropriate invertibility conditions are not satisfied, then an alternative sufficient condition for robust performance can be given by
+
+$$
+\bar{\sigma}\left(W_{d}\right) \bar{\sigma}\left(W_{e} S_{o}\right)+\bar{\sigma}\left(P W_{1}\right) \bar{\sigma}\left(W_{2} K S_{o}\right) \leq 1
+$$
+
+Similar to the previous case, there are many different variations of sufficient conditions although equation (8.10) may be the most useful one.
+
+Remark 8.7 It is important to note that in this case, the robust stability condition is given in terms of $L_{i}=K P$ while the nominal performance condition is given in terms of $L_{o}=P K$. These classes of problems are called skewed problems or problems with skewed specifications. ${ }^{2}$ Since, in general, $P K \neq K P$, the robust stability margin or tolerances for uncertainties at the plant input and output are generally not the same.
+
+Remark 8.8 It is also noted that the robust performance condition is related to the condition number of the weighted nominal model. So, in general, if the weighted nominal model is ill-conditioned at the range of critical frequencies, then the robust performance condition may be far more restrictive than the robust stability condition and the nominal performance condition together. For simplicity, assume $W_{1}=I, W_{d}=I$ and $W_{2}=w_{t} I$, where $w_{t} \in \mathcal{R} \mathcal{H}_{\infty}$ is a scalar function. Further, $P$ is assumed to be invertible. Then the robust performance condition (8.10) can be written as
+
+$$
+\bar{\sigma}\left(W_{e} S_{o}\right)+\kappa(P) \bar{\sigma}\left(w_{t} T_{o}\right) \leq 1, \forall \omega
+$$
+
+Comparing these conditions with those obtained for nonskewed problems shows that the condition related to robust stability is scaled by the condition number of the plant. ${ }^{3}$ Since $\kappa(P) \geq 1$, it is clear that the skewed specifications are much harder to satisfy if the plant is not well conditioned. This problem will be discussed in more detail in Section 10.3.3 of Chapter 10.
+
+Remark 8.9 Suppose $K$ is invertible, then $\tilde{T}_{e \tilde{d}}$ can be written as
+
+$$
+\tilde{T}_{e \tilde{d}}=W_{e} K^{-1}\left(I+T_{i} W_{1} \Delta W_{2}\right)^{-1} S_{i} K W_{d}
+$$
+
+Assume further that $W_{e}=I, W_{d}=w_{s} I, W_{2}=I$, where $w_{s} \in \mathcal{R} \mathcal{H}_{\infty}$ is a scalar function. Then a sufficient condition for robust performance is given by
+
+$$
+\kappa(K) \bar{\sigma}\left(S_{i} w_{s}\right)+\bar{\sigma}\left(T_{i} W_{1}\right) \leq 1, \forall \omega
+$$
+
+with \hl{$\kappa(K):=\bar{\sigma}(K) \bar{\sigma}\left(K^{-1}\right)$}. This is equivalent to treating the input multiplicative plant uncertainty as the output multiplicative controller uncertainty.
+
+\footnotetext{${ }^{2}$ See Stein and Doyle [1991].\\
+${ }^{3}$ Alternative condition can be derived so that the condition related to nominal performance is scaled by the condition number.
+}
+
+The fact that the condition number appeared in the robust performance test for skewed problems can be given another interpretation by considering two sets of plants $\boldsymbol{\Pi}_{1}$ and $\boldsymbol{\Pi}_{2}$, as shown in Figure 8.15 and below.
+
+\begin{researchnote}[author=JC, date=2025-10-20]
+  \subsubsection*{什么是条件数，作用是什么？}
+  以及后面还有条件数随频率的变化曲线。
+  
+\end{researchnote}
+
+$$
+\begin{aligned}
+& \boldsymbol{\Pi}_{1}:=\left\{P\left(I+w_{t} \Delta\right): \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\} \\
+& \boldsymbol{\Pi}_{2}:=\left\{\left(I+\tilde{w}_{t} \Delta\right) P: \Delta \in \mathcal{R} \mathcal{H}_{\infty},\|\Delta\|_{\infty}<1\right\} .
+\end{aligned}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-25}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.15: Converting input uncertainty to output uncertainty}
+\end{center}
+\end{figure}
+
+Assume that $P$ is invertible; then
+
+$$
+\boldsymbol{\Pi}_{2} \supseteq \boldsymbol{\Pi}_{1} \quad \text { if } \quad\left|\tilde{w}_{t}\right| \geq\left|w_{t}\right| \kappa(P) \quad \forall \omega
+$$
+
+since $P\left(I+w_{t} \Delta\right)=\left(I+w_{t} P \Delta P^{-1}\right) P$.\\[0pt]
+The condition number of a transfer matrix can be very high at high frequency, which may significantly limit the achievable performance. The example below, taken from the textbook by Franklin, Powell, and Workman [1990, page 788], shows that the condition number shown in Figure 8.16 may increase with the frequency:
+
+$$
+P(s)=\left[\begin{array}{ccc|cc}
+-0.2 & 0.1 & 1 & 0 & 1 \\
+-0.05 & 0 & 0 & 0 & 0.7 \\
+0 & 0 & -1 & 1 & 0 \\
+\hline 1 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0
+\end{array}\right]=\frac{1}{a(s)}\left[\begin{array}{cc}
+s & (s+1)(s+0.07) \\
+-0.05 & 0.7(s+1)(s+0.13)
+\end{array}\right]
+$$
+
+where $a(s)=(s+1)(s+0.1707)(s+0.02929)$.\\
+It is appropriate to point out that the skewed problem setup, although more complicated than that of the nonskewed problem, is particularly suitable for control system design. To be more specific, consider the transfer function from $w$ and $\tilde{d}$ to $z$ and $e$ :
+
+$$
+\left[\begin{array}{c}
+z \\
+e
+\end{array}\right]=G(s)\left[\begin{array}{c}
+w \\
+\tilde{d}
+\end{array}\right]
+$$
+
+where
+
+$$
+\begin{aligned}
+G(s) & :=\left[\begin{array}{cc}
+-W_{2} T_{i} W_{1} & -W_{2} K S_{o} W_{d} \\
+W_{e} S_{o} P W_{1} & W_{e} S_{o} W_{d}
+\end{array}\right] \\
+& =\left[\begin{array}{cc}
+-W_{2} & 0 \\
+0 & W_{e}
+\end{array}\right]\left[\begin{array}{c}
+K \\
+I
+\end{array}\right](I+P K)^{-1}\left[\begin{array}{ll}
+P & I
+\end{array}\right]\left[\begin{array}{cc}
+W_{1} & 0 \\
+0 & W_{d}
+\end{array}\right]
+\end{aligned}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-26}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.16: Condition number \$\textbackslash kappa(\textbackslash omega)=\textbackslash bar\{\textbackslash sigma}(P(j \textbackslash omega)) / \uline{\textbackslash sigma}(P(j \textbackslash omega))\$\}\end{center}
+\end{figure}
+
+Then a suitable performance criterion is to make $\|G(s)\|_{\infty}$ small. Indeed, small $\|G(s)\|_{\infty}$ implies that $T_{i}, K S_{o}, S_{o} P$ and $S_{o}$ are small in some suitable frequency ranges, which are the desired design specifications discussed in Section 6.1 of Chapter 6. It will be clear in Chapter 16 and Chapter 17 that the $\|G\|_{\infty}$ is related to the robust stability margin in the gap metric, $\nu$-gap metric, and normalized coprime factor perturbations. Therefore, making $\|G\|_{\infty}$ small is a suitable design approach.
+
+\subsection*{8.6 Classical Control for MIMO Systems}
+In this section, we show through an example that the classical control theory may not be reliable when it is applied to MIMO system design.
+
+Consider a symmetric spinning body with torque inputs, $T_{1}$ and $T_{2}$, along two orthogonal transverse axes, $x$ and $y$, as shown in Figure 8.17. Assume that the angular velocity of the spinning body with respect to the $z$ axis is constant, $\Omega$. Assume further that the inertias of the spinning body with respect to the $x, y$, and $z$ axes are $I_{1}$, $I_{2}=I_{1}$, and $I_{3}$, respectively. Denote by $\omega_{1}$ and $\omega_{2}$ the angular velocities of the body with respect to the $x$ and $y$ axes, respectively. Then the Euler's equation of the spinning\\
+body is given by
+
+$$
+\begin{aligned}
+I_{1} \dot{\omega}_{1}-\omega_{2} \Omega\left(I_{1}-I_{3}\right) & =T_{1} \\
+I_{1} \dot{\omega}_{2}-\omega_{1} \Omega\left(I_{3}-I_{1}\right) & =T_{2}
+\end{aligned}
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-27}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.17: Spinning body}
+\end{center}
+\end{figure}
+
+Define
+
+$$
+\left[\begin{array}{l}
+u_{1} \\
+u_{2}
+\end{array}\right]:=\left[\begin{array}{l}
+T_{1} / I_{1} \\
+T_{2} / I_{1}
+\end{array}\right], a:=\left(1-I_{3} / I_{1}\right) \Omega
+$$
+
+Then the system dynamical equations can be written as
+
+$$
+\left[\begin{array}{c}
+\dot{\omega}_{1} \\
+\dot{\omega}_{2}
+\end{array}\right]=\left[\begin{array}{cc}
+0 & a \\
+-a & 0
+\end{array}\right]\left[\begin{array}{l}
+\omega_{1} \\
+\omega_{2}
+\end{array}\right]+\left[\begin{array}{l}
+u_{1} \\
+u_{2}
+\end{array}\right]
+$$
+
+Now suppose that the angular rates $\omega_{1}$ and $\omega_{2}$ are measured in scaled and rotated coordinates:
+
+$$
+\left[\begin{array}{l}
+y_{1} \\
+y_{2}
+\end{array}\right]=\frac{1}{\cos \theta}\left[\begin{array}{cc}
+\cos \theta & \sin \theta \\
+-\sin \theta & \cos \theta
+\end{array}\right]\left[\begin{array}{l}
+\omega_{1} \\
+\omega_{2}
+\end{array}\right]=\left[\begin{array}{cc}
+1 & a \\
+-a & 1
+\end{array}\right]\left[\begin{array}{l}
+\omega_{1} \\
+\omega_{2}
+\end{array}\right]
+$$
+
+where $\tan \theta:=a$. (There is no specific physical meaning for the measurements of $y_{1}$ and $y_{2}$ but they are assumed here only for the convenience of discussion.) Then the transfer matrix for the spinning body can be computed as
+
+$$
+Y(s)=P(s) U(s)
+$$
+
+with
+
+$$
+P(s)=\frac{1}{s^{2}+a^{2}}\left[\begin{array}{cc}
+s-a^{2} & a(s+1) \\
+-a(s+1) & s-a^{2}
+\end{array}\right]
+$$
+
+Suppose the control law is chosen to be a unit feedback $u=-y$. Then the sensitivity function and the complementary sensitivity function are given by
+
+$$
+S=(I+P)^{-1}=\frac{1}{s+1}\left[\begin{array}{cc}
+s & -a \\
+a & s
+\end{array}\right], \quad T=P(I+P)^{-1}=\frac{1}{s+1}\left[\begin{array}{cc}
+1 & a \\
+-a & 1
+\end{array}\right]
+$$
+
+Note that each single loop has the open-loop transfer function as $\frac{1}{s}$, so each loop has $90^{\circ}$ phase margin and $\infty$ gain margin.
+
+Suppose one loop transfer function is perturbed, as shown in Figure 8.18.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-28}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.18: One-loop-at-a-time analysis}
+\end{center}
+\end{figure}
+
+Denote
+
+$$
+\frac{z(s)}{w(s)}=-T_{11}=-\frac{1}{s+1}
+$$
+
+Then the maximum allowable perturbation is given by
+
+$$
+\|\delta\|_{\infty}<\frac{1}{\left\|T_{11}\right\|_{\infty}}=1
+$$
+
+which is independent of $a$. Similarly the maximum allowable perturbation on the other loop is also 1 by symmetry. However, if both loops are perturbed at the same time, then the maximum allowable perturbation is much smaller, as shown next.
+
+Consider a multivariable perturbation, as shown in Figure 8.19; that is, $P_{\Delta}=(I+ \Delta) P$, with
+
+$$
+\Delta=\left[\begin{array}{ll}
+\delta_{11} & \delta_{12} \\
+\delta_{21} & \delta_{22}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+a $2 \times 2$ transfer matrix such that $\|\Delta\|_{\infty}<\gamma$. Then by the small gain theorem, the system is robustly stable for every such $\Delta$ iff
+
+$$
+\gamma \leq \frac{1}{\|T\|_{\infty}}=\frac{1}{\sqrt{1+a^{2}}} \quad(\ll 1 \text { if } a \gg 1)
+$$
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-29}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.19: Simultaneous perturbations}
+\end{center}
+\end{figure}
+
+In particular, consider
+
+$$
+\Delta=\Delta_{d}=\left[\begin{array}{ll}
+\delta_{11} & \\
+& \delta_{22}
+\end{array}\right] \in \mathbb{R}^{2 \times 2}
+$$
+
+Then the closed-loop system is stable for every such $\Delta$ iff
+
+$$
+\operatorname{det}\left(I+T \Delta_{d}\right)=\frac{1}{(s+1)^{2}}\left(s^{2}+\left(2+\delta_{11}+\delta_{22}\right) s+1+\delta_{11}+\delta_{22}+\left(1+a^{2}\right) \delta_{11} \delta_{22}\right)
+$$
+
+has no zero in the closed right-half plane. Hence the stability region is given by
+
+$$
+\begin{aligned}
+2+\delta_{11}+\delta_{22} & >0 \\
+1+\delta_{11}+\delta_{22}+\left(1+a^{2}\right) \delta_{11} \delta_{22} & >0
+\end{aligned}
+$$
+
+It is easy to see that the system is unstable with
+
+$$
+\delta_{11}=-\delta_{22}=\frac{1}{\sqrt{1+a^{2}}}
+$$
+
+The stability region for $a=5$ is drawn in Figure 8.20, which shows how checking the axis misses nearby regions of instability, and that for $a \gg 5$, things just get that much worse. The hyperbola portion of the picture gets arbitrarily close to $(0,0)$. This clearly shows that the analysis of a MIMO system using SISO methods can be misleading and can even give erroneous results. Hence an MIMO method has to be used.
+
+\subsection*{8.7 Notes and References}
+The small gain theorem was first presented by Zames [1966]. The book by Desoer and Vidyasagar [1975] contains an extensive treatment and applications of this theorem in
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_10_18_6c4d7d498f9c7a3706f7g-30}
+\captionsetup{labelformat=empty}
+\caption{Figure 8.20: Stability region for $a=5$}
+\end{center}
+\end{figure}
+
+various forms. Robust stability conditions under various uncertainty assumptions are discussed in Doyle, Wall, and Stein [1982].
+
+\subsection*{8.8 Problems}
+Problem 8.1 This problem shows that the stability margin is critically dependent on the type of perturbation. The setup is a unity-feedback loop with controller $K(s)=1$ and plant $P_{\text {nom }}(s)+\Delta(s)$, where
+
+$$
+P_{\mathrm{nom}}(s)=\frac{10}{s^{2}+0.2 s+1}
+$$
+
+\begin{enumerate}
+  \item Assume $\Delta(s) \in \mathcal{R} \mathcal{H}_{\infty}$. Compute the largest $\beta$ such that the feedback system is internally stable for all $\|\Delta\|_{\infty}<\beta$.
+  \item Repeat but with $\Delta \in \mathbb{R}$.
+\end{enumerate}
+
+Problem 8.2 Let $M \in \mathbb{C}^{p \times q}$ be a given complex matrix. Then it is shown in Qiu et al [1995] that $I-\Delta M$ is invertible for all $\Delta \in \mathbb{R}^{q \times p}$ such that $\bar{\sigma}(\Delta) \leq \gamma$ if and only if $\mu_{\Delta}(M)<1 / \gamma$, where
+
+$$
+\mu_{\Delta}(M)=\inf _{\alpha \in(0,1]} \sigma_{2}\left(\left[\begin{array}{cc}
+\operatorname{Re} M & -\alpha \Im M \\
+\alpha^{-1} \Im M & \operatorname{Re} M
+\end{array}\right]\right) .
+$$
+
+It follows that $(I-\Delta M(s))^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ for a given $M(s) \in \mathcal{R} \mathcal{H}_{\infty}$ and all $\Delta \in \mathbb{R}^{q \times p}$ with $\bar{\sigma}(\Delta) \leq \gamma$ if and only if $\sup _{\omega} \mu_{\Delta}(M(j \omega))<1 / \gamma$. Write a Matlab program to compute $\mu_{\Delta}(M)$ and apply it to the preceding problem.
+
+Problem 8.3 Let $G(s)=\frac{K e^{-\tau s}}{T s+1}$ and $K \in[10,12], \tau \in[0,0.5], T=1$. Find a nominal model $G_{o}(s) \in \mathcal{R} \mathcal{H}_{\infty}$ and a weighting function $W(s) \in \mathcal{R} \mathcal{H}_{\infty}$ such that
+
+$$
+G(s) \in\left\{G_{o}(s)(1+W(s) \Delta(s)): \quad \Delta \in \mathcal{H}_{\infty}, \quad\|\Delta\| \leq 1\right\}
+$$
+
+Problem 8.4 Think of an example of a physical system with the property that the number of unstable poles changes when the system undergoes a small change, for example, when a mass is perturbed slightly or the geometry is deformed slightly.
+
+Problem 8.5 Let $\mathcal{X}$ be a space of scalar-valued transfer functions. A function $f(s)$ in $\mathcal{X}$ is a unit if $1 / f(s)$ is in $\mathcal{X}$.
+
+\begin{enumerate}
+  \item Prove that the set of units in $\mathcal{R} \mathcal{H}_{\infty}$ is an open set, that is, if $f$ is a unit, then
+\end{enumerate}
+
+
+\begin{equation*}
+(\exists \epsilon>0)\left(\forall g \in \mathcal{R} \mathcal{H}_{\infty}\right)\|g\|_{\infty}<\epsilon \Longrightarrow f+g \text { is a unit. } \tag{8.11}
+\end{equation*}
+
+
+\begin{enumerate}
+  \setcounter{enumi}{1}
+  \item Here is an application of the preceding fact. Consider the unity feedback system with controller $k(s)$ and plant $p(s)$, both SISO, with $k(s)$ proper and $p(s)$ strictly proper. Do coprime factorizations over $\mathcal{R} \mathcal{H}_{\infty}$ :
+\end{enumerate}
+
+$$
+p=\frac{n_{p}}{m_{p}}, \quad k=\frac{n_{k}}{m_{k}}
+$$
+
+Then the feedback system is internally stable iff $n_{p} n_{k}+m_{p} m_{k}$ is a unit in $\mathcal{R} \mathcal{H}_{\infty}$. Assume it is a unit. Perturb $p(s)$ to
+
+$$
+p=\frac{n_{p}+\Delta_{n}}{m_{p}+\Delta_{m}}, \quad \Delta_{n}, \Delta_{m} \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+Show that internal stability is preserved if $\left\|\Delta_{n}\right\|_{\infty}$ and $\left\|\Delta_{m}\right\|_{\infty}$ are small enough. The conclusion is that internal stability is preserved if the perturbations are small enough in the $\mathcal{H}_{\infty}$ norm.\\
+3. Give an example of a unit $f(s)$ in $\mathcal{R} \mathcal{H}_{\infty}$ such that equation (8.11) fails for the $\mathcal{H}_{2}$ norm, that is, such that
+
+$$
+(\forall \epsilon>0)\left(\exists g \in \mathcal{R} \mathcal{H}_{2}\right)\|g\|_{2}<\epsilon \text { and } f+g \text { is not a unit. }
+$$
+
+What is the significance of this fact concerning robust stability?\\
+Problem 8.6 Let $\Delta$ and $M$ be square constant matrices. Prove that the following three conditions are equivalent:
+
+\begin{enumerate}
+  \item $\left[\begin{array}{cc}I & -\Delta \\ -M & I\end{array}\right]$ is invertible;
+  \item $I-M \Delta$ is invertible;
+  \item $I-\Delta M$ is invertible.
+\end{enumerate}
+
+Problem 8.7 Consider the unity feedback system\\
+\includegraphics[max width=\textwidth, center]{2025_10_18_6c4d7d498f9c7a3706f7g-32}
+
+For
+
+$$
+G(s)=\left[\begin{array}{ll}
+\frac{1}{s} & \frac{1}{s} \\
+\frac{1}{s} & \frac{1}{s}
+\end{array}\right]
+$$
+
+design a proper controller $K(s)$ to stabilize the feedback system internally. Now perturb $G(s)$ to
+
+$$
+\left[\begin{array}{cc}
+\frac{1+\epsilon}{s} & \frac{1}{s} \\
+\frac{1}{s} & \frac{1}{s}
+\end{array}\right], \quad \epsilon \in \mathbb{R}
+$$
+
+Is the feedback system internally stable for all sufficiently small $\epsilon$ ?\\
+Problem 8.8 Consider the unity feedback system with $K(s)=3, G(s)=\frac{1}{s-2}$. Compute by hand (i.e., without Matlab) a normalized coprime factorization of $G(s)$. Considering perturbations $\Delta_{N}$ and $\Delta_{M}$ of the factors of $G(s)$, compute by hand the stability radius $\epsilon$, that is, the least upper bound on $\left\|\left[\begin{array}{ll}\Delta_{N} & \Delta_{M}\end{array}\right]\right\|_{\infty}$ such that feedback stability is preserved.
+
+Problem 8.9 Let a unit feedback system with a controller $K(s)=\frac{1}{s}$ and a nominal plant model $P_{o}(s)=\frac{s+1}{s^{2}+0.2 s+5}$. Construct a smallest destabilizing $\Delta \in \mathcal{R} \mathcal{H}_{\infty}$ in the sense of $\|\Delta\|_{\infty}$ for each of the following cases:\\
+(a) $P=P_{o}+\Delta$;\\
+(b) $P=P_{o}(1+W \Delta)$ with $W(s)=\frac{0.2(s+10)}{s+50}$;\\
+(c) $P=\frac{N+\Delta_{n}}{M+\Delta_{m}}, N=\frac{s+1}{(s+2)^{2}}, M=\frac{s^{2}+0.2 s+5}{(s+2)^{2}}$, and $\Delta=\left[\begin{array}{cc}\Delta_{n} & \Delta_{m}\end{array}\right]$.
+
+Problem 8.10 This problem concerns the unity feedback system with controller $K(s)$ and plant
+
+$$
+G(s)=\frac{1}{s+1}\left[\begin{array}{ll}
+1 & 2 \\
+3 & 4
+\end{array}\right]
+$$
+
+\begin{enumerate}
+  \item Take $K(s)=k I_{2}$ ( $k$ a real scalar) and find the range of $k$ for internal stability.
+  \item Take
+\end{enumerate}
+
+$$
+K(s)=\left[\begin{array}{cc}
+k_{1} & 0 \\
+0 & k_{2}
+\end{array}\right]
+$$
+
+( $k_{1}, k_{2}$ real scalars) and find the region of ( $k_{1}, k_{2}$ ) in $\mathbb{R}^{2}$ for internal stability.\\
+Problem 8.11 (Kharitonov's Theorem) Let $a(s)$ be an interval polynomial
+
+$$
+a(s)=\left[a_{0}^{-}, a_{0}^{+}\right]+\left[a_{1}^{-}, a_{1}^{+}\right] s+\left[a_{2}^{-}, a_{2}^{+}\right] s^{2}+\cdots
+$$
+
+Kharitonov's theorem shows that $a(s)$ is stable if and only if the following four Kharitonov polynomials are stable:
+
+$$
+\begin{aligned}
+& K_{1}(s)=a_{0}^{-}+a_{1}^{-} s+a_{2}^{+} s^{2}+a_{3}^{+} s^{3}+a_{4}^{-} s^{4}+a_{5}^{-} s^{5}+a_{6}^{+} s^{6}+\cdots \\
+& K_{2}(s)=a_{0}^{-}+a_{1}^{+} s+a_{2}^{+} s^{2}+a_{3}^{-} s^{3}+a_{4}^{-} s^{4}+a_{5}^{+} s^{5}+a_{6}^{+} s^{6}+\cdots \\
+& K_{3}(s)=a_{0}^{+}+a_{1}^{+} s+a_{2}^{-} s^{2}+a_{3}^{-} s^{3}+a_{4}^{+} s^{4}+a_{5}^{+} s^{5}+a_{6}^{-} s^{6}+\cdots \\
+& K_{4}(s)=a_{0}^{+}+a_{1}^{-} s+a_{2}^{-} s^{2}+a_{3}^{+} s^{3}+a_{4}^{+} s^{4}+a_{5}^{-} s^{5}+a_{6}^{-} s^{6}+\cdots
+\end{aligned}
+$$
+
+Let $a_{i}:=\left(a_{i}^{-}+a_{i}^{+}\right) / 2$ and let
+
+$$
+a_{\mathrm{nom}}(s)=a_{0}+a_{1} s+a_{2} s^{2}+\cdots
+$$
+
+Find a least conservative $W(s)$ such that
+
+$$
+\frac{a(s)}{a_{\mathrm{nom}}(s)} \in\left\{1+W(s) \Delta(s) \mid\|\Delta\|_{\infty} \leq 1\right\}
+$$
+
+Problem 8.12 One of the main tools in this chapter was the small-gain theorem. One way to state it is as follows: Define a transfer matrix $F(s)$ in $\mathcal{R} \mathcal{H}_{\infty}$ to be contractive if $\|F\|_{\infty} \leq 1$ and strictly contractive if $\|F\|_{\infty}<1$. Then for the unity feedback system the small gain theorem is this: If $K$ is contractive and $G$ is strictly contractive, then the feedback system is stable.
+
+This problem concerns passivity and the passivity theorem. This is an important tool in the study of the stability of feedback systems, especially robotics, that is complementary to the small gain theorem.
+
+Consider a system with a square transfer matrix $F(s)$ in $\mathcal{R} \mathcal{H}_{\infty}$. This is said to be passive if
+
+$$
+F(j \omega)+F(j \omega)^{*} \geq 0, \quad \forall \omega
+$$
+
+Here, the symbol $\geq 0$ means that the matrix is positive semidefinite. If the system is SISO, the condition is equivalent to
+
+$$
+\operatorname{Re} F(j \omega) \geq 0, \quad \forall \omega ;
+$$
+
+that is, the Nyquist plot of $F$ lies in the right-half plane. The system is strictly passive if $F-\epsilon I$ is passive for some $\epsilon>0$.
+
+\begin{enumerate}
+  \item Consider a mechanical system with input vector $u(t)$ (forces and torques) and output vector $y(t)$ (velocities) modeled by the equation
+\end{enumerate}
+
+$$
+M \dot{y}+K y=u
+$$
+
+where $M$ and $K$ are symmetric, positive definite matrices. Show that this system is passive.\\
+2. If $F$ is passive, then $(I+F)^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ and $(I+F)^{-1}(I-F)$ is contractive; if $F$ is strictly passive, then $(I+F)^{-1}(I-F)$ is strictly contractive. Prove these statements for the case that $F$ is SISO.\\
+3. Using the results so far, show (in the MIMO case) that the unity feedback system is stable if $K$ is passive and $G$ is strictly passive.
+
+Problem 8.13 Consider a SISO feedback system shown below with $P=P_{o}+W_{2} \Delta_{2}$.\\
+\includegraphics[max width=\textwidth, center]{2025_10_18_6c4d7d498f9c7a3706f7g-34}
+
+Assume that $P_{0}$ and $P$ have the same number of right-half plane poles, $W_{2}$ is stable, and
+
+$$
+\left|\operatorname{Re}\left\{\Delta_{2}\right\}\right| \leq \alpha, \quad\left|\Im\left\{\Delta_{2}\right\}\right| \leq \beta
+$$
+
+Derive the necessary and sufficient conditions for the feedback system to be robustly stable.
+
+Problem 8.14 Let $P=\left[\begin{array}{cc}P_{11} & P_{12} \\ P_{21} & P_{22}\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}$ be a two-by-two transfer matrix. Find sufficient (and necessary, if possible) conditions in each case so that $\mathcal{F}_{u}(P, \Delta)$ is stable for all possible stable $\Delta$ that satisfies the following conditions, respectively:
+
+\begin{enumerate}
+  \item at each frequency
+\end{enumerate}
+
+$$
+\operatorname{Re} \Delta(j \omega) \geq 0, \quad|\Delta(j \omega)|<\alpha
+$$
+
+\begin{enumerate}
+  \setcounter{enumi}{1}
+  \item at each frequency
+\end{enumerate}
+
+$$
+\operatorname{Re} \Delta(j \omega) e^{ \pm j \theta} \geq 0, \quad|\Delta(j \omega)|<\alpha
+$$
+
+where $\theta \geq 0$.\\
+3. at each frequency
+
+$$
+\operatorname{Re} \Delta(j \omega) \geq 0, \Im \Delta(j \omega) \geq 0, \operatorname{Re} \Delta(j \omega)+\Im \Delta(j \omega)<\alpha
+$$
+
+Problem 8.15 Let $P=(I+\Delta W) P_{0}$ such that $P$ and $P_{0}$ have the same number of unstable poles for all admissible $\Delta,\|\Delta\|_{\infty}<\gamma$. Show that $K$ robustly stabilizes $P$ if and only if $K$ stabilizes $P_{0}$ and
+
+$$
+\left\|W P_{0} K\left(I+P_{0} K\right)^{-1}\right\|_{\infty} \leq 1
+$$
+
+Problem 8.16 Give appropriate generalizations of the preceding problem to other types of uncertainties.
+
+Problem 8.17 Let $K=I$ and
+
+$$
+P_{0}=\left[\begin{array}{cc}
+\frac{1}{s+1} & \frac{2}{s+3} \\
+\frac{1}{s+1} & \frac{1}{s+1}
+\end{array}\right]
+$$
+
+\begin{enumerate}
+  \item Let $P=P_{0}+\Delta$ with $\|\Delta\|_{\infty} \leq \gamma$. Determine the largest $\gamma$ for robust stability.
+  \item Let $\Delta=\left[\begin{array}{cc}k_{1} & \\ & k_{2}\end{array}\right] \in \mathbb{R}^{2 \times 2}$. Determine the stability region.
+\end{enumerate}
+
+Problem 8.18 Repeat the preceding problem with
+
+$$
+P_{0}=\left[\begin{array}{cc}
+\frac{s-1}{(s+1)^{2}} & \frac{5 s+1}{(s+1)^{2}} \\
+\frac{-1}{(s+1)^{2}} & \frac{s-1}{(s+1)^{2}}
+\end{array}\right]
+$$
+
+
+\end{document}

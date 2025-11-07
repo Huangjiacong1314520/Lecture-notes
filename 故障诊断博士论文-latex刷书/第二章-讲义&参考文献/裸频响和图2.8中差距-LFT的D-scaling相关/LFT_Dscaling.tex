@@ -1,0 +1,119 @@
+% \documentclass{article}
+
+
+
+
+
+% This LaTeX document needs to be compiled with XeLaTeX.
+\documentclass[10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{lipsum}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{caption}
+\usepackage{bbold}
+\usepackage{fixltx2e}
+\usepackage[fallback]{xeCJK}
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{newunicodechar}
+
+
+
+
+
+\begin{document}
+
+\section*{问题分析与解答}
+
+\subsection*{第一段内容}
+
+你看到的这个“幅值差了几十 dB”的现象，不是缩放问题，而是比的对象不一样：
+
+\textbf{你画的是}
+\[ \tilde{G}_d(s, 0) = 7 \cdot 0.25 \, G_1 + 3 \cdot 1 \, G_2 + 3 \cdot 0.75 \, G_3 \]
+（或者把 $\delta_1$, $\Delta_1$ 代进去后的裸频响的 Bode 图）。
+
+\textbf{论文图 (Fig. 2.8)} 画的是
+\[ \tilde{G}_{d,\text{init}}(s) = \mathbf{F}_u(D(s), \, \text{blkdiag}(\delta_1, \Delta_1(s))), \]
+并与“下界” $L(\omega)$ 以及“插值模型”对比。这里的 $\mathbf{F}_u(\cdot)$ 是 \textbf{上线性分式变换 (upper LFT)}，$D(s)$ 是 skewed-$\mu$ 幂迭代 (或 D-K) 得到的频率依赖的 D-scaling。这一项会把幅值成百上千倍地重塑 (+20~+60 dB 很常见)。再加上有时还会乘以前后权重 $W_o$, $W_i$ 去做 $\mu$ 规格化，最终曲线当然会让“裸的 $\tilde{G}_d$”高很多。
+
+更具体地说：
+
+\begin{enumerate}
+    \item $\Delta_1(s)$ 是“全通”型 (all-pass)
+    
+    你截图给出的
+    \[ \Delta_1(s) = \frac{s^2 - 2.388 \times 10^4 s + 3.069 \times 10^6}{s^2 + 2.388 \times 10^4 s + 3.069 \times 10^6} \]
+    是单位增益的全通块 ($|\Delta_1(j\omega)| = 1$)。再乘上 $1 + W(s)\Delta_1(s)$ 也只能带来个位数 dB 的变化 ($W$ 的横值在 0.1~0.2 左右)，绝不可能凭它把曲线抬到 +20 dB。
+    
+    所以真正把曲线抬高几十 dB 的，是 $D(s)$ (和可能的 $W_o$, $W_i$)，而不是 $\Delta_1$。
+    
+    \item 论文图是“被 D-scaling 后的系统”，你的是“未 scaling 的名义系统”
+    
+    Fig. 2.8 的文字里明确写了 “$\tilde{G}_{d,\text{init}}(s) = \mathbf{F}_u(D(s), \, \text{blkdiag}(\delta_1, \Delta_1(s)))$ has the largest gain ...”。
+    
+    这就是说他们先用 skewed-$\mu$ 幂迭代 (或 D-K) 在每个频率点求出频率依赖的放大器 $D(j\omega)$，再把它作为上 LFT 的“外环”，生成“边界模型”。这个 $D(s)$ 的作用就是把在 $\mu$ 意义下“危险”的方向大幅放大，幅值自然能到 +20 dB 甚至更高。你代码里没这一步，当然对不上。
+    
+    \item 坐标轴单位也不同 (Hz vs rad/s)，但这只影响横坐标位置
+    
+    论文横轴标的是 Hz，MATLAB bode 默认是 rad/s。这会导致峰位看起来“挪了 $2\pi$ 倍”，但不会造成你说的“幅值差几十 dB”。幅值的大差距还是第 2 点的原因。
+\end{enumerate}
+
+\subsection*{第二段内容}
+
+我画的确实是裸频啊，可是图中的标称系统 The nominal system is shown “$G_d(s, 0)$”不就是裸频啊吗，也就是图中蓝色的线条，为什么也那么高？它不是不含不确定性吗？标称也可以接到上 LFT 里吗？
+
+非常好的追问——这正是很多人第一次读 Claessens (2024) 这类 $\mu$-分析论文时会混淆的地方。我们来把“标称系统 $ G_d(s, 0) $”的删除蓝线为什么也会在 +10 ~ +20 dB 这一量级讲清楚。
+
+\begin{enumerate}
+    \item “标称系统”并不是原始的 $ 7G_1 + 3G_2 + 3G_3 $
+    
+    文中的 $ G_d(s, 0) $ 已经不是最初那三个基础环节的直接线性组合，而是经过整个 LFT 封装后提取出来的名义通道。
+    
+    也就是说：
+    \[ G_d(s, \Delta) = F_u(D(s), \text{blkdiag}(\delta_1, \Delta_1(s))) \]
+    
+    当 $\Delta = 0$ 时得到的 $ G_d(s, 0) $（蓝线）仍然处在 LFT 结构里，包含了 $D(s)$ 这一串联放大器的效应。
+    
+    在 $\mu$-框架下，$ D(s) $ 被设计为频率依赖的标度矩阵（scaling），它的模值可能在某些频段大于 10 ~ 30 倍。
+    
+    因此即便不含不确定性块，名义系统也会被 $ D(s) $ “抬高”几十 dB。
+    
+    \item 为什么要这样定义“标称”
+    
+    在 $\mu$-综合或 skewed-$\mu$ 算法代算法中，我们的目标是找到一个 $ D(s) $，使得：
+    \[ \mu_\Delta(D(j\omega) G_d(j\omega) D^{-1}(j\omega)) = 1 \]
+    
+    在这个过程中，D 相当于一个频率依赖的放大因子，让系统在“$\mu = 1$”的边界上衡量增益。
+    
+    然后再把 D 固定下来，连同 G 一起形成 $ G_d $。所以论文里的 “nominal $ G_d(s, 0) $”其实是经 D-scaling 后的标称模型，而不是你手里未缩放的“原始标称系统”。
+    
+    \item 蓝线为什么还叫“nominal”
+    
+    因为：
+    \begin{itemize}
+        \item 它对应 $\delta_1 = 0, \Delta_1 = 0$，即不含不确定性扰动；
+        \item 但仍保留了设计时的标度结构 $ D(s) $；
+        \item 这样便于和“最坏情况”（橙线）或“插值解”（紫线）进行统一比较。
+    \end{itemize}
+    
+    论文作者通常把这种“已经被入 D(s) 的版本”称为 nominal，以区分于原始未缩放模型。
+\end{enumerate}
+
+\end{document}
