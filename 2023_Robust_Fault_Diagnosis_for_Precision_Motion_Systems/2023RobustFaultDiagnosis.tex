@@ -1,0 +1,1553 @@
+% This LaTeX document needs to be compiled with XeLaTeX.
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{ucharclasses}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\graphicspath{ {./images/} }
+\usepackage{caption}
+\usepackage{bbold}
+\usepackage[fallback]{xeCJK}
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{float}
+\IfFontExistsTF{Noto Serif CJK SC}
+{\setCJKmainfont{Noto Serif CJK SC}}
+{\IfFontExistsTF{STSong}
+  {\setCJKmainfont{STSong}}
+  {\IfFontExistsTF{Droid Sans Fallback}
+    {\setCJKmainfont{Droid Sans Fallback}}
+    {\setCJKmainfont{SimSun}}
+}}
+
+\setmainlanguage{german}
+\setotherlanguages{english}
+\IfFontExistsTF{CMU Serif}
+{\newfontfamily\lgcfont{CMU Serif}}
+{\IfFontExistsTF{DejaVu Sans}
+  {\newfontfamily\lgcfont{DejaVu Sans}}
+  {\newfontfamily\lgcfont{Georgia}}
+}
+\setDefaultTransitions{\lgcfont}{}
+
+\title{TU/e ASML }
+
+\author{T.S. Ickenroth}
+\date{}
+
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+\section*{Eindhoven University of Technology}
+\section*{MASTER}
+\section*{Robust Fault Diagnosis for Precision Motion Systems}
+Ickenroth，Tjeerd S．
+
+Award date：\\
+2023
+
+Link to publication
+
+\section*{Disclaimer}
+This document contains a student thesis（bachelor＇s or master＇s），as authored by a student at Eindhoven University of Technology．Student theses are made available in the TU／e repository upon obtaining the required degree．The grade received is not published on the document as presented in the repository．The required complexity or quality of research of student theses may vary by program，and the required minimum study period may vary in duration．
+
+\section*{General rights}
+Copyright and moral rights for the publications made accessible in the public portal are retained by the authors and／or other copyright owners and it is a condition of accessing publications that users recognise and abide by the legal requirements associated with these rights．\\
+－Users may download and print one copy of any publication from the public portal for the purpose of private study or research．\\
+－You may not further distribute the material or use it for any profit－making activity or commercial gain
+
+Graduation project\\
+Project phase report\\
+Department of Mechanical Engineering
+
+\section*{Robust Fault Diagnosis for Precision Motion Systems}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Student: & T.S. Ickenroth \\
+\hline
+Identity number: & 1232296 \\
+\hline
+Internal supervisors: & ir. K.H.J. Classens prof. dr. ir. T.A.E. Oomen \\
+\hline
+External supervisor: & dr. ir. J.J.M. van de Wijdeven \\
+\hline
+Department: & Mechanical Engineering \\
+\hline
+Research Group: & Control Systems Technology \\
+\hline
+Committee: & \begin{tabular}{l}
+prof. dr. ir. T.A.E. Oomen dr. ir. K. Tiels \\
+dr. ir. M.S.T. Chong \\
+dr. ir. J.J.M. van de Wijdeven \\
+ir. K.H.J. Classens \\
+\end{tabular} \\
+\hline
+CST Number: & CST2023.050 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section*{Robust Fault Diagnosis for Precision Motion Systems }
+
+
+\begin{abstract}
+\begin{itemize}
+  \item This dissertation gives an optimal solution to the robust fault detection filter design problem for continuous time LTI uncertain systems operating in open loop or closed loop. The proposed framework considers additive faults and no assumption is made on the uncertainties of the plant model. Hence, the provided solution can deal with both parametric and dynamic uncertainties. The solution solves the robust fault detection $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index, and is obtained by solving one Riccati equation. The effectiveness of the proposed approach is validated on two next-generation motion systems. A numerical simulation has been performed on a prototype reticle stage, and an experimental validation on a prototype wafer stage. It has been shown that the obtained solution can give guaranteed bounds on the time domain responses of the residual signals if no faults are present in the system, regardless of the negative effect of model uncertainties and disturbances. This enables clear distinction between faults and unwanted effects in the residuals which is desired.
+
+\end{itemize}
+
+
+\end{abstract}
+
+Index Terms-FDI, robust, model-based, uncertain, closed-loop
+
+\section*{Contents}
+I Introduction ..... 2\\
+III State-of-the-art on Model-based Fault Detection ..... 5\\
+II-A Observer-based Residual Generators ..... 5\\
+II-B Parameterization of Residual Dynamics ..... 6\\
+II-C Robust Residual Generation ..... 7\\
+III Robustness Analysis Towards Uncertain Closed- loop Systems ..... 9\\
+III-A Open-loop FDI for Nominal Systems ..... 9\\
+III-B Closed-loop FDI for Nominal Systems ..... 9\\
+III-C Open-loop FDI for Uncertain Systems ..... 10\\
+III-D Closed-loop FDI for Uncertain Systems ..... 10\\
+III-E Motivating Example ..... 11\\
+IV Optimal Robust Fault Detection Solution ..... 13\\
+IV-A $\quad \mathcal{H}_{i} / \mathcal{H}_{\infty}$-Problem Formulation ..... 13\\
+IV-B Fault Detection Filter Design ..... 14\\
+V Simulation Case Study ..... 18\\
+V-A System Identification ..... 18\\
+V-B Robust Controller Synthesis ..... 19\\
+V-C Robust Fault Detection Filter Synthesis ..... 19\\
+V-D Discussion ..... 21\\
+VI Experimental Case Study ..... 22\\
+VI-A Modelling framework ..... 22\\
+VI-B Robust Fault Detection Filter Synthesis ..... 23\\
+VI-C Experimental Results ..... 24\\
+VI-D Discussion ..... 25\\
+VII Conclusions and Recommendations ..... 26\\
+Acknowledgements ..... 26\\
+References ..... 26\\
+Appendix A: Simplification residual dynamics for un- certain closed-loop systems ..... 27\\
+Appendix B: Numerical Case Study ..... 28\\
+B-A FFR System Identification ..... 28\\
+B-B FFR Robust Controller Synthesis ..... 28\\
+Appendix C: Numerical Case Study ..... 30\\
+C-A OAT System Identification ..... 30\\
+C-B Fault Detection Filter ..... 30
+
+\section*{I. Introduction}
+The advancement in mechatronic systems has resulted in an increase in their complexity and automation level. Consequently, there is a greater need for improved system safety and reliability. Currently, one of the most significant issues in designing mechatronic systems is the system's reliability, which is closely related to high production uptime. For this reason, minimizing downtime is essential for mechatronic systems, since high financial consequences are paired with it.\\[0pt]
+Obviously, the best way to improve a systems reliability is to enhance the quality and robustness of individual system components like sensors, actuators, and software. However, it is inevitable that at some point in time faults occur due to mechanical and electrical wear of components. Therefore, industry is shifting towards the use of predictive maintenance tools and is looking for methods to ensure plant availability and safety, whilst at the same time obviating costly maintenance during plant downtime. Hence, process monitoring and fault diagnosis are becoming a crucial aspect of modern automatic control systems [1].
+
+In order to comprehend the concept of fault diagnosis, it is pertinent to have a clear understanding of the term "fault". The definition of a fault has not been universally accepted in the past, thus making it imperative to clarify.
+
+Definition 1 (Fault). A fault is to be understood as an unexpected change of system function, although it may not represent physical failure or breakdown [2].
+
+A fault or malfunction impedes or disrupts the normal operation of an automated system, potentially resulting in an unacceptable decline in performance or even hazardous situations. Common instances of such malfunctions include an actuator becoming blocked, a sensor failing, or a system component becoming disconnected. Consequently, faults are categorized as actuator, sensor, or plant faults, which may interrupt the control action, cause substantial measurement errors, or alter the dynamic input/output characteristics of the system, leading to the deterioration of system performance and even the failure or collapse of the entire system. Faults are typically modeled as additive faults or multiplicative faults [3]. For models with additive faults, the faults are explicitly defined as fictive inputs which act on the system similarly to the unknown external disturbance inputs. The main advantage of this modeling approach is that, by avoiding the explicit modeling of different fault modes, a single model can be used to account for many possible physical faults. For example, models with additive faults are widely used to describe systems with various types of actuator and sensor faults, like sensor drift. Models with multiplicative faults often describe systems with parametric faults, i.e., abnormal variation of some model parameters, like a shifted resonance mode [4]. In this work, faults are modeled as additive faults due to the main advantage and wide applicability.
+
+The concept of fault diagnosis can be described by three essential tasks
+
+\begin{itemize}
+  \item Fault detection: detection of the occurrence of faults in the functional units of the process, which lead to undesired or intolerable behavior of the whole system.
+  \item Fault isolation: localization of different faults.
+  \item Fault analysis: determination of the type, magnitude and cause of the fault.\\[0pt]
+Fault detection (FD) is the simplest form of fault diagnosis and is defined as a trigger for alarm signals to indicate the occurrence of a fault. Fault detection and isolation (FDI) systems are able to both detect a fault in the process and isolate the root cause of the fault, i.e., identify the specific faulty component. Fault detection, isolation and analysis (FDIA), also known as fault estimation (FE), is the most difficult and comprehensive concept as these systems deliver classified alarm signals including the type of fault together with its magnitude [5]. The relative importance of these three tasks is subjective, however fault detection is an absolute must for any practical system and isolation is almost equally important in order to achieve effective and targeted maintenance. Fault analysis, on the other hand, is particularly essential if a reconfiguration action is involved, like in fault tolerant control [6]. Besides this, fault analysis (or estimation) can be limiting in achievable fault diagnosis performance due to its harder constraints [3]. Another drawback of this approach is that it requires simultaneous design of the FDIA system and feedback controller to achieve high fault diagnosis performance [7]. For mechatronic systems changing the feedback controller is highly undesired, therefore, the main focus lies on the fault detection and isolation problem, especially fault detection as will be further specified later on.
+\end{itemize}
+
+In order to improve the reliability of a system, fault diagnosis is usually employed to monitor, locate, and identify the faults by using the concept of redundancy, either hardware redundancy or analytical redundancy. Next to this, there are also methods based on only input/output signals which are categorized by signal processing methods. In Figure 1 an overview of different FDI methods is visualized.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-04}
+\captionsetup{labelformat=empty}
+\caption{Fig. 1. Main overview of fault detection and isolation methods heading towards model-based FDI.}
+\end{center}
+\end{figure}
+
+\begin{itemize}
+  \item Hardware redundancy consists of the reconstruction of the process components using the identical (redundant) hardware components. A fault in the process component is then detected if the output of the process component is different from the one of its redundant component. Hardware redundancy is reliable, but expensive and increasing weights and occupying more space. It is necessary for key components to be equipped with the redundant duplicate, but would not be applicable if the hardware redundancy is applied to the whole system due to the cost or the difficulty for physical installing when the space and/or weight are strictly constrained.
+  \item Analytical redundancy has, with the maturity of modern control theory, become the main stream of fault diagnosis research since the 1980s [8]. Analytic redundant methods use real-time input/output process data and compare this to existing information of a healthy system. Compared to hardware redundancy, analytical redundancy does not make use of redundant hardware components and is therefore more cost effective. Analytical redundancy is further subdivided into two categories: model-based and knowledge-based, as depicted in Figure 1.
+  \item Model-based approaches are based on a mathematical model obtained through physical laws or system identification methods and fault diagnosis is achieved using residual signals that are formed by the difference between the measured signals and the signals generated by the mathematical model. This approach can be further categorized into two domains: deterministic methods and stochastic methods.
+\end{itemize}
+
+\begin{itemize}
+  \item Deterministic examples include: unknown input observer [2], eigenstructure assignment [2], frequency domain design [9], and parity relation approach [10].
+  \item Stochastic examples include: Kalman filter approach [11] and its variants as stated in [8], and parameter estimation approach [12].
+\end{itemize}
+
+\begin{itemize}
+  \item Knowledge-based diagnosis approaches need to employ a large volume of historic data and is often also called data-driven fault diagnosis. Applying a variety of artificial intelligent techniques to the available historic data of the process, the underlying knowledge, which implicitly represents the possible occurring faults, can be extracted.
+  \item Signal processing methods utilize measured signals rather than explicit input/output models for fault diagnosis. The faults in the process are reflected in the measured signals, whose features are extracted, and a diagnostic decision is then made based on the symptom analysis and prior knowledge on the symptoms of the healthy system [8]. A drawback of this method is that they may not be able to diagnose all types of faults, especially those that are caused by complex interactions between different components of the system.\\
+Mechatronic systems are complex systems and often have\\[0pt]
+strongly coupled dynamics, therefore, both the hardware redundancy and signal processing approaches are not optimal due to the high cost of redundant components and the vulnerability of the signal processing approach to coupled systems. Besides this, analytical redundancy is potentially more reliable than hardware redundancy, since no additional hardware faults are introduced into an analytical redundant scheme [13]. Additionally, often accurate models are already present prior to commissioning a machine, which immediately covers an important requirement for the model-based approach. These models are for instance used for controller design. Furthermore, faults need to be detected online, and with minimal delay, in order to respond more effectively. For that reason, knowledge-based FDI is not suitable, because of its computational complexity, for online fault detection [14]. On top of that, knowledge-based methods typically rely on black-box algorithms which is undesired in understanding the fault.\\[0pt]
+In conclusion, it is believed that the model-based approach has the most potential creating a useful fault diagnosis system to increase the quality of predictive maintenance for complex mechatronic systems. The reader is referred to [15] to see the potential model-based FDI methods being applied to mechatronic systems.
+\end{itemize}
+
+Model-based FDI systems exploit mathematical models of the process and use the process input and output signals as inputs to the residual generator, as can be seen in Figure 2 The residual generator is also known as a fault detection and isolation (FDI) system. The output of the residual generator, denoted by $\epsilon$, is called the residual. The residual signal contains information about the possible occurring faults in the process. In order to obtain a useful residual, the residual generator has to be designed in such a way that the residual is nonzero if a fault occurs, and is equal to zero if no fault occurs. This means that no frequency content of other input signals, e.g., control input and disturbances, have a contribution to the residual. Unfortunately, perfect models of the exact system are never available in practice. Hence, there is always a mismatch between the mathematical model and the real system. This mismatch can lead to unwanted effects in FDI, e.g., false alarms or undetected faults. To this end, robustness of the residual generator is of major importance to be able to guarantee a level of performance.\\
+The residual optimally consists of only faults which need to be post-processed in order to trigger an alarm. This postprocessing is called residual evaluation, as is shown in Figure 2 and the goal is to extract information about the fault of interest from the residual signals in order to classify a fault. Residual evaluation often consists of designing thresholds, regarding to all possible model uncertainties, unknown inputs and the faults of interest. Exceeding the threshold indicates a fault in the process and will release an alarm signal.\\
+In order to obtain correct fault information after the residual evaluation, it is of uttermost importance to solve the first problem by creating useful residual signals by designing the
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-06}
+\captionsetup{labelformat=empty}
+\caption{Fig. 2. General overview of model-based fault diagnosis. The focus in this work lies on the design of the residual generator.}
+\end{center}
+\end{figure}
+
+FDI system. In general, this consists of a two stage design where first the fault detection problem is solved followed by fault isolation. To be able to isolate faults, it is important to optimally detect faults. Therefore, the main focus in this work lies on the design of an optimal robust fault detection filter, which can then be used in the next step to isolate the faults. The definition of optimal will be further specified later on in this work. Hence, the design of a fault isolation system is excluded from this work. However, some remarks will be made on how to extend the found solution towards a complete FDI system. The residual evaluation is out of scope for this project as this requires additional research on its own.\\[0pt]
+Previous research has been done to the design of residual generators, in particular to the design of fault detection filters, and has lead to fruitful results. A solution is found that optimally solves the fault detection filter design problem for openloop nominal systems, i.e., systems without uncertainty, with additive faults and disturbances in [16]. This result is optimal in the sense that the residuals contain as much information about the faults as possible provided that the disturbances acting on the system are exactly known. It has been shown that this solution can be solved by only one Riccati equation [17] [18] [5], considering some assumptions which are practically not limiting. An attempt has been done to extend the optimal solution in [18] to open-loop systems including uncertainty in [19]. Here, the optimal solution is given that solves the robust fault detection problem for open-loop uncertain systems. However, no valid working example is provided resulting in no clear instructions for actual implementation. Besides this, for uncertain systems operating in closed loop, e.g., almost all mechatronic systems, there is, to the best authors knowledge, no published literature available that solves the fault detection problem. This directly motivates the goal of this work and is to find an optimal solution to the fault detection problem for uncertain systems operating in closed loop. The solution is optimal in the sense that the faults present in the system are amplified as much as possible into the residuals regarding a\\
+level of suppression for model uncertainty and disturbances. An overview of the main contributions of this work are outlined below.\\
+C1 The model-based approach requires mathematical models of the process, as was mentioned in the introduction. Often, these models do already exist for the purpose of controller design. However, the question is whether these models serve the purpose of fault diagnosis. Therefore, guidelines have been developed for system identification that results in superior fault detection performance, since this has a different purpose than feedback control design. (Sections III-C III-D)\\
+C2 An optimal solution to the fault detection filter (FDF) design problem has been found for MIMO uncertain LTI closed-loop systems. The filter is optimal in the sense that the faults present in the system are amplified as much as possible into the residuals regarding a level of suppression for model uncertainty and disturbances. (Section IV-B)\\
+C3 The developed insights and solution to the FDF design problem have been validated on a prototype wafer stage to put the framework into practice, and to show the potential of the solution. (Section VI)\\
+The remainder of this work is structured as follows. Section III provides the required background information and shows the state-of-the-art solution that solves the fault detection problem for nominal systems. In Section III the translation is made towards closed-loop uncertain systems where it is shown that the FD problem for closed-loop uncertain systems cannot be solved using the state-of-the-art solution in openloop setting. This is proven using a motivating example. Section IV provides the optimal solution to the FD problem for closed-loop uncertain systems together with a procedure on how to obtain the optimal result. To validate the obtained solution, a numerical case study is performed in Section Von a MIMO next generation prototype called the Free Floating Reticle stage. Section VI provides an experimental case study where the developed framework is put into practice to test the robust fault detection filter performance. The work ends with some concluding remarks and recommendations in Section VII.
+
+\section*{II. State-of-the-art on Model-based Fault Detection}
+This section provides the required background information on model-based residual generators. First, the general description of a model-based residual generator will be explained that is based on an observer. It will be shown that the fault detection filter design basically boils down to two steps, the design of an output observer and a post-filter. Second, the residual dynamics will be derived for open-loop nominal systems to show that there exists a trade-off between robustness to disturbances and sensitivity to faults. Last, a performance measure is introduced that is going to be used to design the fault detection filter. It will be shown that this design problem has an optimal solution based on a single Riccati equation and is called the unified solution. This solution solves the fault detection filter design problem in an optimal sense that the faults are maximized in the residuals.
+
+\section*{A. Observer-based Residual Generators}
+The concept analytical redundancy is understood as a reconstruction of the measured quantities of the system under consideration. Consider the following LTI system $G_{y u}$, with state space matrices ( $A, B, C, D$ ), that describes (part of) the transfer behaviour of the system under monitoring
+
+
+\begin{equation*}
+y=G_{y u} u \tag{1}
+\end{equation*}
+
+
+where $y$ the measured variable, for which a redundancy will be built, and $u$ the input to the process. The reconstruction of the output $y$ is often done by a parallel computation of the input-output relationship (1)
+
+
+\begin{equation*}
+\hat{y}=G_{y u} u \tag{2}
+\end{equation*}
+
+
+with $\hat{y}$ the estimation of $y$ and is called analytical redundancy. In practice, the model in (1) never completely describes the real world application which can result in unwanted behaviour since there are no guarantees that $\hat{y}$ approaches $y$ in this setting. In order to explain this, the system in (1) is extended to a more realistic realization
+
+
+\begin{equation*}
+y=G_{y u} u+C(s I-A)^{-1} x(0)+\Delta y \tag{3}
+\end{equation*}
+
+
+where $x(0)$ is the process initial state and $\Delta y$ being the model uncertainty as perfect models do not exist in practice. Setting up the relation for the residual $\epsilon$, which is a comparison between the measured output $y$ and estimated output $\hat{y}$ results in the following
+
+
+\begin{equation*}
+\epsilon=y-\hat{y}=C(s I-A)^{-1} x(0)+\Delta y \tag{4}
+\end{equation*}
+
+
+It is, obviously, the goal to have $\epsilon=0$, however, (4) reveals that the variation of $\epsilon$ from zero caused by the initial state $x(0)$ disappears only when the process is stable (i.e., $A$ Hurwitz), and even in this case the eigenvalues of $A$ determine the convergence rate. Next to this, the model uncertainty $\Delta y$ is not suppressed. As a result, the reconstructed output may strongly\\
+differ from the measured output. The redundant system thus needs a different design than the one opted in (2). Before this is given, the properties for a redundant system are listed below\\
+I. $\epsilon=y-\hat{y}=0$ for all $u$\\
+II. $\lim _{t \rightarrow \infty} \epsilon(t)=0 \quad$ for all $x(0)$\\
+III. the convergence rate is arbitrarily assignable\\
+IV. the influence of $\Delta y$ is suppressed.
+
+In the work of [5] an expression has been found for the construction of a redundant system satisfying I-IV and will be summarized in Theorem 1 below. For the derivation the reader is referred to [5].\\
+Theorem 1. Given a proper real-rational transfer function matrix $G(s)$ with detectable state space matrices ( $A, B, C, D$ ), then signal $\hat{y}$ delivered by
+
+
+\begin{equation*}
+\hat{y}=\tilde{N}_{u} u-\left(\tilde{M}_{u}-I\right) y \tag{5}
+\end{equation*}
+
+
+or equivalently by
+
+
+\begin{align*}
+& \dot{\hat{x}}=A \hat{x}+B u+L(y-C \hat{x}-D u)  \tag{6}\\
+& \hat{y}=C \hat{x}+D u
+\end{align*}
+
+
+reconstructs $y$ in the sense of I-IV.\\
+In (5) the matrices $\tilde{M}_{u}, \tilde{N}_{u} \in \mathcal{R} \mathcal{H}_{\infty}$ denote a left coprime factorization (LCF) of system $G_{y u}$, that is, $G_{y u}=\tilde{M}_{u}^{-1} \tilde{N}_{u}$, with corresponding state space representations
+
+$$
+\left[\begin{array}{cc}
+\tilde{M}_{u} & \tilde{N}_{u}
+\end{array}\right]=\left[\begin{array}{c|cc}
+A+L C & L & B+L D \\
+\hline C & I & D
+\end{array}\right] .
+$$
+
+Equation (5), which is equivalent to (6), describes a dynamic system whose inputs are $u$ and $y$ and output an estimate of $y$, denoted by $\hat{y}$, and is denoted by the output observer. This system is stable and will converge to $y$, independent of $u, x(0)$, with an arbitrarily assignable convergence rate via gain matrix $L$, hence satisfying I-IV. This output observer will build the core of the residual generator and is constructed by the comparison of the estimated output $\hat{y}$ with the measured output $y$
+
+
+\begin{equation*}
+\epsilon=y-\hat{y}=\tilde{M}_{u} y-\tilde{N}_{u} u \tag{7}
+\end{equation*}
+
+
+In the context of FD, the residual acts as an indicator for possible occurring faults in a process. The most important characteristic features of a residual are\\
+(i) $\lim _{t \rightarrow \infty} \epsilon(t)=0$ for all $u(t), x(0)$ and $\Delta y(t)=0$\\
+(ii) $\epsilon=G_{\epsilon f} f, \quad G_{\epsilon f} \neq 0$\\
+where $G_{\epsilon f}$ denotes the transfer from fault $f$ to residual $\epsilon$. Condition (ii) ensures that all possible faults in the process are present in the residual which is satisfied if transfer $G_{y f}$ has full column rank. Condition (i) is satisfied by Theorem 1 when the residual is expressed in the form as in (7). However, this is in fact not the only expression that delivers a residual satisfying (i)-(ii), since it is known that a signal constructed by for example, $R(s)(y-\hat{y})$, where $R(s) \neq 0 \in \mathcal{R} \mathcal{H}_{\infty}$, is also\\
+a residual in the sense of (i)-(ii). This brings an extra degree of freedom to the design of the residual generator.\\
+Remark 1. In fact, all residual generators can be written in the form
+
+$$
+\epsilon=F(s) u+H(s) y, \quad F(s), H(s) \in \mathcal{R} \mathcal{H}_{\infty}
+$$
+
+as long as the residual fulfills conditions (i)-(ii). This includes that transfer matrices $F(s)$ and $H(s)$ do not necessarily follow from a LCF and that a stable factorization of the plant could provide the desired result. The expressions for all possible transfer matrices $F(s)$ and $H(s)$ can be found in [5] and will not be discussed here.
+
+The setup for a general description of a residual generator is summarized in Theorem 2 below.
+
+Theorem 2. Given a proper real-rational transfer function matrix $G_{y u}(s)$ with a left coprime factorization pair $\left(\tilde{M}_{u}(s), \tilde{N}_{u}(s)\right) \in \mathcal{R} \mathcal{H}_{\infty}$, then
+
+
+\begin{equation*}
+\epsilon=R(s)\left(\tilde{M}_{u}(s) y-\tilde{N}_{u}(s) u\right) \tag{8}
+\end{equation*}
+
+
+represents a parameterization form of LTI residual generators in the sense that
+
+\begin{itemize}
+  \item for every residual generator a parameterization matrix $R(s) \in \mathcal{R} \mathcal{H}_{\infty}$ can be found such that the residual generator is expressed in terms of (8), and
+  \item for every $R(s) \in \mathcal{R} \mathcal{H}_{\infty}$ system (8) delivers a residual satisfying conditions (i)-(ii) [5].
+\end{itemize}
+
+Thus, the design of a residual generator can be split up in two parts where the first part builds the core of the residual generator and is based on an output observer, essentially finding observer gain matrix $L$. This is used to reconstruct the systems' behaviour so that the preliminary form of residual, $y-\hat{y}$, provides information about the variation of the system operation from its nominal value. Then the second part including dynamic stable filter $R(s)$, acts as a signal filter and is there to enhance the effects of the faults on residual and simultaneously suppress the effects of unwanted dynamics, which will be further explained in forthcoming sections. Thus, $R(s)$ is also called the post-filter.
+
+\section*{B. Parameterization of Residual Dynamics}
+Until now it is clear that the residual vector should be a linear combination of the output estimation error. To parameterize post-filter $R(s)$, such that condition (ii) is satisfied, the dynamic input output relation is written in the following general open-loop form
+
+
+\begin{equation*}
+y=G_{y u}(s) u+G_{y d}(s) d+G_{y f}(s) f \tag{9}
+\end{equation*}
+
+
+where transfer matrix $G_{y d}^{n_{y} \times n_{d}}(s) \in \mathcal{R} \mathcal{H}_{\infty}$ describes the relation from possible disturbances and/or model uncertainties to the output $y$, and $G_{y f}^{n_{y} \times n_{f}}(s) \in \mathcal{R} \mathcal{H}_{\infty}$ the transfer function matrix (TFM) from faults to the output. An overview of the dynamic relations is provided in Figure 3. To ensure that $\epsilon$
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-08}
+\captionsetup{labelformat=empty}
+\caption{Fig. 3. General FDI configuration for open-loop nominal systems.}
+\end{center}
+\end{figure}
+
+generated by the dynamic system (8) also meets condition (ii), it is useful to study the dynamics of the residual vector corresponding to the fault $f$ as well as to the model uncertainties and possible disturbances collected in input $d$. To this end, equation (9) is substituted into (8) which results in
+
+
+\begin{equation*}
+\epsilon=R(s) \tilde{M}_{u}(s)\left(G_{y f}(s) f+G_{y d}(s) d\right) \tag{10}
+\end{equation*}
+
+
+Equation (10) describes the residual dynamics which gives insight on how to design post-filter $R(s)$. For $\epsilon$ being a residual, condition (ii) must be satisfied which implies that the following must hold
+
+$$
+R(s) \tilde{M}_{u}(s) G_{y f}(s) \neq 0
+$$
+
+Next to this, the influence of unwanted dynamics generated by $d$ is not desired in the residual, and ideally the residual only contains information generated by $f$. This introduces the well studied perfect fault detection and isolation (PFDI) definition that is only an ideal case which is in practice normally not realizable, but provides insight in FDI [16, and references therein].\\
+From (10) it follows that a PFDI is achievable if and only if there exists a $\mathcal{R} \mathcal{H}_{\infty}$ parameterization matrix $R(s)$ so that
+
+
+\begin{align*}
+& R(s) \hat{M}_{u}(s) G_{y f}(s)=\operatorname{diag}\left(t_{1}(s), \ldots, t_{n_{f}}(s)\right) \in \mathcal{R} \mathcal{H}_{\infty}  \tag{11}\\
+& R(s) \hat{M}_{u}(s) G_{y d}(s)=\mathbf{0} \tag{12}
+\end{align*}
+
+
+Then the existence conditions for PFDI are given by [20]
+
+
+\begin{align*}
+\operatorname{rank}\left[G_{y f}(s) \quad G_{y d}(s)\right] & =\operatorname{rank} G_{y f}(s)+\operatorname{rank} G_{y d}(s)  \tag{13}\\
+\operatorname{rank} G_{y f} & =n_{f} \tag{14}
+\end{align*}
+
+
+The physical interpretation of condition (13) is that $f$ and $d$ must have totally decoupled effects on the measurement $y$\\
+which, in practice, is typically untrue. Besides this, the number of sensors must be at least equal to the sum of inputs $f$ and $d$, i.e., $n_{y} \geq n_{f}+n_{d}$ to be able to have PFDI. This is typically violated as well, since each sensor in a real application is subjected to noise. This proves the need for a method to design robust residual generators and requires a new definition of the problem. This will be introduced in the next section.
+
+\section*{C. Robust Residual Generation}
+The dynamics of the residual generator in (10) reveal that there exists a trade-off between sensitivity to faults and robustness against disturbances. Only in an exclusive, nonpractical, situation PFDI is possible as was explained in previous subsection. Therefore, a way has been developed to measure sensitivity and robustness so that this can be used to define a performance index that would give a fair evaluation of the trade-off between the robustness and sensitivity. A natural way to evaluate the robustness of residual generator (10) against disturbance $d$ is the use of an induced norm, that is, the worst-case evaluation of the possible influence of $d$ on $\epsilon$. The sensitivity of faults requires a more subtle definition, since it is desired to define an index that gives a fair evaluation of the influence of the faults on the residual signal over the whole frequency domain and in all directions in the measurement subspace [5]. This has led to the so-called $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index to measure the trade-off between fault sensitivity and robustness to disturbances. To explain why this index is a fair performance evaluation, recall that the singular values of a matrix give a measure of the gain in each direction of the subspace spanned by the matrix. In this context, all singular values $\sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right), \omega \in[0, \infty]$, together build a natural measure of the fault sensitivity. They cover all directions of the subspace spanned by $R(s) \tilde{M}_{u}(s) G_{y f}(s)$. In comparison, $\left\|R \tilde{M}_{u} G_{y f}\right\|_{-}$or $\left\|R \tilde{M}_{u} G_{y f}\right\|_{\infty}$ with corresponding indices $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ and $\mathcal{H}_{\infty} / \mathcal{H}_{\infty}$, respectively, which are often used in literature [17] [18] [19], are only outer values in this subspace. It holds $\forall \omega \in[0, \infty]$,
+
+$$
+\left\|R \tilde{M}_{u} G_{y f}\right\|_{-} \leq \sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right) \leq\left\|R \tilde{M}_{u} G_{y f}\right\|_{\infty}
+$$
+
+Hence, solving the problem for the $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ index automatically solves the problem for the $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ and $\mathcal{H}_{\infty} / \mathcal{H}_{\infty}$ indices. The $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index is then defined as follows
+
+
+\begin{equation*}
+J_{i, \omega}(R)=\frac{\sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right)}{\left\|R \tilde{M}_{u} G_{y d}\right\|_{\infty}} \tag{15}
+\end{equation*}
+
+
+Now having a performance index (15) that captures the trade-off between fault sensitivity and disturbance robustness, the fault detection filter design problem can be formulated, which is in fact a multi-objective optimization problem. That is, find $R(s) \in \mathcal{R} \mathcal{H}_{\infty}$ such that for all $\sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right), i=1, \ldots, n_{f}, \omega \in [0, \infty], J_{i, \omega}(R)$ is maximized, that is,
+
+
+\begin{equation*}
+\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} J_{i, \omega}(R)=\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} \frac{\sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right)}{\left\|R \tilde{M}_{u} G_{y d}\right\|_{\infty}} . \tag{16}
+\end{equation*}
+
+
+A solution that optimally solves multi-objective optimization problem (16) has been found, which is called the unified solution [5, p. 230]. This solution exists under the assumption that transfer function matrix $\tilde{M}_{u} G_{y d}$ has no transmission zeros on the imaginary axis, which is not a limiting assumption for real mechatronic systems. The solution is based on a co-inner-outer factorization (CIOF), which is the dual form of the well known inner-outer factorization, and will shortly be explained here. Define, for the sake of readability, $\tilde{G}_{d}(s)=\tilde{M}_{u}(s) G_{y d}(s)$ then a COIF exists if $\tilde{G}_{d}(s) \in \mathcal{R} \mathcal{H}_{\infty}$, i.e., when a transfer function matrix is a proper real rational stable TFM. A co-inner-outer factorization can be written as $\tilde{G}_{d}^{n_{y} \times n_{d}}=G_{d o}^{n_{y} \times n_{y}} G_{d i}^{n_{y} \times n_{d}}$, where $G_{d o} \in \mathcal{G} \mathcal{H}_{\infty}$ being the co-outer factor having the property that both $G_{d o}, G_{d o}^{-1} \in \mathcal{R} \mathcal{H}_{\infty}$ and $G_{d o}^{-1} G_{d o}=I$, and with $G_{d i} \in \mathcal{R} \mathcal{H}_{\infty}$ the co-inner satisfying $G_{d i} G_{d i}^{H}=I$ which implies $\sigma_{i}\left(G_{d i}(j \omega)\right)=1$ for all $\omega$ and all $i$, and thus $\left\|G_{d i}\right\|_{\infty}=1$ [21, p. 70]. This will be used to develop insight in the solution after the unified solution is stated in Theorem 3 below.
+
+Theorem 3 (Unified solution). Given residual dynamics (10) and assume that $\tilde{G}_{d}(s)$ has no transmission zeros on the imaginary axis, then $\forall \omega \in[0, \omega]$ and $\sigma_{i}\left(R(j \omega) \tilde{M}_{u}(j \omega) G_{y f}(j \omega)\right), i=1, \ldots, n_{f}$,
+
+
+\begin{equation*}
+R_{o p t}(s)=\arg \left(\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} J_{i, \omega}(R)\right)=G_{d o}^{-1}(s) \tag{17}
+\end{equation*}
+
+
+where $G_{d o}(s)$ is a co-outer of $\tilde{G}_{d}(s)$.\\[0pt]
+The proof of Theorem 3 can be found in [5, p. 231]. To get intuition for the unified solution, lets insert (17) into the residual dynamics (10) to obtain
+
+
+\begin{equation*}
+\epsilon=G_{d i}(s) d+G_{d o}^{-1}(s) \tilde{M}_{u}(s) G_{y f}(s) f \tag{18}
+\end{equation*}
+
+
+for which it holds in the fault-free case that $\|\epsilon\|_{2}=\|d\|_{2}$. This is because of the norm preserving property of a co-inner. The dynamics in (18) show that $G_{d o}^{-1}(s)$ can be considered as a weighting matrix of the influence of the fault $f$ on the residual $\epsilon$. It is known that $G_{d o}^{-1}(s)$ is the inverse of the co-outer of $\tilde{G}_{d}(s)$, and the co-outer of a transfer matrix can be interpreted as the magnitude profile of the transfer matrix in the frequency domain. In this context, it can be concluded that the optimal solution is achieved by inversing the magnitude profile of $\tilde{G}_{d}(s)$. As a result, the influence of $d$ on $\epsilon$ becomes uniform in the whole subspace spanned by the possible disturbances, while the influence of $\underset{\sim}{f}$ on $\epsilon$ is weighted by the inverse of the magnitude profile of $\tilde{G}_{d}(j \omega)$ [5, p. 232].\\
+The novelty of the unified solution is that the multi-objective optimization problem in (16) can be solved by using only one Riccati equation to obtain a CIOF. In comparison to other\\
+approaches, e.g., LMI solutions, that even try to solve special cases of (16) like $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ and $\mathcal{H}_{\infty} / \mathcal{H}_{\infty}$, the Riccati solution is computationally less demanding. On top of that, even though this topic is not addressed in this work since this belongs to residual evaluation, it is worth mentioning that the unified solution leads to an optimal trade-off between the false alarm rate and fault detection rate and thus meets the primary and practical demands of an FDI system [5].\\
+This study has motivated the use of the unified solution as a base to solve the fault detection problem for uncertain closedloop systems that will be given in Section IV-B.
+
+\section*{III. Robustness Analysis towards Uncertain Closed-loop Systems}
+The previous section has given a short overview of the state-of-the-art solution on the optimal design of a fault detection filter (FDF). This solution is provided for open-loop systems without uncertainties, which is the most used configuration in literature on fault diagnosis. However, mechatronic systems almost always operate in a closed-loop setting. On top of that, models of real-world applications are always imperfect. This model uncertainty needs to be taken into account explicitly when designing fault detection filters. It is therefore required to investigate whether these open-loop methods can be applied to closed-loop systems. For this reason, it is useful to come up with an overview of the similarities and differences between open-loop and closed-loop systems, and to give insight in the consequences for fault diagnosis. The next sections provide the dynamic relations between inputs and residual, first for open-loop nominal systems. Second, for closed-loop nominal systems. Third, for open-loop uncertain systems. Fourth, for closed-loop uncertain systems. Last, a motivating example is provided that shows that closed-loop FDF synthesis is required for uncertain closed-loop systems.
+
+\section*{A. Open-loop FDI for Nominal Systems}
+Consider the general FDI configuration as depicted in Figure 4 For the nominal case, the system can be simplified by setting $\Delta=0$, because there are no model uncertainties. Given that the output $y$ is equal to
+
+$$
+y=\left[\begin{array}{lll}
+G_{f} & G_{d} & G_{u}
+\end{array}\right]\left[\begin{array}{l}
+f \\
+d \\
+u
+\end{array}\right],
+$$
+
+where $f$ the faults, $d$ the disturbances and $u$ the input to the plant. Let $G_{u}=\tilde{M}_{u}^{-1} \tilde{N}_{u}$ be a left coprime factorization where $\tilde{M}_{u}$ and $\tilde{N}_{u}$ are left coprime over $\mathcal{R} \mathcal{H}_{\infty}$. Then, the residual can be expressed as follows
+
+
+\begin{equation*}
+\epsilon=Q_{\mathrm{ol}} \tilde{M}_{u}\left(G_{d} d+G_{f} f\right) \tag{19}
+\end{equation*}
+
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-11}
+\captionsetup{labelformat=empty}
+\caption{Fig. 4. General FDI configuration for uncertain open-loop systems.}
+\end{center}
+\end{figure}
+
+From here it is immediately clear that if the disturbance is in the same frequency range as the fault, and in the same subspace, then the fault cannot be detected if the magnitude of the disturbance is equal to or greater than the fault. Hence, for effective fault diagnosis there is a trade-off between fault detection and disturbance attenuation.
+
+Remark 2. Obviously for SISO systems, faults and disturbances always lie in the same space and therefore the magnitude ratio between fault and disturbance determines if the fault can be detected if both occur on the same frequency, which can be limiting FDI performance. For MIMO systems, directionality plays a fundamental role to be able to detect faults even if they occur at the same frequency as the disturbance, resulting in higher possible FDI performance compared to SISO systems.
+
+\section*{B. Closed-loop FDI for Nominal Systems}
+For systems in closed loop the control input is generated by a controller, e.g., through negative feedback with $u=K(r- y)$. Again, the uncertainty is discarded, i.e., $\Delta=0$. The output of the system then becomes
+
+$$
+y=G_{u} K(r-y)+G_{d} d+G_{f} f=\left[\begin{array}{lll}
+S G_{u} K & S G_{d} & S G_{f}
+\end{array}\right]\left[\begin{array}{l}
+r \\
+d \\
+f
+\end{array}\right]
+$$
+
+where $S=\left(I+G_{u} K\right)^{-1}$ the nominal output sensitivity function.\\
+According to Figure 5 the residual can be expressed as follows
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-11(1)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 5. General FDI configuration for uncertain closed-loop systems.}
+\end{center}
+\end{figure}
+
+
+\begin{align*}
+& \epsilon= Q_{\mathrm{cl}}\left(\tilde{M}_{u} y-\tilde{N}_{u} u\right) \\
+&= Q_{\mathrm{cl}}\left(\tilde{M}_{u} y-\tilde{N}_{u} K(r-y)\right) \\
+&= Q_{\mathrm{cl}}\left(\left(\tilde{M}_{u}+\tilde{N}_{u} K\right)\left(S G_{u} K r+S G_{d} d+S G_{f} f\right)\right. \\
+&\left.\begin{array}{r}
+\quad-\tilde{N}_{u} K r
+\end{array}\right) \\
+& \Rightarrow \epsilon=Q_{\mathrm{cl}} \tilde{M}_{u}\left(\left(S^{-1} S G_{u} K-G_{u} K\right) r+\tilde{M}^{-1} S G_{d} d\right. \\
+&\left.\quad+S^{-1} S G_{f} f\right)
+\end{align*}
+
+
+Hence, it can be concluded when comparing (19) and (20), that the expressions for the residual is exactly the same for open-loop and closed-loop nominal systems, as was already shown in [22]. This is why literature on fault diagnosis is often based on the open-loop configuration. However, for uncertain systems, this holds not true which will be shown in the upcoming sections.
+
+\section*{C. Open-loop FDI for Uncertain Systems}
+Consider that the transfer function matrices inside generalized plant $G$ are perturbed, i.e., $\Delta \neq 0$. For the analysis there is no assumption made on the structure of the uncertainty, i.e., $\Delta \in \Delta:\|\Delta\|_{\infty} \leq 1$, where $\Delta$ can be any structure. Then system $G$, as in Figure 4, has the following form:
+
+
+\begin{align*}
+{\left[\begin{array}{c}
+z_{\Delta} \\
+\hline y
+\end{array}\right] } & =\underbrace{\left[\begin{array}{c|ccc}
+G_{z_{\Delta} w_{\Delta}} & G_{z_{\Delta} f} & G_{z_{\Delta} d} & G_{z_{\Delta} u} \\
+\hline G_{y w_{\Delta}} & G_{y f} & G_{y d} & G_{y u}
+\end{array}\right]}_{G}\left[\begin{array}{c}
+w_{\Delta} \\
+\hline f \\
+d \\
+u
+\end{array}\right] \\
+w_{\Delta} & =\Delta z_{\Delta} \tag{21}
+\end{align*}
+
+
+where $w_{\Delta}$ and $z_{\Delta}$ the uncertain inputs and outputs, respectively. Applying an upper linear fractional transformation (LFT), the system in 21 takes the following form:
+
+\[
+y=\left[\begin{array}{lll}
+G_{y f}^{\Delta} & G_{y d}^{\Delta} & G_{y u}^{\Delta}
+\end{array}\right]\left[\begin{array}{l}
+f  \tag{22}\\
+d \\
+u
+\end{array}\right]
+\]
+
+where
+
+$$
+\begin{aligned}
+& G_{y f}^{\Delta}=G_{y f}+G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} f}, \\
+& G_{y d}^{\Delta}=G_{y d}+G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} d}, \\
+& G_{y u}^{\Delta}=G_{y u}+G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u} \\
+& \text { and } S_{\Delta}=\left(I-G_{z_{\Delta} w_{\Delta}} \Delta\right)^{-1} .
+\end{aligned}
+$$
+
+The residual can then be expressed as
+
+
+\begin{align*}
+\epsilon & =Q_{\mathrm{ol}}\left(\tilde{M}_{u} y-\tilde{N}_{u} u\right) \\
+& =Q_{\mathrm{ol}}\left(\tilde{M}_{u}\left(G_{y f}^{\Delta} f+G_{y d}^{\Delta} d+G_{y u}^{\Delta} u\right)-\tilde{N}_{u} u\right)  \tag{23}\\
+& =Q_{\mathrm{ol}} \tilde{M}_{u}\left(G_{y f}^{\Delta} f+G_{y d}^{\Delta} d+G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u} u\right)
+\end{align*}
+
+
+Remark 3. Note that when there is no uncertainty, i.e., $\Delta=0$, the expression for the residual simplifies to
+
+
+\begin{equation*}
+\epsilon=Q_{\mathrm{ol}} \tilde{M}_{u}\left(G_{y d} d+G_{y f} f\right) \tag{24}
+\end{equation*}
+
+
+which is, obviously, exactly the same as the expression in (19) for the open-loop nominal case since $G_{y d}=G_{d}$ and $G_{y f}=G_{f}$.
+
+Hence, it can be concluded that the residual for uncertain open-loop systems will be negatively influenced by the control input $u$, due to the $G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u}$ term. Furthermore, the uncertainty $\Delta$ which is present in both the transfers from $f \rightarrow \epsilon$ and $d \rightarrow \epsilon$ influences the residual. Equation (23) gives insight in the importance of the model-fit for nominal plant model $G_{u}$, overall the more accurate the model, the smaller the $\Delta$ set, and thus the higher residual quality, because the dependence on the input $u$ vanishes. This can be further specified to that the post-filter $Q$ must be chosen such that the magnitude of $Q$ is high at the frequencies where $G_{y f}^{\Delta} f$ are dominant, and that it must be low where $G_{y d}^{\Delta} d$ and $G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u} u$ dominate contributions to the residual.
+
+Remark 4. This brings an interesting insight to the quality of the model fit for the plant. It is thus important that for high FDI performance, the level of uncertainty $\Delta$ must be minimized in the frequency ranges where $f, d$ and $u$ act on the system. More specifically, if all transfers from $\left[\begin{array}{lll}f & d & u\end{array}\right]^{T} \rightarrow \epsilon$ are uncertain, the model fit must be of high quality (i.e., low uncertainty) at the frequencies in $f$ where uncertain transfer $G_{y f}^{\Delta}$ has the lowest gain, and at the frequencies in $d$ and $u$ where uncertain transfers $G_{y d}^{\Delta}$ and $G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u}$ have the highest gain, respectively. In other words, the lower realization of uncertain transfer $G_{y f}^{\Delta}$ will be shifted to a higher gain, and the upper realizations of transfers $G_{y d}^{\Delta}$ and $G_{y w_{\Delta}} \Delta S_{\Delta} G_{z_{\Delta} u}$ will be shifted to a lower gain. This required model for FDI is thus different compared to model fitting for feedback controller design as it is important to have a good model quality around the bandwidth.
+
+\section*{D. Closed-loop FDI for Uncertain Systems}
+Consider the closed loop as in Figure 5, where the control input is given by $u=K(r-y)$. For the uncertain case, the transfer function matrices inside generalized plant $G$ are perturbed, i.e., $\Delta \neq 0$. For the analysis there is no assumption made on the structure of the uncertainty, i.e., $\Delta \in \Delta:\|\Delta\|_{\infty} \leq 1$, where $\Delta$ can be any structure. The generalized plant $G$ for uncertain closed-loop systems is then also described by (21), being the same description as for uncertain open-loop systems.\\
+The difference compared to open loop is that the control input $u$ is now generated by
+
+
+\begin{equation*}
+u=K(r-y), \tag{25}
+\end{equation*}
+
+
+and the uncertainty output $w_{\Delta}$ is again given by
+
+
+\begin{equation*}
+w_{\Delta}=\Delta z_{\Delta} \tag{26}
+\end{equation*}
+
+
+Then, closing the feedback loop by applying a lower LFT results in the closed-loop transfer matrix $M=\mathcal{F}_{l}(G, K)$, where $M$ is partitioned as follows
+
+$$
+z_{\Delta}=\underbrace{\left[\begin{array}{c|ccc}
+M_{z_{\Delta} w_{\Delta}} \mid M_{z_{\Delta} f} & M_{z_{\Delta} d} & M_{z_{\Delta} r}
+\end{array}\right]}_{M}\left[\begin{array}{c}
+w_{\Delta} \\
+\hline f \\
+d \\
+r
+\end{array}\right]
+$$
+
+where
+
+$$
+\begin{aligned}
+& M_{z_{\Delta} w_{\Delta}}=G_{z_{\Delta} w_{\Delta}}-G_{z_{\Delta} u} K S G_{y w_{\Delta}} \\
+& M_{z_{\Delta} f}=G_{z_{\Delta} f}-G_{z_{\Delta} u} K S G_{y f} \\
+& M_{z_{\Delta} d}=G_{z_{\Delta} d}-G_{z_{\Delta} u} K S G_{y d}, \quad \text { and } \\
+& M_{z_{\Delta} r}=G_{z_{\Delta} u} K S
+\end{aligned}
+$$
+
+with $S$ the nominal output sensitivity as defined in Section III-B.
+
+The last step is to close the uncertain loop by applying an upper LFT, the uncertain output $z_{\Delta}$ is then given by
+
+
+\begin{align*}
+z_{\Delta} & =M_{z_{\Delta} w_{\Delta}} \Delta z_{\Delta}+M_{z_{\Delta} f} f+M_{z_{\Delta} d} d+M_{z_{\Delta} r} r \\
+& =\left(I-M_{z_{\Delta} w_{\Delta}} \Delta\right)^{-1}\left(M_{z_{\Delta} f} f+M_{z_{\Delta} d} d+M_{z_{\Delta} r} r\right) \tag{27}
+\end{align*}
+
+
+Substitution of (25) into (21) leads to the closed-loop output $y$ and is given by
+
+
+\begin{align*}
+y & =G_{y w_{\Delta}} w_{\Delta}+G_{y f} f+G_{y d} d+G_{y u} K(r-y) \\
+& =\left[\begin{array}{llll}
+S G_{y w_{\Delta}} & S G_{y f} & S G_{y d} & S G_{y u} K
+\end{array}\right]\left[\begin{array}{c}
+w_{\Delta} \\
+f \\
+d \\
+r
+\end{array}\right] \tag{28}
+\end{align*}
+
+
+Substituting (26) and (27) into (28) gives
+
+$$
+\begin{aligned}
+y= & S G_{y w_{\Delta}} \Delta z_{\Delta}+S G_{y f} f+S G_{y d} d+S G_{u} K r \\
+y= & S(\underbrace{G_{y w_{\Delta}} \Delta\left(I-M_{z_{\Delta} w_{\Delta}} \Delta\right)^{-1} M_{z_{\Delta} f}}_{T_{y f}^{\Delta}}+G_{y f}) f+ \\
+& S(\underbrace{G_{y w_{\Delta}} \Delta\left(I-M_{z_{\Delta} w_{\Delta}} \Delta\right)^{-1} M_{z_{\Delta} d}}_{T_{y d}^{\Delta}}+G_{y d}) d+ \\
+& S(\underbrace{G_{y w_{\Delta}} \Delta\left(I-M_{z_{\Delta} w_{\Delta}} \Delta\right)^{-1} M_{z_{\Delta} r}}_{T_{y r}^{\Delta}}+G_{y u} K) r
+\end{aligned}
+$$
+
+This expression above for the closed-loop uncertain output $y$ can then be used to obtain the residual $\epsilon$, and is expressed as follows
+
+
+\begin{align*}
+\epsilon= & Q_{\mathrm{cl}}\left(\tilde{M}_{u} y-\tilde{N}_{u} K(r-y)\right) \\
+= & Q_{\mathrm{cl}}\left(\left(\tilde{M}_{u}+\tilde{N}_{u} K\right) y-\tilde{N}_{u} K r\right) \\
+= & Q_{\mathrm{cl}} \tilde{M}_{u}\left(S^{-1} y-G_{u} K r\right) \\
+= & Q_{\mathrm{cl}} \tilde{M}_{u}\left(S ^ { - 1 } \left(S\left(T_{y f}^{\Delta}+G_{y f}\right) f+S\left(T_{y d}^{\Delta}+G_{y d}\right) d+\right.\right. \\
+& \left.\left.\quad S\left(T_{y r}^{\Delta}+G_{y u} K\right) r\right)-G_{u} K r\right) \\
+= & Q_{\mathrm{cl}} \tilde{M}_{u}\left(\left(T_{y f}^{\Delta}+G_{y f}\right) f+\left(T_{y d}^{\Delta}+G_{y d}\right) d+T_{y r}^{\Delta} r\right) \tag{29}
+\end{align*}
+
+
+From which can be concluded that in the uncertain closedloop case the residual is dependent on the reference $r$, the disturbance $d$, the fault $f$, and the uncertainty $\Delta$.\\
+Remark 5. Note that when there is no uncertainty, i.e., $\Delta=0$, the expression for the residual simplifies to
+
+
+\begin{equation*}
+\epsilon=Q_{\mathrm{cl}} \tilde{M}_{u}\left(G_{y d} d+G_{y f} f\right) \tag{30}
+\end{equation*}
+
+
+which is exactly the same for the closed-loop nominal case in (20), hence equal to the open-loop nominal case.
+
+According to (29) it directly follows that, to emphasize the effect of the faults in the residual, the post-filter $Q_{\mathrm{cl}}$ must be chosen such that the magnitude of $Q_{\mathrm{cl}} \tilde{M}_{u}\left(T_{y f}^{\Delta}+G_{y f}\right)$ is high at the frequencies where the faults $f$ are dominant, and that the transfers $Q_{\mathrm{cl}} \tilde{M}_{u}\left(T_{y d}^{\Delta}+G_{y d}\right)$ and $Q_{\mathrm{cl}} \tilde{M}_{u} T_{y r}^{\Delta}$ must be low in the frequency ranges where $d$ and $r$ dominate contributions to the residual. Same as for the open-loop uncertain case the plant uncertainty affects FDI performance making it desirable to have a good model fit. To enhance FDI performance, the fit must be of high quality at the frequencies of $f$ where uncertain transfer $T_{y f}^{\Delta}+G_{y f}$ has the lowest gain, and at the frequencies of $d$ and $r$ where uncertain transfers $T_{y d}^{\Delta}+G_{y d}$ and $T_{y r}^{\Delta}$ have the highest gain, respectively.\\
+When comparing the residual expressions for uncertain closedloop systems (29) with the expression for uncertain openloop systems (23) it becomes evident that closed-loop FDI problems require their own $Q$-filter synthesis. This is because the residual signals depend in a different manner on the exogenous input signals and hence when implementing an open-loop synthesized $Q$-filter in a closed-loop setting, the disturbances and/or uncertainties will possibly leak extensively into the residual. An illustrative numerical example of this claim is given in Section III-E.
+
+\section*{E. Motivating Example}
+This section provides a motivating example in the form of a numerical simulation for the claim that is made at the end of Section III-D. It is stated that when a post-filter is synthesized based on an open-loop system, it will not guarantee that this same filter fulfills the requirements when implemented in closed loop, as this would be the case for nominal systems. If this is the case, it means that the disturbances and/or uncertainties have a higher contribution to the residual than allowed, hence leading to worse fault detectability.
+
+In order to construct the example，a problem needs to be for－ mulated for for the design of a robust fault detection filter for uncertain systems operating in closed loop．The formulation is based on the work of［19］where an attempt has been made to solve this problem for uncertain open－loop systems．In order to formulate the problem，the dynamic relations for uncertain closed－loop systems as derived in Section III－D which belong to Figure 5 have been used．In the work of［19］，the problem is formulated for three performance indices，namely， $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ ， $\mathcal{H}_{2} / \mathcal{H}_{\infty}$ and $\mathcal{H}_{2} / \mathcal{H}_{\infty}$ for which it turned out that one solution solved all three problems．For that reason，the problem that is formulated below only considers the $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ index，which is a subclass of the $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ index given in Section II－C\\
+Problem 1 （ $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ ）．Let an uncertain system be described by equation（21）and let $\gamma>0$ be a given disturbance rejection level．Find a stable transfer matrix $Q_{\mathrm{cl}} \in \mathcal{R} \mathcal{H}_{\infty}$ in（29）such that $\left\|Q_{\mathrm{cl}} \tilde{M}_{u}\left[\begin{array}{ll}T_{y r}^{\Delta} & T_{y d}^{\Delta}+G_{y d}\end{array}\right]\right\|_{\infty} \leq \gamma$ and $\left\|Q_{\mathrm{cl}} \tilde{M}_{u}\left(T_{y f}^{\Delta}+G_{y f}\right)\right\|_{-}$is maximized，i．e．，
+
+$$
+\begin{aligned}
+& \max _{Q_{\mathrm{cl}} \in \mathcal{R} \mathcal{H}_{\infty}} \\
+& \left\{\left\|Q_{\mathrm{cl}} \tilde{M}_{u}\left(T_{y f}^{\Delta}+G_{y f}\right)\right\|_{-}:\left\|Q_{\mathrm{cl}} \tilde{M}_{u}\left[T_{y r}^{\Delta} \quad T_{y d}^{\Delta}+G_{y d}\right]\right\|_{\infty} \leq \gamma\right\}
+\end{aligned}
+$$
+
+The numerical example is based on a simple SISO system including parameter uncertainty，which is the same example as used in［19］．Let the output of this system be described by
+
+
+\begin{equation*}
+y=\frac{1}{s+2+\alpha} u+\frac{s+1}{s+2+\alpha} d+\frac{15}{s+2+\alpha} f \tag{31}
+\end{equation*}
+
+
+where $s$ the continuous time Laplace operator and $\alpha \in [-1,1]$ the uncertain parameter．The open－loop $Q$－filter is then synthesized following the procedure in［19］and is therefore not shown here．\\
+Remark 6．It was noted that the solution presented to the example in［19］seems to exceed the prescribed specifica－ tions，leading to an incorrect filter．For that reason，the filter $Q_{\mathrm{ol}}(s)=\frac{s^{2}+3 s+2}{s^{2}+3.078 s+2.236}$ where $\beta=1$ is used．
+
+To test this filter in closed loop，the control input $u= K(r-y)$ is implemented in（31）where the controller $K$ is an integrator with a cut－off frequency at 0.1 Hz ，i．e．， $K=\frac{s+2 \pi * 0.1}{s}$ ．This controller ensures that the system is robustly stable．For this closed－loop system，a post－filter $Q_{\mathrm{cl}}$ has been synthesized based on the formulated problem in Section III－E The procedure will be explained in Section IV－B The found solution $Q_{\mathrm{cl}}=\frac{s^{3}+4 s^{2}+4.628 s+1.257}{s^{3}+4.105 s^{2}+4.054 s+0.8886}$ optimally solves this closed－loop uncertain FDI problem．To illustrate this，Figures 6 a and 6 b show the relations between inputs $\left[\begin{array}{l}r \\ d\end{array}\right]$ and residual $\epsilon$ for both cases when the optimal closed－ loop filter $Q_{\mathrm{cl}}$ is inserted to the closed loop in（一）and when the open－loop filter $Q_{\mathrm{ol}}$ is inserted to the closed loop in（一）．Figure 6 c displays the maximum singular values， i．e．， $\bar{\sigma}\left(Q \tilde{M}_{u}\left[\begin{array}{ll}T_{y r}^{\Delta} & T_{y d}^{\Delta}+G_{y d}\end{array}\right]\right)$ with $Q=Q_{\mathrm{cl}}$ in（一） and $Q=Q_{\mathrm{ol}}$ in（一）．Clearly，the open－loop filter $Q_{\mathrm{ol}}$ does not satisfy the bound $\gamma=1$ ，hence，using the open－ loop synthesized result in a closed－loop setting results in violated specifications．To this end，closed－loop FDI synthesis is required for uncertain systems operating in closed loop．
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-14}
+\captionsetup{labelformat=empty}
+\caption{Fig．6．Open－loop（－）versus closed－loop（－）$Q$－filter synthesis．Two optimal $Q$－filters have been designed based on system 31 in open loop and in closed loop resulting in \$Q\_\{\textbackslash mathrm\{ol}\}\$ and $Q_{\mathrm{cl}}$ ，respectively．Both filters are then applied to system（31）operating in closed loop．The resulting closed－loop transfers are shown in（a）and（b）and a worst case singular value plot is given in（c）．The design constraint $\gamma=1$ is shown in（－－）．\}\end{center}
+\end{figure}
+
+\section*{IV. Optimal Robust Fault Detection Solution}
+In this section the fault detection filter design problem is formulated for uncertain closed-loop systems. The problem is a multi-objective optimization problem that is based on the maximization of a performance index. The performance index is inspired by the work of [5], which was introduced in Section II-C for nominal open-loop systems. After this, the optimal solution to the formulated problem is provided. It will be shown that the solution holds regarding an assumption that can easily be validated for systems up to one output, for which guidelines will be provided to obtain a solution. For larger systems, an alternative possibly conservative suggestion is made.
+
+\section*{A. $\mathcal{H}_{i} / \mathcal{H}_{\infty}$-Problem Formulation}
+Consider a linear time invariant system with possible model uncertainties, disturbances and additive faults in the frequency domain
+
+
+\begin{equation*}
+y=G_{u}(s, \Delta) u+G_{d} d+G_{f} f \tag{32}
+\end{equation*}
+
+
+where $G_{u}(s, \Delta), G_{d}$ and $G_{f}$ are $n_{y} \times n_{u}, n_{y} \times n_{d}$ and $n_{y} \times n_{f}$ transfer function matrices, respectively. The model uncertainties are denoted by $\Delta \in \Delta$ which can be parametric or dynamic uncertainties with suitable dimensions. Note that the notation used in Section III can be rewritten to the notation used in this section. The control input $u$ is generated by the controller $K$ through negative feedback, i.e., $u=K(r-y)$ with $r$ being the reference signal, as can be seen in Figure 7 Substitution of this relation into (32) gives the dynamic closed-loop input-output relation
+
+
+\begin{align*}
+y & =G_{u}(s, \Delta) K(r-y)+G_{d} d+G_{f} f \\
+& =S_{\Delta}\left(G_{u}(s, \Delta) K r+G_{d} d+G_{f} f\right) \tag{33}
+\end{align*}
+
+
+where $S_{\Delta}=\left(I+G_{u}(s, \Delta) K\right)^{-1}$ the uncertain sensitivity.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-15}
+\captionsetup{labelformat=empty}
+\caption{Fig. 7. General uncertain closed-loop configuration.}
+\end{center}
+\end{figure}
+
+It has been shown in (8) in Theorem 2 that all residual vectors $\epsilon$ for fault detection can be parameterized in the following general form
+
+\[
+\epsilon=R\left[\begin{array}{ll}
+\tilde{M}_{u} y & -\tilde{N}_{u} u \tag{34}
+\end{array}\right]
+\]
+
+where $R \in \mathcal{R} \mathcal{H}_{\infty}^{n_{y} \times n_{y}}$ is a stable post filter of the pre-residual $\tilde{\epsilon}$, and the matrices $\tilde{M}_{u}, \tilde{N}_{u} \in \mathcal{R} \mathcal{H}_{\infty}$ are obtained by applying a left coprime factorization of the nominal plant $G_{u}(s, 0)$, i.e., $G_{u}(s, 0)=\tilde{M}_{u}^{-1} \tilde{N}_{u}$.
+
+Let the uncertain part of the plant be defined as
+
+
+\begin{equation*}
+\tilde{G}_{u}(s, \Delta):=G_{u}(s, \Delta)-G_{u}(s, 0) \tag{35}
+\end{equation*}
+
+
+and substitute (33) and (35) into (34), using that $u=K(r- y$, results in the residual expression for uncertain closed-loop systems
+
+
+\begin{align*}
+& \epsilon=R \tilde{M}_{u}\{\underbrace{\tilde{G}_{u}(s, \Delta) K\left(I-S_{\Delta} G_{u}(s, \Delta) K\right)}_{T_{\tilde{\epsilon} r}^{\Delta}} r+ \\
+& (G_{d}-\underbrace{\tilde{G}_{u}(s, \Delta) K S_{\Delta} G_{d}}_{T_{\tilde{\epsilon} d}^{\Delta}}) d+ \\
+& (G_{f}-\underbrace{\tilde{G}_{u}(s, \Delta) K S_{\Delta} G_{f}}_{T_{\tilde{\epsilon} f}^{\Delta}}) f\} \tag{36}
+\end{align*}
+
+
+To enhance readability, let $T_{\tilde{\epsilon} r}(s, \underset{\sim}{\Delta})=\tilde{M}_{u} T_{\tilde{\epsilon} r}^{\Delta}, T_{\tilde{\epsilon} d}(s, \Delta)= \tilde{M}_{u}\left(G_{d}-T_{\tilde{\epsilon} d}^{\Delta}\right)$ and $T_{\tilde{\epsilon} f}(s, \Delta)=\tilde{M}_{u}\left(G_{f}-T_{\tilde{\epsilon} f}^{\Delta}\right)$. Substitution into the residual expression (34) leads to
+
+\[
+\epsilon=R \underbrace{\left[\begin{array}{cc}
+T_{\tilde{\epsilon} r}(s, \Delta) & T_{\tilde{\epsilon} d}(s, \Delta)
+\end{array}\right]}_{\tilde{G}_{d}(s, \Delta)}\left[\begin{array}{c}
+r  \tag{37}\\
+d
+\end{array}\right]+R T_{\tilde{\epsilon} f}(s, \Delta) f .
+\]
+
+Remark 7. Note that when there is no uncertainty, i.e., $\Delta=0$ and thus $T_{\tilde{\epsilon} r}^{\Delta}=0, T_{\tilde{\epsilon} d}^{\Delta}=0$, and $T_{\tilde{\epsilon} f}^{\Delta}=0$, the expression for the residual (37) simplifies to the same expression as the closed (and open)-loop nominal case
+
+$$
+\epsilon=R \tilde{M}_{u}\left(G_{d} d+G_{f} f\right)
+$$
+
+According to (37) it is desirable to make $R \tilde{G}_{d}(s, \Delta)$ as small as possible to decouple the effects of $r$ and $d$ on the residual. On the other hand, it is desirable to make $R T_{\tilde{\epsilon} f}(s, \Delta)$ as large as possible to be as sensitive to faults as possible. Clearly, the same trade-off between disturbance suppression and fault sensitivity is present in (37) compared to open-loop expression for nominal systems in (10). For this reason, the familiar $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index that was introduced in Section II-C will also be used here to formulate the problem. This performance index is a fair evaluation of the fault sensitivity and robustness to disturbances. Recall that the singular values of a matrix give a measurement of the 'gain' in each direction of the subspace spanned by the matrix. In this context, all singular values $\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right), \omega \in[0, \infty]$, together build a natural measurement of the fault sensitivity. They cover\\
+all directions of the subspace spanned by $R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)$. In comparison, $\left\|R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right\|_{-}$or $\left\|R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right\|_{\infty}$ are only extreme points in this subspace. It holds $\forall \omega \in[0, \infty]$,
+
+
+\begin{align*}
+\left\|R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right\|_{-} \leq \sigma_{i} & \left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right) \\
+& \leq\left\|R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right\|_{\infty} \tag{38}
+\end{align*}
+
+
+Hence, solving the problem for the $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ index automatically solves the problem for the $\mathcal{H}_{-} / \mathcal{H}_{\infty}$ and $\mathcal{H}_{\infty} / \mathcal{H}_{\infty}$ indices. The $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index is then defined as follows
+
+
+\begin{equation*}
+J_{i, \omega, \Delta}(R)=\frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty}} \tag{39}
+\end{equation*}
+
+
+where $\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right), i=1, \ldots, n_{f}$, the singular values of $R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)$.\\
+Before the residual generator design problem is formulated, let $\gamma>0$ be a maximum uncertainty/disturbance rejection level which becomes useful when evaluating residuals. That is, when the magnitude of the input signals $r$ and $d$ are known, an upper bound on how these signals affect the residual can be retrieved. This bound forms a clear threshold for indicating faults present in the system and can vary over time, depending on the magnitude profile of $r$ and $d$.\\
+The residual generator design can then be formulated as the following problem.\\
+Problem 2 ( $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ ). Let a closed-loop uncertain system be described by (33) and let $\gamma>0$ be a given uncertainty/disturbance rejection level. Find a stable transfer matrix $R(s) \in \mathcal{R} \mathcal{H}_{\infty}^{n_{y} \times n_{y}}$ in (34) such that $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ for all $\Delta \in \boldsymbol{\Delta}$ and that for all $\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right), i= 1, \ldots, n_{f}, \omega \in[0, \infty], \Delta \in \boldsymbol{\Delta}$, performance index $J_{i, \omega, \Delta}(R)$ is maximized, that is,
+
+
+\begin{equation*}
+\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} J_{i, \omega, \Delta}(R)=\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} \frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty}} \tag{40}
+\end{equation*}
+
+
+Remark 8. Note that introducing $\gamma>0$ has no effect on finding the maximum performance index $J_{i, \omega, \Delta}(R)$ in 39 . It serves as a scaling parameter that has no influence on the ratio.
+
+Remark 9. The question may rise why post-filter $R$ has $n_{y}$ outputs. In case of fault detection it is indeed sufficient if $R$ has only one output, i.e., one residual. For fault detection and isolation the best possible performance in terms of isolating faults can be reached when $R$ has $n_{y}$ outputs. If $R$ would have more than $n_{y}$ outputs, then some residuals would be linear combinations of others since $R$ has $n_{y}$ inputs, resulting in no additional information. If $R$ would have less than $n_{y}$ outputs then information is thrown away that was available before the post-filter.
+
+Remark 10. Now, the residual generator design problem is formulated such that the influence of uncertainty/disturbance\\
+inputs is bounded by the scalar parameter $\gamma>0$. However, if one desires to find only the optimal ratio between disturbance suppression and fault sensitivity, i.e., find maximum performance index $J_{i, \omega, \Delta}(R)$, without the infinity norm constraint $\gamma$ on the uncertainty/disturbance transfer, then the design problem can be simplified. Consider the residual dynamics expressed in (36), it has been found that this expression simplifies to
+
+$$
+\epsilon=R \tilde{M}_{u} S^{-1} S_{\Delta}\left(\tilde{G}_{u}(s, \Delta) K S r+G_{d} d+G_{f} f\right)
+$$
+
+where $S=(I+G(s, 0) K)^{-1}$ the nominal sensitivity. Hence, the optimal ratio can be found by only considering TFM [ $\tilde{G}_{u}(s, \Delta) K S$ G $G_{d}$ ] which simplifies the problem, since all inputs $r, d$ and $f$ are filtered by the same expression $\tilde{M}_{u} S^{-1} S_{\Delta}$ which does not influence the optimal ratio. The proof for this derivation can be found in Appendix A
+
+Problem 2 is formulated as the residual generator design problem. Recall that the residual generator design consists of two steps, the FDF design step and the isolation step. This work focuses on the optimal design of a FDF, as this forms the base of the FDI system. The possibility exists to extend this solution with an isolation step to obtain an optimal FDI system. It is expected that the solution given in the next section can be combined with the already existing FDI toolbox for nominal systems [23], to obtain a complete FDI toolbox for uncertain systems operating in open loop or closed loop. However, this is out of scope for this work. For that reason, the next section provides the solution to Problem 2 that will result in an optimal fault detection filter.
+
+\section*{B. Fault Detection Filter Design}
+This section provides the solution to multi-objective optimization problem (40). In the work of [5] a general solution has been found that optimally solves (40) without uncertainty, i.e., $\Delta=0$, and is denoted by the unified solution, which is explained in Section II-C It turns out that the same solution optimally solves problem (40) with an extra assumption required. The solution is as follows.\\
+Recall that the transfer from disturbance to the pre-residual in nominal case was given by $d \rightarrow \tilde{\epsilon}: \tilde{G}_{d}(s)$ (see Section II-C), which is a certain (that is, not uncertain) transfer function matrix. Now, for uncertain closed-loop systems, the preresidual not only depends on the disturbances $d$ but might also depend on the reference $r$ due to the uncertainty $\Delta$, as shown in (37). This creates the so called extended disturbance matrix $\tilde{G}_{d}(s, \Delta)$, that is now an uncertain transfer function matrix, possibly containing sets of transfer functions on its entries. In order to become robust to all influences of exogenous inputs $\tilde{d}=\left[\begin{array}{ll}r & d\end{array}\right]^{T}$ it is required to find a certain (that is, not uncertain) transfer function matrix that can be seen as an upper bound of uncertain TFM $\tilde{G}_{d}(s, \Delta)$. Let $\bar{G}_{d}(s) \in \mathcal{R} \mathcal{H}_{\infty}$ be the upper bound realization of $\tilde{G}_{d}(s, \Delta)$, i.e.,
+
+
+\begin{equation*}
+\bar{G}_{d}^{n_{y} \times\left(n_{y}+n_{d}\right)}(s)=\left[\bar{T}_{\tilde{\epsilon} r}(s) \quad \bar{T}_{\tilde{\epsilon} d}(s)\right] \tag{41}
+\end{equation*}
+
+
+such that for all $\omega$ and $\Delta$ it holds that
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-17}
+\captionsetup{labelformat=empty}
+\caption{Fig. 8. Illustrative example, let \$A\textbackslash left(\textbackslash omega\_\{i}, \textbackslash Delta\textbackslash right)\$ be a real valued uncertain matrix with 2 rows, i.e., 2 singular values, at a specific frequency $\omega_{i}$. The ellipses spanned by $A\left(\omega_{i}, \Delta\right)$ are plotted for four different realizations of $\Delta$ in (-). The ellipse of the upper bound system $\bar{A}\left(\omega_{i}\right)$, plotted in (-), should tightly capture all ellipses produced by $A\left(\omega_{i}, \Delta\right)$ for all $\Delta$, in order to obtain an optimal result.\}\end{center}
+\end{figure}
+
+
+\begin{equation*}
+\tilde{G}_{d}(j \omega, \Delta) \tilde{G}_{d}^{H}(j \omega, \Delta) \leq \bar{G}_{d}(j \omega) \bar{G}_{d}^{H}(j \omega) . \tag{42}
+\end{equation*}
+
+
+The condition in (42) can intuitively be interpreted with the use of an illustrative example, based on a real valued system having 2 outputs. Let an uncertain system be described by a real valued matrix $A^{m \times n}\left(\omega_{i}, \Delta\right)$, with $n \geq m$, for a specific frequency $\omega_{i}$ and real uncertainty $\Delta$. By applying a singular value decomposition, $A=U \Sigma V^{H}$, where the singular values are on the diagonal of $\Sigma$ and the columns of $U$ and $V$ being the real valued left and right singular vectors, respectively. Then, the singular values of the $m \times n$ matrix can be interpreted as the magnitude of the semiaxes of an $m$-dimensional ellipsoid in an $m$-dimensional space, and the left singular vectors $U$ encode the directions of the semiaxes. Figure 8 shows an illustrative example for $m=2$, i.e., a system with 2 outputs and thus 2 singular values, where four different realizations of $A\left(\omega_{i}, \Delta\right)$ are plotted in the form of the corresponding ellipses. The ellipse formed by the upper bound $\bar{A}\left(\omega_{i}\right)$ should capture all ellipses in $A\left(\omega_{i}, \Delta\right)$ in order to satisfy (42). If this ellipse formed by upper bound $\bar{A}\left(\omega_{i}\right)$ does not tightly capture all ellipses formed by $A\left(\omega_{i}, \Delta\right)$, conservatism is introduced in the solution which will be further explained towards the end of the solution. It must be mentioned that the systems in (42) produce complex frequency response matrices, and hence, the singular vectors become complex vectors making it not possible to graphically represent the conditions. For that reason, the example is shown for a real valued matrix to develop intuition.\\
+Then, it follows when pre-multiplying (42) by $R(s) \in \mathcal{R} \mathcal{H}_{\infty}$ that
+
+
+\begin{equation*}
+\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq\left\|R(s) \bar{G}_{d}(s)\right\|_{\infty} \tag{43}
+\end{equation*}
+
+
+Proof. Given (42) it follows that
+
+
+\begin{align*}
+& \left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty}^{2} \\
+= & \sup _{\omega} \bar{\lambda}\left(R(j \omega) \tilde{G}_{d}(j \omega, \Delta) \tilde{G}_{d}^{H}(j \omega, \Delta) R^{H}(j \omega)\right)  \tag{44}\\
+\leq & \sup _{\omega} \bar{\lambda}\left(R(j \omega) \bar{G}_{d}(j \omega) \bar{G}_{d}^{H}(j \omega) R^{H}(j \omega)\right) \\
+= & \left\|R(s) \bar{G}_{d}(s)\right\|_{\infty}^{2}
+\end{align*}
+
+
+i.e.,
+
+$$
+\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq\left\|R(s) \bar{G}_{d}(s)\right\|_{\infty}
+$$
+
+Equation (43) can now be substituted into (39) and leads to
+
+
+\begin{align*}
+& J_{i, \omega, \Delta}(R)= \\
+& \quad \frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty}} \geq \frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \bar{G}_{d}(s)\right\|_{\infty}} \tag{45}
+\end{align*}
+
+
+Remark 11. Note that conservatism can be introduced by the selection of transfer function matrix $\bar{G}_{d}(s)$. When this is chosen so that the ellipsoid formed by $\bar{G}_{d}(s)$ does not tightly capture the ellipsoids of $\tilde{G}_{d}(s, \Delta)$, the performance index $J_{i, \omega, \Delta}(R)$ turns out to be lower than possibly can be achieved.
+
+Lets assume that the tight upper bound exists, i.e., $\bar{G}_{d}(s) \in \tilde{G}_{d}(s, \Delta)$ such that $\sigma_{i}\left(\tilde{G}_{d}(s, \Delta)\right) \leq \sigma_{i}\left(\bar{G}_{d}(s)\right) \forall \omega, \Delta$. This means that for a particular realization of $\tilde{G}_{d}(s, \Delta)$ the singular values are equal, i.e., $\sigma_{i}\left(\tilde{G}_{d}(s, \Delta)\right)=\sigma_{i}\left(\bar{G}_{d}(s)\right)$ and are largest for all $\omega$ and $\Delta$. This can be related to Figure 8 as that there exists a gray ellipse that captures all other ellipses, for all $\omega$ and $\Delta$. Then the $\geq$ sign can be replaced by an $=$ sign in (45) resulting in
+
+
+\begin{align*}
+& J_{i, \omega, \Delta}(R)= \\
+& \quad \frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty}}=\frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \bar{G}_{d}(s)\right\|_{\infty}} \tag{46}
+\end{align*}
+
+
+The concept co-inner-outer factorization (CIOF) can then be applied to transfer function matrix $\bar{G}_{d}(s)$, and can be written as
+
+
+\begin{equation*}
+\bar{G}_{d}(s)=G_{d o}(s) G_{d i}(s) \tag{47}
+\end{equation*}
+
+
+where $G_{d i}(s)$ is the co-inner matrix satisfying $G_{d i}(j \omega) G_{d i}^{T}(-j \omega)=I$ and $\sigma\left(G_{d i}(j \omega)\right)=I$ for all $\omega$, $G_{d o}(s)$ is the co-outer satisfying $G_{d o} \in \mathcal{G} \mathcal{H}_{\infty}$ and thus $G_{d o}(s)^{-1} G_{d o}(s)=I$. Same as the unified solution, set
+
+$$
+R(s)=\gamma Q(s) G_{d o}^{-1}(s)
+$$
+
+where $Q(s) \in \mathcal{R} \mathcal{H}_{\infty}$ an arbitrary stable TFM, and implement into (46) using (47) yields
+
+
+\begin{align*}
+& J_{i, \omega, \Delta}(R)= \\
+& \frac{\sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|R(s) \bar{G}_{d}(s)\right\|_{\infty}}=\frac{\sigma_{i}\left(Q(j \omega) G_{d o}^{-1}(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\left\|Q(s) G_{d i}(s)\right\|_{\infty}} \\
+& =\frac{\sigma_{i}\left(Q(j \omega) G_{d o}^{-1}(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)}{\|Q(s)\|_{\infty}} \\
+& \leq \sigma_{i}\left(G_{d o}^{-1}(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right) \tag{48}
+\end{align*}
+
+
+In this derivation there has been made use of the inner property $G_{d i}(j \omega) G_{d i}^{T}(-j \omega)=I$ so that $\left\|Q(s) G_{d i}(s)\right\|_{\infty}=\|Q(s)\|_{\infty}$ and follows from
+
+$$
+\left\|Q G_{d i}\right\|_{\infty}^{2}=\|Q \underbrace{G_{d i} G_{d i}^{H}}_{I} Q^{H}\|_{\infty}=\|Q\|_{\infty}^{2}
+$$
+
+On the other hand, setting $R_{\text {opt }}(s)=\gamma G_{d o}^{-1}(s)$, i.e., $Q(s)=I$ and substitute into (48) it holds that $\forall \omega, \Delta, \sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)$
+
+
+\begin{equation*}
+J_{i, \omega, \Delta}\left(R_{\mathrm{opt}}\right)=\sigma_{i}\left(G_{d o}^{-1}(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right) \tag{49}
+\end{equation*}
+
+
+Hence, the $\leq$ sign in (48) can be replaced for an $=$ sign, resulting in the optimal fault detection solution for uncertain closed-loop systems.\\
+Remark 12. The solution $R_{\mathrm{opt}}(s)=\gamma G_{d o}^{-1}(s)$ optimally solves problem (40) if and only if the $\geq$ sign in (45) can be replaced by an $=$ sign. This is the case when the $\leq$ sign in (42) is replaced by an $=$ sign, i.e., when $\bar{G}_{d}(s)$ tightly upper bounds $\tilde{G}_{d}(s, \Delta)$ for all $\omega$ and $\Delta$.
+
+In case that the tight upper bound does not exist, i.e., there is no $\bar{G}_{d}(s) \in \tilde{G}_{d}(s, \Delta)$ such that (42) holds, two additional 'tuning knobs' are introduced to compensate for this undesired situation. These tuning knobs are two stable SISO LTI transfer functions, denoted by $\alpha(s), \beta(s) \geq 1 \in \mathcal{R} \mathcal{H}_{\infty}$ and can directly influence the singular values of the upper bound matrix $\bar{G}_{d}(s)$. Recall the definition for this TFM in (41), then the new definition is given by
+
+
+\begin{equation*}
+\bar{G}_{d}(s)=\left[\alpha(s) \bar{T}_{\tilde{\epsilon}}(s) \quad \beta(s) \bar{T}_{\tilde{\epsilon} d}(s)\right] \tag{50}
+\end{equation*}
+
+
+where $\alpha(s)$ and $\beta(s)$ can be used to locally tweak the singular values of $\bar{G}_{d}(s)$ such that the singular values of $\bar{G}_{d}(s)$ are larger than or equal to the singular values of $\tilde{G}_{d}(s, \Delta)$ for all $\omega$ and all $\Delta$, so that (42) holds. In fact, in the visualization of Figure 8 the tuning knobs are required to obtain the red upper bound $\bar{G}_{d}(s)$ if we would assume that the four gray ellipses are all realizations in $\tilde{G}_{d}(s, \Delta)$. This is because the biggest gray ellipse needs to be extended in $\sigma_{2}$-direction in order to capture all realizations to obtain the upper bound $\bar{G}_{d}(s)$ satisfying (42).\\
+Remark 13. Note that when $\alpha(s), \beta(s)=1$ and (42) is satisfied, the solution $R(s)=\gamma G_{d o}^{-1}(s)$ optimally solves the\\
+fault detection filter design problem in (2). If $\alpha(s)$ and/or $\beta(s)$ are required in order to satisfy (42), the solution will be sub-optimal since no perfect upper bound is found. This results in a conservative post-filter not maximally amplifying the faults into the residual due to conservatism in disturbances suppression.
+
+The complete solution to fault detection filter design problem (2) is provided in Theorem (4).\\
+Theorem 4. Let $\bar{G}_{d}(s)$ be defined as in (50) with $\alpha(s), \beta(s)=$ 1 and be a tight upper bound of $\tilde{G}_{d}(s, \Delta)$, i.e., $\bar{G}_{d}(s) \in \tilde{G}_{d}(s, \Delta)$ such that (42) holds. Provided that the following assumptions are satisfied\\
+( $A_{1}$ ) Let $\bar{G}_{d}=\left(A, B_{d}, C, D_{d}\right)$ be written as a state space with A Hurwitz and ( $A, C$ ) detectable.\\
+$\left(A_{2}\right) D_{d}$ has full row rank.\\
+$\left(A_{3}\right) \bar{G}_{d}$ has no transmission zeros on the imaginary axis.\\
+Then there exists a co-inner-outer factorization of $\bar{G}_{d}(s)= G_{d o}(s) G_{d i}(s)$, so that the optimal post-filter is defined by $R_{\mathrm{opt}}(s)=\gamma G_{d o}^{-1}$ with corresponding state space
+
+\[
+R_{\mathrm{opt}}(s)=\gamma\left[\begin{array}{c|c}
+A+L_{0} C & L_{0}  \tag{51}\\
+\hline R_{d}^{-1 / 2} C & R_{d}^{-1 / 2}
+\end{array}\right] \in \mathcal{R} \mathcal{H}_{\infty}
+\]
+
+where $R_{d}:=D_{d} D_{d}^{T}>0$ and let $Y \geq 0$ be the stabilizing solution to the Riccati equation
+
+$$
+\begin{array}{r}
+\left(A-B_{d} D_{d}^{T} R_{d}^{-1} C\right) Y+Y\left(A-B_{d} D_{d}^{T} R_{d}^{-1} C\right)^{T}- \\
+Y C^{T} R_{d}^{-1} C Y+B_{d}\left(I-D_{d}^{T} R_{d}^{-1} D_{d}\right) B_{d}^{T}=0
+\end{array}
+$$
+
+such that $A-B_{d} D_{d}^{T} R_{d}^{-1} C-Y C^{T} R_{d}^{-1} C$ is stable and
+
+
+\begin{equation*}
+L_{0}:=-\left(B_{d} D_{d}^{T}+Y C^{T}\right)^{T} \tag{52}
+\end{equation*}
+
+
+Then it holds that $\forall \omega, \Delta, \sigma_{i}\left(R(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)$
+
+$$
+\sup _{R(s) \in \mathcal{R} \mathcal{H}_{\infty}} J_{i, \omega, \Delta}\left(R_{\mathrm{opt}}\right)=\sigma_{i}\left(G_{d o}^{-1}(j \omega) T_{\tilde{\epsilon} f}(j \omega, \Delta)\right)
+$$
+
+and the optimal fault detection filter has the following representation
+
+$$
+\epsilon=R_{\text {opt }}\left[\begin{array}{ll}
+\tilde{M}_{u} & -\tilde{N}_{u}
+\end{array}\right]\left[\begin{array}{l}
+y \\
+u
+\end{array}\right],
+$$
+
+where $\tilde{M}_{u}, \tilde{N}_{u} \in \mathcal{R} \mathcal{H}_{\infty}$ can be any $L C F$ of the nominal system $G_{u}(s, 0)$. Hence, the optimal fault detection filter is independent of the choice of observer gain matrix $L$.\\
+Remark 14. The condition in (42) can be difficult to check for systems with more than 1 output. For systems with one output $n_{y}=1$, e.g. MISO systems, a singular value check is sufficient, that is, condition (42) is satisfied if $\sigma_{1}\left(\tilde{G}_{d}(j \omega, \Delta)\right) \leq \sigma_{1}\left(\bar{G}_{d}(j \omega)\right)$ for all $\omega$ and $\Delta$.\\
+For systems with more than 1 output, condition (42) cannot be verified by only looking directly at the singular values of $\bar{G}_{d}(s)$ compared to $\tilde{G}_{d}(s, \Delta)$. This is because this would\\
+not take the rotation of the ellipses in Figure 8 into account, which can lead to undesired results not satisfying $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ for all $\Delta$. This could be solved by an automatic check based on an algorithm that checks if all realizations $\tilde{G}_{d}(s, \Delta)$ are captured by the upper bound realization $\bar{G}_{d}(s)$ per frequency so that (42) is satisfied. On top of that, it should provide guidelines on how to reshape the singular values of $\bar{G}_{d}(s)$ per frequency so that this can be used to shape $\alpha(s)$ and $\beta(s)$ and ultimately ensure that (42) is satisfied.\\
+For now, a conservative approach that is not limited by the number of outputs $n_{y}$ of a system has been developed, that satisfies the design constraint in Problem (2). The construction of the upper bound realization $\bar{G}_{d}(s)$ is done by only compensating for the maximum singular value of $\tilde{G}_{d}(s, \Delta)$, i.e., $\sigma_{1}\left(\tilde{G}_{d}(s, \Delta)\right)$, resulting in a diagonal post-filter with equal singular values. This concept can be related to Figure 8. where the upper bound in (-) is a circle instead of an ellipse that captures all gray ellipses. This approach is worked out in detail in Section VI-B, where it has been put into practice on a mechatronic system with 4 outputs.
+
+Remark 15. It may look that in $\left(A_{1}\right) A$ Hurwitz is restrictive but, in fact, this is not the case as system $\bar{G}_{d}$ is always stable since this transfer matrix describes the closed-loop transfer between $\left[\begin{array}{l}r \\ d\end{array}\right] \rightarrow \tilde{\epsilon}$.\\
+Remark 16. Assumption ( $A_{3}$ ) is in the context of high precision motion systems not seen as a restrictive assumption, since these systems always contain a specific amount of damping, moving the zeros away from the imaginary axis. However, if one desires to remove assumption ( $A_{3}$ ), so that the problem can be solved if $\bar{G}_{d}$ has zeros on the imaginary axis, the reader is referred to [24].
+
+\section*{V. Simulation Case Study}
+In this section, the optimal robust FDF design approach is validated to a real world mechatronic system. The system under consideration is called the Free Floating Reticle stage which will first be introduced. Second, a robust controller is synthesized based on the one-step robust control design approach that was opted in [25]. The working principle of this approach will be explained in this work followed by the resulting robustly stabilizing feedback controller. Third, the optimal fault detection filter is designed based on the theoretical approach proposed in Section IV-B. It has been shown that the obtained post-filter is close to optimal in detecting faults and its performance is evaluated in time domain.
+
+The Free Floating Reticle stage (FFR) is a light weight over-actuated and over-sensed test-rig of a reticle stage (RS) used in lithographic systems. The reticle in the RS contains patterns that will be "printed" onto a light sensitive layer on a silicon disc, called the wafer. To enable accurate "printing", the RS needs to follow a setpoint extremely accurately in 6 degrees of freedom (DOFs). Since the FFR design is focused to be lightweight, structures become more flexible causing the flexible behaviour occurring at lower frequencies. This has impact on the design of the controller and requires new control approaches. Next generation motion systems tend towards over-actuation and over-sensing to actively control the flexible behaviour in the system. The aim is to control the FFR in 6 motion DOFs, i.e., 3 translations and 3 rotations. The setup is equipped by 14 force actuators of which 8 actuators operate in vertical direction making it possible to control the flexible behaviour of the system. The system is equipped with an active vibration isolation system that isolates the metrology frame from environmental disturbances. The metrology frame contains 14 sensors that measure the position of the reticle stage with nanometer accuracy of which 8 capacitive sensors measure the vertical position. For motion control, the vertical directions are the most challenging due to the limited out-ofplane stiffness of the reticle stage. For this reason, the focus lies on the vertical direction of the FFR to synthesize both the feedback controller and fault detection filter. In particular, only the motion DOF and first flexible mode are considered in the problem, which are obtained using decoupling matrices to go from an 8 -input 8 -output system towards a 2 -input 2 -output decoupled system.\\
+First, the dynamics of the FFR stage will be captured in an uncertain parametric model. Second, this will be used to synthesize a robust controller based on the one-step approach using $\mathcal{H}_{\infty}$ synthesis as was done in [25]. Last, the robust fault detection filter is synthesized based on the method described in Section IV-B, and will be checked on performance by a time domain simulation. The control scheme that is used for both controller and FDF synthesis is shown in Figure 9.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-20}
+\captionsetup{labelformat=empty}
+\caption{Fig. 9. Control configuration that is used to synthesize both the robustly stabilizing feedback controller and optimal fault detection filter for the FFR.}
+\end{center}
+\end{figure}
+
+\section*{A. System Identification}
+As was mentioned previously, the FFR is an overactuated and oversensed mechatronic system allowing to control the flexible mode behaviour in vertical direction. The system is decoupled such that the system under consideration describes low-frequent rigid-body mode behaviour, denoted by the motion DOF, and first flexible mode behaviour in vertical direction. This decoupling has been done by using modal decoupling techniques where the motion DOF describes the dynamics of all actuator inputs to a centralized point of interest, resulting a non-collocated situation. The decoupled system can then be denoted by a nominal system $G$ having 2 inputs and 2 outputs and is described as
+
+\[
+\left[\begin{array}{c}
+\tilde{y}  \tag{53}\\
+y_{\mathrm{flex}}
+\end{array}\right]=\underbrace{\left[\begin{array}{cc}
+G_{\mathrm{rb}} & G_{12} \\
+G_{21} & G_{\mathrm{flex}}
+\end{array}\right]}_{G}\left[\begin{array}{c}
+u \\
+u_{\mathrm{flex}}
+\end{array}\right]
+\]
+
+where $u, \tilde{y} \in \mathbb{R}$ denote the input and output to the motion DOF and $u_{\text {flex }}, y_{\text {flex }} \in \mathbb{R}$ denote the additional input and output used to actively control the flexible mode.\\
+A system identification experiment has been performed to obtain the frequency response data of the decoupled FFR which can be seen in Figure 10 depicted in (-). A stable parametric model $G$, of order 6, has been fitted through this frequency response data which can also be seen in Figure 10 and will later be used to synthesize the $\mathcal{H}_{\infty}$ feedback controller. The state space realization of $G$ is provided in Appendix B-A To capture measurement errors and mismatch between the frequency response data and nominal model $G$, model uncertainty is included. This has been done by expanding nominal model $G$ by an uncertain channel with input $w_{\Delta}$ and output $z_{\Delta}$ and is used to construct the generalized plant $P$, which is partitioned as follows
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-21(2)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 10. Bode magnitude plot of the FFR. The measured frequency response is depicted in (-) together with the nominal 6th order plant model $G$ in (一) and the uncertain state space model \$G\_\{u}\$ in (-) visualized for 30 different uncertainties $\Delta \in \boldsymbol{\Delta}$.\}\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-21(1)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 11. Disturbance model \$G\_\{d}\$.\}\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-21}
+\captionsetup{labelformat=empty}
+\caption{Fig. 12. Fault model \$G\_\{f}\$.\}\end{center}
+\end{figure}
+
+\[
+\left[\begin{array}{c}
+z_{\Delta}  \tag{54}\\
+\hline \tilde{y} \\
+y_{\text {flex }}
+\end{array}\right]=\underbrace{\left[\begin{array}{c|cc}
+G_{z_{\Delta} w_{\Delta}} & G_{z_{\Delta} u} & G_{z_{\Delta} u_{\text {flex }}} \\
+\hline G_{y w_{\Delta}} & G_{\text {rb }} & G_{12} \\
+G_{y_{\text {flex }} w_{\Delta}} & G_{21} & G_{\text {flex }}
+\end{array}\right]}_{P}\left[\begin{array}{c}
+w_{\Delta} \\
+\hline u \\
+u_{\text {flex }}
+\end{array}\right] .
+\]
+
+Here, the uncertainty channel is described by $w_{\Delta}=\Delta z_{\Delta}$ with the uncertainty being a norm-bounded subset of $\mathcal{H}_{\infty}$
+
+
+\begin{equation*}
+\boldsymbol{\Delta}=\left\{\Delta \in \mathcal{R} \mathcal{H}_{\infty} \mid\|\Delta\|_{\infty} \leq 1\right\} . \tag{55}
+\end{equation*}
+
+
+The uncertain plant is then constructed by applying an upper LFT, i.e., $G_{u}=\mathcal{F}_{u}(P, \Delta)$ which is also visualized in Figure 10. It can be seen that the uncertain model captures all variations in the frequency response data (and more) up to around 400 Hz , which is far beyond the desired bandwidth making model $G_{u}$ a valid model for robust control and FDF synthesis.\\
+Next to the uncertain plant model that is required for feedback controller design, the disturbance model $G_{d}$ and fault model $G_{f}$ as in Figure 9 need to be defined in order to synthesize a robust fault detection filter. At the time of writing there was no\\
+available information about the disturbance and fault models for the FFR, resulting in designing self-defined models to show the working principle of fault detection. The disturbance model is defined as a high-pass simulating the effect of high frequent measurement noise after a frequency of 500 Hz and is present on both sensors. The bode magnitude plot is depicted in Figure 11. Since there is no information about a possible fault model, the frequency spectrum has been taken to be flat with a gain of 1 and can later be used to draw conclusions about performance. The fault model is shown in Figure 12
+
+\section*{B. Robust Controller Synthesis}
+The robust controller synthesis is based on a one-step $\mathcal{H}_{\infty}$ control problem developed in the work of [25]. The reader is referred to Section B-B in Appendix B for the controller synthesis procedure that has been applied to obtain a robustly stabilizing feedback controller. The target bandwidth is 140 Hz , which is obtained by the controller.
+
+\section*{C. Robust Fault Detection Filter Synthesis}
+A case study has been done to the FFR stage to synthesize a robust fault detection filter that is optimal in the sense of amplifying possible occurring faults while rejecting model uncertainties and additional disturbances, using the solution proposed in Section IV-B. Given the uncertain plant $G_{u}$ in Figure 10, disturbance and fault models in Figures 11 and 12 respectively, and robustly stabilizing feedback controller $K$ in Figure 23 in Appendix B-B, the closed-loop transfers from inputs $\left[\begin{array}{lll}r & d & f\end{array}\right] \rightarrow \tilde{\epsilon}$ can be determined. Since system $G$ is modeled stable, the following coprime factors have been used, $\left[\begin{array}{ll}\tilde{M}_{u} & \tilde{N}_{u}\end{array}\right]=\left[\begin{array}{ll}I & G\end{array}\right]$, to obtain the transfers. This leads to the uncertain TFM $\tilde{G}_{d}^{2 \times 4}(s, \Delta)$ having 2 outputs, since $n_{y}=2$ and 4 inputs since $\operatorname{dim} r=n_{y}$ and $n_{d}=2$. In order to find the optimal post-filter $R$ the upper bound transfer $\bar{G}_{d}(s) \in \tilde{G}_{d}(s, \Delta)$ must be found which is done by using the wcgain.m function in Matlab. This function finds the uncertainty values that correspond with the highest gain over all frequencies leading to TFM $\bar{G}_{d}(s)$. To demonstrate the working principle, it is useful to check the singular values of $\tilde{G}_{d}(s, \Delta)$ to validate whether wcgain.m is able to find a TFM $\bar{G}_{d}(s)$ that bounds the singular values from above $\forall \omega, \Delta$. Figure 13 shows all singular values of $\tilde{G}_{d}(s, \Delta)$ for some $\Delta$ in (-) together with the singular values of $\bar{G}_{d}(s)$ in (一). Indeed, the transfer with the worst-case gain (highest gain) is found as can be validated from the plot on the left. However, this specific realization does not bound all singular values $\forall \omega, \Delta$ from above which would lead to higher amplification of the closed-loop transfer $\left[\begin{array}{ll}r & d\end{array}\right] \rightarrow \epsilon$ than the specified bound $\gamma=1$. Therefore, additional tuning weight filters $\alpha(s)$ and $\beta(s)$, as in Figure 14, have been implemented to TFM $\bar{G}_{d}(s)$ to locally lift the singular values such that $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ for all $\Delta$ is satisfied. This has been obtained via an iterative procedure by re-tuning weights $\alpha(s)$ and $\beta(s)$ until the design constraint was satisfied. The lifted singular values of upper bound $\bar{G}_{d}(s)$ after applying weights $\alpha(s)$ and $\beta(s)$ can be seen in Figure 13
+
+This has led to the sub-optimal post-filter $R$ that is depicted in Figure 15.\\
+Remark 17. The result is sub-optimal due to the need for manually tuned weighting filters $\alpha(s)$ and $\beta(s)$ leading to a conservative $\bar{G}_{d}(s)$. If there existed a realization $\bar{G}_{d}(s) \in \tilde{G}_{d}(s, \Delta)$ that satisfied condition (42), the result would be optimal!
+
+Figure 15 also shows the optimal post-filter when no model uncertainty is taken into account. The optimal filter in this case then becomes the inverse of the disturbance model $G_{d}$. This figure again proves the need for robust fault detection since the robust filter deviates from the nominal filter. However, there are similarities when comparing the two looking at the diagonal in Figure 15 When speaking in terms of singular values, the gain at low and high frequencies are equal because the disturbance model dominates contribution compared to the model uncertainty. In the mid frequency range, the shape of the diagonal entries are closely related to the inverse of the dashed singular value plots in Figure 13, that is, the first entry on the diagonal relates with the inverse of $\underline{\sigma}$ and the second entry relates with the inverse of $\bar{\sigma}$.\\
+Implementation of the sub-optimal post-filter $R$ gives the desired result and is shown in Figure 16. All singular values of transfer $T_{\epsilon \tilde{d}}:\left[\begin{array}{ll}r & d\end{array}\right] \rightarrow \epsilon$ are mapped below the specified bound $\gamma=1$ after applying sub-optimal post-filter $R$ satisfying the constraint opted in Problem 2 in Section IV-B Hence,
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-22}
+\captionsetup{labelformat=empty}
+\caption{Fig. 13. Singular value plots of uncertain transfer function matrix \$\textbackslash tilde\{G}\_\{d\}(s, \textbackslash Delta)\$ in (-) together with the singular values of upper bound $\bar{G}_{\underline{d}}(s)$ in (-), and the upper bound after applying weights $\alpha(s)$ and $\beta(s)$ to $\bar{G}_{d}(s)$ in (--).\}\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-22(3)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 14. Bode magnitude plots of the manually tuned filters $\alpha(s)$ (left) and $\beta(s)$ (right).}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-22(1)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 15. Bode magnitude plot of the sub-optimal $R$-filter in (-) together with the optimal post-filter if no model uncertainty is present in (-).}
+\end{center}
+\end{figure}
+
+this solution leads to a sub-optimal amplification of transfer $T_{\epsilon f}: f \rightarrow \epsilon$ and the result is shown in the right plot of Figure 16
+
+Remark 18. It must be kept in mind that transfer $T_{\epsilon f}$ is dependent on the disturbance, fault and uncertain plant models, as was chosen to be the transfers of Figures 11,12 and 10 . respectively. Therefore, the conclusions that will be drawn next only hold for this specific case study.
+
+If it is assumed that the magnitude of input signals $r, d$ and $f$ are equal, the following conclusion can be made based on the right plot of Figure 16. This shows that for the FFR stage it is only possible to detect faults up to 345 Hz , the cross-over frequency of transfer $T_{\epsilon f}$, which is far beyond
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-22(2)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 16. Singular values of transfer \$T\_\{\textbackslash epsilon \textbackslash tilde\{d}\}:\textbackslash left[\[
+\begin{array}{ll}r & d\end{array}
+\]\textbackslash right] \textbackslash rightarrow \textbackslash epsilon\$ in (一) together with bound $\gamma=1$ in (--) (left) and the singular values of transfer $T_{\epsilon f}: f \rightarrow \epsilon$ (right) for 50 different uncertainties $\Delta \in \boldsymbol{\Delta}$. On top of that, the singular values of the maximum achievable transfer $T_{\epsilon f}$ is plotted in (-) when the optimal post-filter is used in the case of no model uncertainty. Hence, performance degradation due to model uncertainty is minor.\}\end{center}
+\end{figure}
+
+the obtained bandwidth of 140 Hz . This is because after this frequency the transfer goes below 0 dB leading to the fact that it is not possible to distinguish the fault from the residuals. Faults containing frequencies before the bandwidth will approximately be amplified by a factor 3 ( 9.5 dB ), while the reference and disturbances are suppressed. The singular values of transfer $T_{\epsilon f}$ when taking no model uncertainty into account, i.e., when using optimal post-filter as in Figure 15, is also shown in the right plot of Figure 16 It can be seen that the fault detection performance decrease, due to model uncertainty, is minor compared to the maximum possible amplification. Moreover, it is possible that faults can be more amplified due to model uncertainty as is the case for the low and high frequencies.
+
+A time domain simulation has been performed to demonstrate the fault detection process with the same models that were used to synthesize sub-optimal post-filter $R$ from Figure 15 For this, the disturbance inputs are modeled as two independent white noise signals varying between $[-0.1,0.1]$ and are constantly applied to the system. The reference $r$ is a block-signal with an amplitude equal to 1 , resulting in a signal-to-noise ratio of 23.6 dB , and has a frequency $f_{r}=50$ Hz which is applied to the motion DOF only after $T=0.05$ s. A fault is added to the system after $T=0.1 \mathrm{~s}$ having an amplitude of 1 and frequency $f_{f}=\frac{f_{r}}{4}=12.5 \mathrm{~Hz}$. The resulting residual signals $\epsilon_{1}$ and $\epsilon_{2}$ for different values of uncertainty $\Delta \in \Delta$ are shown in Figure 17 together with the inputs $r$ and $f$. Given the amplitudes of the reference and disturbance inputs it is ensured that $\|\tilde{d}\|_{2} \leq 1$, knowing that when no fault is present in the system, the amplitudes of the residuals remain below $\gamma=1$, hence remain bounded in $[-1,1]$ as can be seen in Figure 17 . This figure shows that it is now possible to set bounds on the time domain residual plots if the magnitudes of reference and disturbances are known.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-23}
+\captionsetup{labelformat=empty}
+\caption{Fig. 17. Time response of both residual signals \$\textbackslash epsilon\_\{1}\$ and $\epsilon_{2}$ in (一) for 30 different uncertainties $\Delta \in \boldsymbol{\Delta}$ together with the reference input $r$ in ( - ) and fault input $f$ in ( $\cdots$ ). The $\gamma=1$ bound is plotted in (—). Indeed, the residuals exceed the user-defined $\gamma$-bounds when a fault is present in the system.\}\end{center}
+\end{figure}
+
+This leads to a desired situation where it is clearly visible when there is a fault present in the system. For example, when looking at Figure 17, the signals before the fault is added to the system at $T=0.1 \mathrm{~s}$ all remain in the predefined bound $[-1,1]$. After the fault is present, the amplitudes of the residuals exceed the predefined bound, hence knowing that a fault is present. It may look as a problem that the amplitude of $\epsilon_{1}$ is not larger than 1 for all uncertainties $\Delta$ when the fault is present, however, this is simply not a problem since the amplitude of $\epsilon_{2}$ clearly exceeds the bound. Moreover, for fault detection, it is allowed to take a linear combination of the residuals.
+
+\section*{D. Discussion}
+This discussion section is to provide an overview of the major problems encountered during synthesis of the result. The points are collected in the list below.
+
+\begin{itemize}
+  \item A minimal order model of the plant $G$ is highly desired to prevent high order transfer functions as input to the Riccati equation, that would possibly lead to numerical instability. It has been seen that if $G$ is non-minimal, the resulting closed-loop transfers contain unstable RHP poles very close to the imaginary axis that cause problems in finding the worst case gain transfer. Besides this, for motion systems, the use of modal models of the plant is recommended to obtain minimal order models and to be able to model a system up to a mode one desires.
+  \item The system has been modeled as a stable system instead of using pure integrators, as can be seen in Appendix B-A. This has been done to prevent numerical instabilities in the very low frequency range. If the true system contains pure integrators, a mismatch between estimated model and true system occurs below the integrator cutoff frequency of $1.6 \mathrm{e}-3 \mathrm{~Hz}$. This mismatch increases low frequency model uncertainty and translates in a different closed-loop transfer from $\left[\begin{array}{ll}r & d\end{array}\right] \rightarrow \epsilon$ with the possibility that the $\gamma$-bound is not satisfied in the low frequency range only. If input signals $r$ and/or $d$ contain very low frequency components, this mismatch could cause the residual signals drift outside the $\gamma$-bounds over very long time. The most simple way to overcome this effect is to adapt shaping weights $\alpha(s)$ and/or $\beta(s)$ in the very low frequency range by increasing gain so that the gain of the post-filter decreases, and hence, discarding this unwanted effect.\\
+It must be mentioned that the plot in Figure 17 is made using the unstable system $G$, i.e., with pure integrators and not the model with shifted integrators that was used for the post-filter synthesis.
+  \item The uncertain plant $G_{u}$ should include more uncertainty before 10 Hz , since the measurement of the plant is reliable after 10 Hz , if the synthesized filter would have to be implemented on the real application.
+\end{itemize}
+
+\section*{VI. Experimental Case Study}
+In this section, an experimental validation of the obtained solution to the FDF design problem has been performed. A robust fault detection filter has been designed such that it is robust to model uncertainties and disturbances. The experiment has been performed on a MIMO prototype wafer stage, named the over-actuated test-rig (OAT). First, background information is provided about the mechatronic system. This is followed by an overview of the dynamic systems that are required to obtain a fault detection filter. Thereafter, the conservative robust fault detection filter synthesis procedure is shown followed by the obtained post-filter. Last, the experiment that has been performed will be explained and the resulting residuals are plotted. It is shown that, indeed, the design constraints are satisfied and that guarantees can be made about the time domain responses of the residuals.
+
+The wafer stage (WS) is used in lithographic systems and consists out of two levels, namely, the long-stroke and the short-stroke. The short-stroke in the WS contains the silicon disc, called the wafer, that is exposed to light to "print" a specific pattern. To enable accurate "printing", the short-stroke of the WS needs to follow a setpoint extremely accurately in 6 degrees of freedom. Since lightweight structures allow higher accelerations, and therefore, faster movements, it can be beneficial to use lightweight, and therefore more flexible, structures and compensate the flexible dynamics with overactuation. To investigate the behaviour of the lightweight replication of a short-stroke, present in the WS, the overactuated test-rig is designed. The over-actuated test-rig is a lightweight over-actuated and over-sensed test-rig of the shortstroke of a wafer stage. The OAT consists out of 17 actuators, 2 in both $x$ and $y$ direction and 13 in the vertical $z$-direction,
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-24}
+\captionsetup{labelformat=empty}
+\caption{Fig. 18. Schematic top view of the OAT including the actuator locations denoted by \$u\_\{1}, u\_\{2\}, u\_\{3\}, u\_\{4\}\$ and sensor locations $y_{1}, y_{2}, y_{3}, y_{4}$ that are used to construct the $4 \times 4$ plant model. Next to this, the input locations of the faults $f_{1}$ and $f_{2}$ are indicated as well.\}\end{center}
+\end{figure}
+
+and has 7 sensors, 2 in $x$-direction, 1 in $y$-direction, and 4 in $z$-direction. For motion control, the vertical directions are the most challenging due to the limited out-of-plane stiffness. For this reason, only the vertical direction is considered in this case study, assuming that the other directions are controlled up to an acceptable extend. In Figure 18 a schematic layout is provided of 5 actuator and 4 sensor positions in $z$-direction present in the OAT that are used for this experimental case study. The other actuators in $z$-direction are omitted here, since these are not used in the experiment.
+
+\section*{A. Modelling framework}
+For the synthesis of a robust fault detection filter, an uncertain plant model $G_{u}(\Delta)$, a robustly stabilizing feedback controller $K$, a disturbance model $G_{d}$ and fault model $G_{f}$ are required.\\
+First, for an uncertain plant model $G_{u}$ it is important that this model set captures the possible dynamic behaviour of the true system under consideration. This is important because this uncertainty directly influences the shape of the post-filter $R$, that is going to be designed to compensate for the effect of uncertainty in the residuals. If the uncertain model set $G_{u}$ is chosen inappropriately, still no guarantees can be made if the residual is triggered by a fault or due to the effect of model mismatch and disturbances.\\
+The system that is considered describes the transfers from inputs $\left[\begin{array}{llll}u_{1} & u_{2} & u_{3} & u_{4}\end{array}\right]^{T}$ to outputs $\left[\begin{array}{llll}y_{1} & y_{2} & y_{3} & y_{4}\end{array}\right]^{T}$, where the actuators and sensors are located as in Figure 18 A multisine identification experiment has been performed to obtain an estimate of the mean plant description together with the $95 \%$ confidence intervals. This frequency response data has subsequently been used to obtain a parametric model representation of order 20 of the nominal plant, denoted by $G$. Both the frequency response data and the parametric model have been provided by other research, so no further context is given about that in this work. The uncertain plant $G_{u}$ is constructed using additive uncertainty by
+
+
+\begin{equation*}
+G_{u}=G+W \Delta, \tag{56}
+\end{equation*}
+
+
+where $W \in \mathcal{R} \mathcal{H}_{\infty}$ a real rational stable transfer function (see (63) in Appendix C-A), and $\Delta$ is an unstructured uncertainty that fits in the open unit ball, i.e.,
+
+$$
+\Delta:=\left\{\Delta \in \mathcal{R} \mathcal{H}_{\infty} \mid\|\Delta\|_{\infty}<1\right\} .
+$$
+
+The resulting uncertain plant $G_{u}$ together with the frequency response data are shown in Figure 26 in Appendix C-A
+
+Second, the feedback controller to control the system in $z$-direction is a SISO rigid body controller $K_{\mathrm{rb}}$ only controlling the first rigid body mode in $z$-direction. This controller was already present on the setup, and is designed based on a rigid body decoupled plant $G_{\text {dec }}=T_{y} G T_{u}$, where $T_{y}=\frac{1}{4}\left[\begin{array}{llll}1 & 1 & 1 & 1\end{array}\right]$, and $T_{u}=T_{y}^{T}$. This defines that $\hat{K}=T_{u} K T_{y}$, which is the full block robustly stable controller used for the FDF synthesis as is shown in Figure 19\\
+Third, the design of the disturbance model is, for the same
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-25}
+\captionsetup{labelformat=empty}
+\caption{Fig．19．Control configuration that is used for the FDF synthesis for the OAT considering a 4 input 4 output system．}
+\end{center}
+\end{figure}
+
+reason as an appropriate uncertainty set $\Delta$ ，as important for a proper post－filter design，since the disturbance model directly influences transfer $\tilde{G}_{d}(s, \Delta)$ ，as was defined in（37）．However， the disturbances present on the OAT are not modeled，but the sensors are of high quality．To that end，only measurement noise is taken into account and it is assumed that each sensor has a standard deviation $\sigma_{\text {std }}=10 \mathrm{~nm}$ ．This results in a diagonal transfer function matrix where the gain is equal to $\sigma_{\text {std }}$ ，i．e．，$G_{d}=\sigma_{\text {std }} I_{4}$ ，satisfying Assumption（ $A_{2}$ ）provided in Theorem 4\\
+Last，the faults that act on the system will be two actuator faults．The first fault $f_{1}$ is inserted via actuator 6 and the second fault $f_{2}$ is inserted via actuator 3 ，as is indicated in Figure 18．This means that the fault models are equal to the available transfers from inputs $u_{6}$ and $u_{3}$ to the four outputs． Therefore，fault model $G_{f}=\left[\begin{array}{ll}G_{u 3} & G_{u 6}\end{array}\right]$ ，which can also be seen in Figure 19
+
+\section*{B．Robust Fault Detection Filter Synthesis}
+In Section IV－B，it has been emphasized that the obtained solution holds under the assumption that condition（42）is satisfied．This condition explains the requirements for the construction of the upper bound realization $\bar{G}_{d}(s)$ ．In order to obtain an upper bound realization $\bar{G}_{d}(s) \in \bar{G}_{d}(s, \Delta)$ the wcgain．m function in Matlab is used，as is also explained in Section V－C For the OAT，and often in practice for complex mechatronic systems，the obtained upper bound $\bar{G}_{d}(s)$ does not satisfy condition（42），requiring the needs for additional tuning knobs $\alpha(s)$ and $\beta(s)$ to satisfy the condition．However， since no clear procedure has been found to be able to check condition（42）for systems with more than one output，apart from the check $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ afterwards，and numerical problems were encountered in finding post－filter $R$ ， as described in the discussion in Section VI－D，has lead to that the unified solution is not used to obtain the post－filter． Instead，a more conservative approach is used to obtain a post－\\
+filter that can always be applied，regardless of the dimension of the system under consideration，resulting in guaranteed bounds on the residuals in time domain responses．This approach is explained based on two steps，and is as follows．\\
+The first step in obtaining the FDF is to construct the left coprime factors $\tilde{M}_{u}, \tilde{N}_{u}$ of the nominal system $G$ ．This has been obtained by using the lncf．m function in Matlab，that computes the normalized left coprime factors．Since the system has integrators，these will be shifted to left half plane poles in the factorization in order to obtain two stable factors．It has been seen that the frequency of these low frequency poles is of major importance to obtain useful residuals．The poles should be＂fast enough＂to follow the dynamics of the input signals，which means that the frequency must be sufficiently high．This is something to keep in mind when determining the left coprime factors．In this case study，the poles are placed at a frequency of 0.2 Hz ．\\
+The second step is the design of the post－filter where the design steps are as follows：\\
+1）Construct extended disturbance matrix $\tilde{G}_{d}(s, \Delta)$ as de－ fined in（37）．\\
+2）Determine the maximum singular values，i．e．， $\sigma_{1}\left(\tilde{G}_{d}(s, \Delta)\right)$ for all $\Delta$ ，which are shown in（一） in Figure 20 at the top．\\
+3）Construct a SISO upper bound realization $\bar{G}_{d}(s) \in \mathcal{G} \mathcal{H}_{\infty}$ that captures all $\sigma_{1}\left(\tilde{G}_{d}(s, \Delta)\right)$ for all $\omega, \Delta$ ，as is shown in（一）in Figure 20 at the top．\\
+4）Construct diagonal post－filter as $R=\gamma \bar{G}_{d}^{-1}(s) I_{n_{y}}$ ．This filter guarantees that $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ for all $\Delta$ is satisfied．The obtained filter is shown in Figure 25 in Appendix C－B and the bottom plot in Figure 20 shows the resulting maximum singular values of transfer $\left[\begin{array}{ll}r & d\end{array}\right] \rightarrow \epsilon$ for $\gamma=1$ ．\\
+This post－filter has all its singular values equal to the max－
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-25(1)}
+\captionsetup{labelformat=empty}
+\caption{Fig．20．（Top）maximum singular values \$\textbackslash sigma\_\{1}\textbackslash left(\textbackslash tilde\{G\}\_\{d\}(s, \textbackslash Delta)\textbackslash right)\$ for 100 different uncertainties $\Delta \in \boldsymbol{\Delta}$ in（－），together with the self－made upper bound $\bar{G}_{d}(s)$ in（一）．（Bottom）maximum singular values $\sigma_{1}\left(R \tilde{G}_{d}(s, \Delta)\right)$ ，together with the $\gamma=1$ bound in（－－）\}\end{center}
+\end{figure}
+
+imum singular value, resulting in possibly conservative fault detection performance. The intuitive relation of this solution to the co-inner-outer factorization solution (i.e., the unified solution) is that this manually constructed upper bound forms an $n_{y}$-dimensional "ball", per frequency, that captures all realizations $\tilde{G}_{d}(s, \Delta)$, instead of an $n_{y}$-dimensional "ellipsoid". For that reason, the filter produces a conservative suppression of the uncertainties/disturbances leading to a conservative amplification of the faults into the residuals. On the other hand, the filter guarantees that the design constraint is satisfied, i.e., $\left\|R(s) \tilde{G}_{d}(s, \Delta)\right\|_{\infty} \leq \gamma$ for all $\Delta$, which is, obviously, desired, and allows the construction of guaranteed bounds on the time domain responses of the residuals.
+
+\section*{C. Experimental Results}
+An experiment has been performed on the OAT to verify the obtained fault detection filter presented in Section VI-B The system operates with the SISO rigid body feedback controller $K_{\mathrm{rb}}$, allowing the reference to be a one dimensional input signal. The measurements of the control inputs $u$ and system output $y$ are obtained as in the configuration of Figure 18 , resulting in both 4 dimensional signals. The reference and fault signals that are applied to the system can be seen at the bottom plot of Figure 21. The reference is a $4{ }^{\text {th }}$ order setpoint making an up and down motion with a base frequency of 1 Hz and an amplitude of $1 \mathrm{e}-4 \mathrm{~m}$, starting from $T=10 \mathrm{~s}$. After $T=15$ s the first fault $f_{1}$ is injected to the system with a duration of 10 s . This fault is applied via actuator input $u_{6}$, as can be seen in Figure 18, and consists out of a square wave with an amplitude of 0.5 N and a frequency of 0.5 Hz . The second fault $f_{2}$ is injected after $T=35 \mathrm{~s}$ which remains for 5 s and consists out of an actuator offset of 0.1 N , and is injected via actuator $u_{3}$. There are no additional disturbances injected to the system, so the only disturbance acting on the system is assumed to be the measurement noise with $\sigma_{\text {std }}=10 \mathrm{~nm}$. From this, it follows that $\|\tilde{d}\|_{2}=1 \mathrm{e}-4 \mathrm{~m}$, which defines the robustness bounds on the resulting residuals in time domain. The four top plots in Figure 21 show the residuals generated by the FDF, together with the robustness bounds. The goal of fault detection is to maximally amplify the effect of the faults in all residuals, which is why all residuals in Figure 21 react to the faults. It can be concluded that, when no fault is acting on the system, all residuals satisfy the design constraint by not exceeding the bounds. This enables clear distinction between a faulty situation compared to a fault-free situation, regardless of the effect of model uncertainty and disturbances acting on the system, as long as $\|\tilde{d}\|_{2}$ is known.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-26}
+\captionsetup{labelformat=empty}
+\caption{Fig. 21. Time responses of all residual signals in (-) together with the $\gamma=1$ bound for \$|\textbackslash tilde\{d}|\_\{2\}=1 \textbackslash mathrm\{e\}-4 \textbackslash mathrm\{\~{}m\}\$ in (-). Indeed, the residuals stay within the bound if no fault is acting on the system. In the bottom plot, the applied reference $r$ is shown in (-) together with the applied faults $f_{1}$ in (-) and $f_{2}$ in ( $\cdots$ ).\}\end{center}
+\end{figure}
+
+\section*{D. Discussion}
+This section reflects on the design choices made to obtain the final result and provides an overview of the major problem encountered during synthesis of the unified solution (that has not been used).
+
+\begin{itemize}
+  \item It has been shown that the residuals satisfy the design constraint, hence, faults can be distinguished from unwanted effects due to model uncertainty and disturbances for all frequencies, as is shown in Figure 20 However, the reference applied to the system has a base frequency of 1 Hz , which is below the 4 Hz where the measured plant is of high quality as shown in Figure 26 in Appendix C-A. Since the uncertain plant $G_{u}$ does not capture all variations in dynamics before 4 Hz , it might be that the residuals exceed the bound if a reference with a different frequency below 4 Hz is applied to the system. To be on the safe side, one could shift the gain upwards of the upper bound realization $\bar{G}_{d}(s)$ below 4 Hz .
+  \item Besides the conservative solution proposed in this section, there has been tried to obtain the unified solution, as developed in this work. The main problem encountered during synthesis were the extremely low frequency (below $1 \mathrm{e}-5 \mathrm{~Hz}$ ) poles and zeros present in the uncertain transfer function matrix $\tilde{G}_{d}(s, \Delta)$, leading to an unusable upper bound $\bar{G}_{d}(s)$. The plant model $G$ contains extremely low frequency zeros, which are taken into account in the left coprime factors $\tilde{M}_{u}, \tilde{N}_{u}$, and therefore introduced in the uncertain transfer $\tilde{G}_{d}(s, \Delta)$. Then, these poles and zeros are present in the upper bound, and thus, they appear in the post-filter producing unusable residuals. It is thus of major importance to have an accurate model fit starting from frequency 0 , not containing additional poles and zeros that are effectively not there.
+\end{itemize}
+
+\section*{VII. Conclusions and Recommendations}
+In this dissertation, an optimal solution is derived to the robust fault detection filter design problem for continuous time LTI uncertain systems operating in an open-loop or closedloop setting. The faults in this work have been modeled as additive faults and no assumption is made on the uncertainties of the plant model. Hence, the provided solution can deal with both parametric and dynamic uncertainties. To get a fair evaluation of sensitivity to faults and robustness to disturbances, the $\mathcal{H}_{i} / \mathcal{H}_{\infty}$ performance index is considered. It is shown that the optimal solution, that maximizes the performance index, can be obtained by solving one Riccati equation. The solution consists of a co-inner-outer factorization that effectively ensures that all unwanted exogenous inputs (including model uncertainty and disturbances effects) into the residuals are suppressed below a user-defined scalar bound, while the effect of faults into the residuals are maximized. Hence, thresholds can be placed on the residuals when the amplitude of the exogenous input signals is known, resulting in a highly desired situation where faults can be effectively distinguished from unwanted effects.\\
+Both a numerical and experimental case study has been performed on a real world 6 DOF controlled mechatronic system to put the obtained solution into practice. It has been shown that the obtained fault detection filter satisfies the user-defined bound and achieves remarkable fault detection performance. Next to this, some guidelines have been developed for system identification that results in superior fault detection performance. It has been shown that fault detection can require different needs for model accuracy compared to the available plant models that suit the needs for robust feedback controller design.\\
+Based on the results above, it is believed that several possible directions for future research in this area could be the following recommendations:\\
+R1 The study of finding a novel and automated approach for the construction of the upper bound realization $\bar{G}_{d}(s)$.\\[0pt]
+R2 The obtained solution can be expanded towards an FDI system, so that the FDI problem can be solved for uncertain systems operating in closed loop. It is believed that the obtained solution in this work can be combined with the FDI toolbox for nominal systems [23].\\
+R3 The study of removal of Assumption ( $A_{2}$ ).
+
+\section*{Acknowledgements}
+This work is supported by ASML Research, Veldhoven, The Netherlands. The experimental setups are provided by ASML. Upfront, I would like to express my gratitude to my direct supervisor Koen Classens, for his daily supervision and fruitful discussions during the project, lifting this project to a higher level. Secondly, a special thanks to Jeroen van de Wijdeven for his additional input, suggestions and discussions. Finally, I would like to thank Tom Oomen for for his critical questions and feedback during the project.
+
+\section*{References}
+[1] K. Classens and T. Oomen, "Digital Twins in Mechatronics : From Model-based Control to Predictive Maintenance," 2021 IEEE 1st International Conference on Digital Twins and Parallel Intelligence (DTPI), pp. 336-339, 2021.\\[0pt]
+[2] J. Chen and R. Patton, Robust model-based fault diagnosis for dynamic systems, vol. 38. Springer science, 1999.\\[0pt]
+[3] A. Varga, Solving Fault Diagnosis Problems, vol. 84. Springer Nature, 2017.\\[0pt]
+[4] K. Classens, M. Mostard, J. v. d. Wijdeven, M. Heemels, and T. Oomen, "Fault Detection for Precision Mechatronics : Online Estimation of Mechanical Resonances," IFAC PapersOnLine, vol. 55, no. 37, pp. 746751, 2023.\\[0pt]
+[5] S. X. Ding, Model-based fault diagnosis techniques: Design schemes, algorithms, and tools. Springer Nature, 2008.\\[0pt]
+[6] M. Blanke and M. Kinnaert, Diagnosis and Fault-Tolerant Control. Springer science, 2016.\\[0pt]
+[7] J. Stoustrup and H. H. Niemann, "Fault estimation - A standard problem approach," International Journal of Robust and Nonlinear Control, vol. 12, no. 8, pp. 649-673, 2002.\\[0pt]
+[8] Z. Gao, C. Cecati, and S. X. Ding, "A survey of fault diagnosis and fault-tolerant techniques-part I: Fault diagnosis with model-based and signal-based approaches," IEEE Transactions on Industrial Electronics, vol. 62, no. 6, pp. 3757-3767, 2015.\\[0pt]
+[9] X. Ding and P. M. Frank, "Fault detection via factorization approach," Systems \& Control letters, vol. 14, pp. 431-436, 1990.\\
+$[10]$ E. Y. Chow and A. S. Willsky, "Analytical Redundancy and the Design of Robust Failure Detection Systems," IEEE Transactions on Automatic Control, vol. 29, no. 7, pp. 603-614, 1984.\\[0pt]
+[11] R. K. Mehra and J. Peschon, "An innovations approach to fault detection and diagnosis in dynamic systems," Automatica, vol. 7, no. 5, pp. 637640, 1971.\\[0pt]
+[12] R.Isermann, "Supervision FDD Methods - An Introduction," Control Engineering Practice, vol. 5, no. 5, pp. 639-652, 1997.\\[0pt]
+[13] D. Van Schrick, "Investigations of reliability for instrument fault detection state-estimator schemes," European J. of Diagnosis and Safety in Automation, vol. 1, p. 63, 1991.\\[0pt]
+[14] N. Liu, Optimal Robust Fault Detection. PhD thesis, LSU, 2008.\\[0pt]
+[15] K. Classens, J. v. d. Wijdeven, M. Heemels, and T. Oomen, "From Fault Diagnosis and Predictive Maintenance to Control Reconfiguration," Mikroniek, no. 5, pp. 5-12, 2023.\\[0pt]
+[16] P. M. Frank and X. Ding, "Frequency Domain Approach to Optimally Robust Residual Generation and Evaluation for Model-based Fault Diagnosis," Automatica, vol. 30, no. 5, pp. 789-804, 1994.\\[0pt]
+[17] S. X. Ding, T. Jeinsch, P. M. Frank, and E. L. Ding, "A unified approach to the optimization of fault detection systems," International journal of adaptive control and signal processing, pp. 725-745, 2000.\\[0pt]
+[18] N. Liu and K. Zhou, "Optimal solutions to multi-objective robust fault detection problems," Proceedings of the IEEE Conference on Decision and Control, pp. 981-988, 2007.\\[0pt]
+[19] J. Li, K. Zhou, and Z. Ren, "Robust fault diagnosis for linear time invariant uncertain systems," Proceedings of the World Congress on Intelligent Control and Automation (WCICA), pp. 1170-1173, 2008.\\[0pt]
+[20] M. Vidyasagar, Control System Synthesis: a Factorization Approach. Cambridge, Mass, : MIT Press, 1985.\\[0pt]
+[21] G. Vinnicombe, Uncertainty and Feedback. Imperial College Press, 2001.\\[0pt]
+[22] K. Classens, W. P. Heemels, and T. Oomen, "Closed-loop Aspects in MIMO Fault Diagnosis with Application to Precision Mechatronics," Proceedings of the American Control Conference, vol. 2021-May, pp. 1756-1761, 2021.\\[0pt]
+[23] A. Varga, "Fault Detection and Isolation Tools (FDITOOLS) User's Guide," CoRR, 2017.\\[0pt]
+[24] K. Glover and A. Varga, "On solving non-standard $\mathcal{H}_{-} / \mathcal{H}_{2 / \infty}$ fault detection problems," Proceedings of the IEEE Conference on Decision and Control, no. 2, pp. 891-896, 2011.\\[0pt]
+[25] P. Tacx and T. Oomen, "A One-step Approach for Centralized Overactuated Motion Control of a Prototype Reticle Stage," IFAC-PapersOnLine, vol. 55, no. 37, pp. 308-313, 2022.\\[0pt]
+[26] D. McFarlane and K. Glover, "A loop-shaping design procedure using $H_{\infty}$ synthesis," IEEE Transactions on Automatic Control, vol. 37, pp. 759-769, 1992.\\[0pt]
+[27] S. Skogestad and I. Postlethwaite, Multivariable feedback control: analysis and design. John Wiley \& Sons, Inc., 2005.
+
+\section*{Appendix A \\
+ Simplification residual dynamics for uncertain CLOSED-LOOP SYSTEMS}
+Consider the dynamics depicted in (36) and let $\epsilon=R \tilde{M}_{u} \tilde{\epsilon}$, then the expression is again the following
+
+$$
+\begin{aligned}
+\tilde{\epsilon}=\tilde{G}_{u}(s, \Delta) K(I-\underbrace{S_{\Delta} G_{u}(s, \Delta) K}_{T_{\Delta}}) r+ \\
+\left(G_{d}-\tilde{G}_{u}(s, \Delta) K S_{\Delta} G_{d}\right) d+ \\
+\left(G_{f}-\tilde{G}_{u}(s, \Delta) K S_{\Delta} G_{f}\right) f
+\end{aligned}
+$$
+
+Using that $S_{\Delta}+T_{\Delta}=I$, this equation can be rewritten to
+
+$$
+\tilde{\epsilon}=\tilde{G}_{u}(s, \Delta) K S_{\Delta} r+\left(I-\tilde{G}_{u}(s, \Delta) K S_{\Delta}\right)\left(G_{d} d+G_{f} f\right)
+$$
+
+Lets, for the sake of readability remove the dependency variables $s$ and $\Delta$ and write from now on $\tilde{G}_{u}(s, \Delta)=\tilde{G}_{u}$. Then it follows that\\
+$\tilde{\epsilon}=\left(I-\tilde{G}_{u} K S_{\Delta}\right)\left(\left(I-\tilde{G}_{u} K S_{\Delta}\right)^{-1} \tilde{G}_{u} K S_{\Delta} r+G_{d} d+G_{f} f\right)$.\\
+The derivation will be done in two steps. First, the expression in front of $r$ can be written as
+
+$$
+\begin{aligned}
+& \left(I-\tilde{G}_{u} K S_{\Delta}\right)^{-1} \tilde{G}_{u} K S_{\Delta} \Longrightarrow \\
+& =\left(\tilde{G}_{u} K S_{\Delta}\left(\left(\tilde{G}_{u} K S_{\Delta}\right)^{-1}-I\right)\right)^{-1} \tilde{G}_{u} K S_{\Delta} \\
+& =\left(\left(\tilde{G}_{u} K S_{\Delta}\right)^{-1}-I\right)^{-1} \underbrace{\left(\tilde{G}_{u} K S_{\Delta}\right)^{-1} \tilde{G}_{u} K S_{\Delta}}_{I} \\
+& =\left(S_{\Delta}^{-1}\left(\tilde{G}_{u} K\right)^{-1}-I\right)^{-1} \\
+& =\left(\left(I+G_{u}(s, \Delta) K\right)\left(\tilde{G}_{u} K\right)^{-1}-I\right)^{-1} \\
+& =\left(\left(I+G_{u}(s, \Delta) K-\tilde{G}_{u} K\right)\left(\tilde{G}_{u} K\right)^{-1}\right)^{-1}
+\end{aligned}
+$$
+
+use relation $\tilde{G}_{u}(s, \Delta)=G_{u}(s, \Delta)-G_{u}(s, 0)$ leads to
+
+$$
+\begin{aligned}
+& =\left(\left(I+G_{u}(s, 0) K\right)\left(\tilde{G}_{u} K\right)^{-1}\right)^{-1} \\
+& =\tilde{G}_{u} K S
+\end{aligned}
+$$
+
+where $S=\left(I+G_{u}(s, 0) K\right)^{-1}$ the nominal sensitivity. Second, the expression in front can be rewritten to
+
+$$
+\begin{aligned}
+& \left(I-\tilde{G}_{u} K S_{\Delta}\right) \Longrightarrow \\
+& =I-\left(G_{u}(s, \Delta)-G_{u}(s, 0)\right) K S_{\Delta} \\
+& =I-T_{\Delta}+G_{u}(s, 0) K S_{\Delta} \\
+& =S_{\Delta}+G_{u}(s, 0) K S_{\Delta} \\
+& =\left(I+G_{u}(s, 0) K\right) S_{\Delta} \\
+& =S^{-1} S_{\Delta}
+\end{aligned}
+$$
+
+Hence, the residual dynamics can be simplified to
+
+$$
+\epsilon=R \tilde{M}_{u} S^{-1} S_{\Delta}\left(\tilde{G}_{u}(s, \Delta) K S r+G_{d} d+G_{f} f\right)
+$$
+
+which is equal to 36 .
+
+\section*{Appendix B Numerical Case Study}
+\section*{A. FFR System Identification}
+The uncertain plant $G_{u}$ is constructed by
+
+$$
+G_{u}=\hat{G}_{u}\left(I_{2}+\frac{1}{10} \Delta W I_{2}\right)
+$$
+
+where the state space realization of $\hat{G}_{u}$ is given by
+
+$$
+\begin{aligned}
+\hat{G}_{u}= & {\left[\begin{array}{c|c}
+A & B \\
+\hline C & D
+\end{array}\right]=} \\
+& {\left[\begin{array}{cccccc|cc}
+-a & 0 & 0 & 0 & 0 & 0 & 2 & 0 \\
+m_{1} & -a & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & -a & 0 & 0 & 0 & 0 & 0.13 \\
+0 & 0 & m_{1} & -a & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & -1.90 e 6 & -3.45 & k_{2} & -k_{1} \\
+\hline 0 & 0.06 & 0 & 0.20 & -2.68 e-4 & 0 & 0 & 0 \\
+0 & 2.84 & 0 & 0 & 1 & 0 & 0 & 0
+\end{array}\right], }
+\end{aligned}
+$$
+
+with uncertain parameters $m_{1}=1 \pm 0.05, k_{1}=1.24 e 3 \pm 0.124 e 3$, and $k_{2}=37.65 \pm 0.377$, and is modeled to be stable by cutting off the integrators at $a=0.01 \mathrm{rad} / \mathrm{s}$. The dynamic weight $W$ is defined as
+
+$$
+W=\frac{5623 s^{2}}{s^{2}+1.01 e 6 s+1.26 e 10}
+$$
+
+The nominal plant $G$ is obtained by filling in the nominal values of parametric uncertainties in $\hat{G}_{u}$.
+
+\section*{B. FFR Robust Controller Synthesis}
+The fact that the FFR system is overactuated is exploited in the feedback controller design to push the bandwidth further than that is possible using traditional rigid body motion control. The additional actuator and sensor actively control the flexible mode behaviour, via $K_{\text {flex }}$ (see Figure 9), and allow to go beyond the conventional limits on the attainable bandwidth. The controller synthesis is based on a two-step loop-shaping design approach that originates from [26] which is translated into a one-step $\mathcal{H}_{\infty}$ control problem in the work of [25]. The key benefit of the loop-shaping approach is that it can be effectively used to specify open-loop requirements for motion systems. First, the $\mathcal{H}_{\infty}$ control criterion will be introduced which is followed by the intuitive two-step weighting filter design procedure. Second, numerical results following this design procedure are provided together with the robustly stabilizing feedback controller.
+
+\section*{Controller design process}
+The control goal that needs to be minimized is specified by the $\mathcal{H}_{\infty}$-norm-based control criterion
+
+
+\begin{equation*}
+\mathcal{J}(G, K):=\|W T(G, K) V\|_{\infty} \tag{57}
+\end{equation*}
+
+
+where $W, V \in \mathcal{G} \mathcal{H}_{\infty}$ are user-defined weighting filters and will be defined later.\\
+The closed loop feedback interconnection $T(G, K)$ is defined as
+
+
+\begin{align*}
+T(G, K) & =-\left[\begin{array}{c}
+I \\
+K
+\end{array}\right](I+G K)^{-1}\left[\begin{array}{ll}
+I & G
+\end{array}\right]  \tag{58}\\
+& =-\left[\begin{array}{cc}
+S & S G \\
+K S & K S G
+\end{array}\right]
+\end{align*}
+
+
+The criterion (57) in conjunction with the four-block interconnection (58) guarantees that the resulting closed loop is internally stable [27].\\
+In order to use the weighting filters $W$ and $V$ in (57) as openloop shaping filters a specific internal structure is required and are defined as follows
+
+\[
+W=\left[\begin{array}{cc}
+W_{2} & 0  \tag{59}\\
+0 & W_{1}^{-1}
+\end{array}\right] \quad V=\left[\begin{array}{cc}
+W_{2}^{-1} & 0 \\
+0 & W_{1}
+\end{array}\right]
+\]
+
+where $W_{1}$ and $W_{2}$ are designed such that the FFR has a desired open-loop shape
+
+$$
+G_{s}=W_{2} G W_{1}
+$$
+
+Since system $G$ is a modal decoupled system, the weighting filter design is split up in a two-step weighting filter design process that will later be solved in only 1 step using $\mathcal{H}_{\infty}$ synthesis. The procedure is as follows:\\
+S1 Consider the flexible mode behaviour $G_{\text {flex }}: u_{\text {flex }} \rightarrow y_{\text {flex }}$. Design the weight filters $W_{2, f}$ and $W_{1, f}$ to obtain a desired open-loop flex mode shape
+
+
+\begin{equation*}
+G_{\text {flex }, \mathrm{s}}=W_{2, f} G_{\text {flex }} W_{1, f} \tag{60}
+\end{equation*}
+
+
+Typically, a simple PD controller is used to increase the stiffness of the flexible loop which results in an increased eigenfrequency.\\
+S2 The weighting filters for the motion DOF $G_{\mathrm{rb}}: u \rightarrow y$ must then be designed on the equivalent plant
+
+
+\begin{equation*}
+G_{\mathrm{eq}}=\mathcal{F}_{l}\left(G,-W_{2, f} W_{1, f}\right) \tag{61}
+\end{equation*}
+
+
+The equivalent plant resembles the motion DOF that is under control of the flexible loop. Then, by shaping weight filters $W_{1, \mathrm{rb}}$ and $W_{2, \mathrm{rb}}$ the desired open-loop motion DOF can be constructed
+
+
+\begin{equation*}
+G_{\mathrm{eq}, \mathrm{~s}}=W_{1, \mathrm{rb}} G_{\mathrm{eq}} W_{1, \mathrm{rb}} \tag{62}
+\end{equation*}
+
+
+Combining (60) and (62) reveals that the internal structures of $W_{1}$ and $W_{2}$ are given as
+
+$$
+W_{1}=\operatorname{diag}\left(W_{1, \mathrm{rb}}, W_{1, f}\right) \quad W_{2}=\operatorname{diag}\left(W_{2, \mathrm{rb}}, W_{2, f}\right)
+$$
+
+and can now be used in (59) to solve $\mathcal{H}_{\infty}$ control problem (57).
+
+\section*{Weight filter and feedback controller design}
+According to the procedure in previous subsection, first the desired open-loop flex mode shape must be created by constructing weight filters $W_{1, f}$ and $W_{2, f}$. The second step is to\\
+design weighting filters $W_{1, \mathrm{rb}}$ and $W_{2, \mathrm{rb}}$ to get to the desired open-loop motion DOF. The weights are designed such that the target bandwidth is at 140 Hz for the motion DOF, and can be seen in Figure 22\\
+P1 The desired flexible loop shape is a high gain at low frequencies to obtain a high stiffness to counteract the deformation of the reticle stage and enables a higher bandwidth in the motion DOF loop. However, in the low range, a low gain is desired to prevent static deformations of the reticle, i.e., the use of an integrator is strongly discouraged. Therefore, $W_{f, 2}$ is equipped with a highpass filter with a cutoff frequency of 40 Hz . For high frequencies, a low gain is desired to suppress the effect of disturbances so for that reason $W_{f, 1}$ is equipped with a lowpass filter with a cutoff at 600 Hz .\\
+P2 The motion DOF weights filters can then be designed on the equivalent plant in (61). Due to the higher stiffness in the flexible loop the flexible behaviour in the motion DOF dynamics is counteracted enabling a higher achievable bandwidth. The weight filters $W_{1, \mathrm{rb}}$ and $W_{2, \mathrm{rb}}$ are based on general motion control loop-shaping aspects, i.e., high gain at low frequencies and low gain at high frequencies, and are designed to have a cross-over frequency at 140 Hz . Therefore, weight $W_{1, \mathrm{rb}}$ is equipped with an integrator and has a cutoff frequency at 60 Hz , whereas weight $W_{2, \text { rb }}$ is equipped with a lowpass with a cutoff frequency at 540 Hz .\\
+The corresponding synthesized feedback controller that stabilizes the closed-loop feedback interconnection in (58) is plotted in Figure 23. It turned out that this controller robustly stabilizes the uncertain plant $G_{u}$ for all $\Delta \in \Delta$ with a margin of $516 \%$ which means that the uncertainty may increase 5 times before running unstable. The obtained motion DOF bandwidth is equal to the target bandwidth of 140 Hz , as can be seen in Figure 24. This figure clearly shows the beneficial effect of closing the flex mode loop, since the flexible behaviour around 220 Hz that is originally present in the motion DOF (see Figure 10 top left) is now vanished in the motion DOF without using a notch filter in the controller. This allows pushing for a higher bandwidth leading to an increase
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-31(1)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 22. Bode magnitude plots of the motion DOF weights (left) with \$W\_\{1, \textbackslash mathrm\{rb}\}\$ in (-) and $W_{1, \mathrm{rb}}$ in (-), and the flexible loop (right) with $W_{1, f}$ in (-) and $W_{2, f}$ in (一).\}\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-31(2)}
+\captionsetup{labelformat=empty}
+\caption{Fig. 23. Bode magnitude plot of the robustly stabilizing feedback controller.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-31}
+\captionsetup{labelformat=empty}
+\caption{Fig. 24. Bode magnitude plot of the open loop of the motion DOF for the frequency response data in (-) and using the nominal model $G$ in (-). The achieved bandwidth is equal to the target bandwidth of 140 Hz .}
+\end{center}
+\end{figure}
+
+in performance.
+
+\section*{Appendix C Numerical Case Study}
+\section*{A. OAT System Identification}
+This section shows the bode magnitude plots of uncertain plant model $G_{u}$, nominal plant $G$, and the result of the system identification experiment in Figure 26. It can be seen that the uncertain plant $G_{u}$ captures the dynamics of the measured plant from 4 Hz up to the second resonance frequency. Below 4 Hz , the quality of the identification experiment is low and has lightly been captured in $G_{u}$ to increase the uncertainty below 4 Hz . The nominal model $G$ is modeled correctly up to the second resonance frequency, so for that reason the model uncertainty increases after this resonance peak and an attempt has been done to capture all dynamics. However, since this occurs far beyond the obtained bandwidth of 80 Hz , it is of less importance to capture all dynamics than it is for the uncertain parts in the mid-frequency range, assuming that the faults do not occur at those high frequencies.
+
+The uncertain plant is constructed by (56) with stable dynamic weight $W(s)$ having poles $p$ and zeros $z$ given by
+
+\[
+z=1 \mathrm{e} 3\left[\begin{array}{c}
+-0.10+2.57 i  \tag{63}\\
+-0.10-2.57 i \\
+-0.63 \\
+-0.63 \\
+-0.031
+\end{array}\right] \quad p=1 \mathrm{e} 3\left[\begin{array}{c}
+-0.46+2.53 i \\
+-0.46-2.53 i \\
+-0.10 \mathrm{e}-3 \\
+-0.10 \mathrm{e}-3 \\
+-0.10 \mathrm{e}-3
+\end{array}\right] \text {, }
+\]
+
+and a gain of $3.16 \mathrm{e}-7$. This weight $W$ has been multiplied with a $4 \times 4$ matrix having 1 on the diagonal, and $\frac{1}{5}$ on the off-diagonal terms to match the dimensions of the plant $G$.
+
+\section*{B. Fault Detection Filter}
+The resulting post-filter $R$ that has been used in the experiment to perform the residuals shown in Figure 21 is depicted in Figure 25.
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-32}
+\captionsetup{labelformat=empty}
+\caption{Fig. 25. Diagonal post-filter $R$ that is used in the experiment.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+  \includegraphics[width=\textwidth]{2025_11_06_e8539dc5fd9c4526b573g-33}
+\captionsetup{labelformat=empty}
+\caption{Fig. 26. Bode magnitude plots of the nominal plant $G$ in (--), the uncertain plant \$G\_\{u}\$ in (-) plotted for 60 uncertainty realizations $\Delta$, and the mean estimation of the plant in (-).\}\end{center}
+\end{figure}
+
+
+\end{document}
